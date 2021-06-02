@@ -1,1 +1,1 @@
-alert('m3ez');
+<script>alert('m3ez');</script>
