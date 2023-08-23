@@ -12,6 +12,17 @@ if ! command -v tcpflow &> /dev/null; then
     fi
 fi
 
+if ! command -v jq &> /dev/null; then
+    echo "[!] jq is not installed. Would you like to install it? (y/n)"
+    read choice
+    if [[ $choice == [Yy] ]]; then
+        sudo apt-get install jq -y # Use the appropriate package manager for your system
+    else
+        echo "[!] Aborting!."
+        exit 1
+    fi
+fi
+
 if [ $# -ne 1 ]; then
     echo "[?] Usage: $0 <port>"
     exit 1
