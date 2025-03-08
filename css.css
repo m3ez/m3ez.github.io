@@ -1,0 +1,3 @@
+body { -webkit-transition: all 1s; }
+body:hover { -webkit-transform: rotate(360deg); }
+@keyframes execute { 0% { content: "m3ez"; } 100% { content: url("javascript:alert`m3ez`"); } }
