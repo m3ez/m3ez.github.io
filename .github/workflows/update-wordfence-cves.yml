@@ -1,0 +1,60 @@
+name: Update Wordfence CVE ledger
+
+on:
+  schedule:
+    - cron: "17 3 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+
+concurrency:
+  group: wordfence-cve-update
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout gh-pages
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: gh-pages
+
+      - name: Update Wordfence CVE inventory
+        env:
+          WORDFENCE_API_KEY: ${{ secrets.WORDFENCE_API_KEY }}
+        run: node automation/update-wordfence-cves.mjs --output data/wordfence-cves.json
+
+      - name: Commit changed Wordfence CVE inventory
+        run: |
+          changed_paths="$(git status --porcelain --untracked-files=all | sed -E 's/^.. //')"
+          if [ -z "$changed_paths" ]; then
+            exit 0
+          fi
+          if [ "$changed_paths" != "data/wordfence-cves.json" ]; then
+            echo "Unexpected changed paths" >&2
+            exit 1
+          fi
+          if git diff --quiet -- data/wordfence-cves.json; then
+            exit 0
+          fi
+          git add -- data/wordfence-cves.json
+          git diff --cached --quiet -- data/wordfence-cves.json && exit 0
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "chore: update Wordfence CVE ledger"
+          git push origin HEAD:gh-pages
+
+      - name: Request GitHub Pages rebuild
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          curl --fail-with-body --silent --show-error \
+            -X POST \
+            -H "Accept: application/vnd.github+json" \
+            -H "X-GitHub-Api-Version: 2026-03-10" \
+            -H "Authorization: Bearer $GITHUB_TOKEN" \
+            "https://api.github.com/repos/${GITHUB_REPOSITORY}/pages/builds"
