@@ -15,6 +15,9 @@ concurrency:
 
 jobs:
   update:
+    environment:
+      name: WORDFENCE_API_KEY
+      deployment: false
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
