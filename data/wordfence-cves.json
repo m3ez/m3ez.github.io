@@ -7,259 +7,259 @@
       "id": "CVE-2026-32498",
       "title": "RegistrationMagic – Custom Registration Forms, User Registration, Payment, and User Login <= 6.0.7.6 - Missing Authorization",
       "cvss": 5.3,
-      "href": "https://www.wordfence.com/threat-intel/vulnerabilities/wordpress-plugins/custom-registration-form-builder-with-submission-manager/registrationmagic-custom-registration-forms-user-registration-payment-and-user-login-6076-missing-authorization"
+      "href": "https://www.wordfence.com/threat-intel/vulnerabilities/id/f6515d70-438b-47b7-a3c4-5b8dc401a40e?source=api-prod"
     },
     {
       "id": "CVE-2026-32385",
       "title": "RegistrationMagic <= 6.0.7.6 - Missing Authorization",
       "cvss": 4.3,
-      "href": "https://www.wordfence.com/threat-intel/vulnerabilities/wordpress-plugins/custom-registration-form-builder-with-submission-manager/registrationmagic-6076-missing-authorization"
+      "href": "https://www.wordfence.com/threat-intel/vulnerabilities/id/63099a49-913f-428d-b9a4-85e1bc5afe56?source=api-prod"
     },
     {
       "id": "CVE-2026-23799",
       "title": "Tutor LMS – eLearning and online course solution <= 3.9.5 - Missing Authorization",
       "cvss": 4.3,
-      "href": "https://www.wordfence.com/threat-intel/vulnerabilities/wordpress-plugins/tutor/tutor-lms-elearning-and-online-course-solution-395-missing-authorization"
+      "href": "https://www.wordfence.com/threat-intel/vulnerabilities/id/24009534-3a57-4ed3-b841-72e87e2a6925?source=api-prod"
     },
     {
       "id": "CVE-2026-18352",
       "title": "User Access Manager <= 2.3.15 - Unauthenticated Arbitrary File Read via 'uamgetfile' Parameter",
       "cvss": 7.5,
-      "href": "https://www.wordfence.com/threat-intel/vulnerabilities/wordpress-plugins/user-access-manager/user-access-manager-2315-unauthenticated-arbitrary-file-read-via-uamgetfile-parameter"
+      "href": "https://www.wordfence.com/threat-intel/vulnerabilities/id/4e88efe0-ffad-4d66-bb03-3f3a9dcbe5b1?source=api-prod"
     },
     {
       "id": "CVE-2026-15981",
       "title": "SAML Single Sign On <= 5.4.4 - Unauthenticated Authentication Bypass via SAMLResponse Parameter",
       "cvss": 9.8,
-      "href": "https://www.wordfence.com/threat-intel/vulnerabilities/wordpress-plugins/miniorange-saml-20-single-sign-on-2/saml-single-sign-on-544-unauthenticated-authentication-bypass-via-samlresponse-parameter"
+      "href": "https://www.wordfence.com/threat-intel/vulnerabilities/id/b412f60f-61ea-47b1-a3ef-17275f7951df?source=api-prod"
     },
     {
       "id": "CVE-2026-15022",
       "title": "Tutor LMS <= 4.0.0 - Authenticated (Subscriber+) SQL Injection via Stored Quiz Answer Array",
       "cvss": 6.5,
-      "href": "https://www.wordfence.com/threat-intel/vulnerabilities/wordpress-plugins/tutor/tutor-lms-400-authenticated-subscriber-sql-injection-via-stored-quiz-answer-array"
+      "href": "https://www.wordfence.com/threat-intel/vulnerabilities/id/8cd603aa-c4d4-488c-b134-6983240c3a18?source=api-prod"
     },
     {
       "id": "CVE-2026-12761",
       "title": "miniOrange Social Login and Register (Discord, Google, Twitter, LinkedIn) <= 7.7.0 - Unauthenticated Authentication Bypass to Administrator Account Takeover via Profile Completion OTP Flow",
       "cvss": 9.8,
-      "href": "https://www.wordfence.com/threat-intel/vulnerabilities/wordpress-plugins/miniorange-login-openid/miniorange-social-login-and-register-discord-google-twitter-linkedin-770-unauthenticated-authentication-bypass-to-administrator-account-takeover-via-profile-completion-otp-flow"
+      "href": "https://www.wordfence.com/threat-intel/vulnerabilities/id/a56b59ce-29c2-4172-b703-a06d7bb28da0?source=api-prod"
     },
     {
       "id": "CVE-2026-7655",
       "title": "SureCart <= 4.2.3 - Unauthenticated Linked WordPress Account Takeover via Forged customer.updated Webhook",
       "cvss": 8.1,
-      "href": "https://www.wordfence.com/threat-intel/vulnerabilities/wordpress-plugins/surecart/surecart-423-unauthenticated-linked-wordpress-account-takeover-via-forged-customerupdated-webhook"
+      "href": "https://www.wordfence.com/threat-intel/vulnerabilities/id/e19f5f7b-6698-4275-a362-15e5441e0fa9?source=api-prod"
     },
     {
       "id": "CVE-2026-7651",
       "title": "User Registration & Membership <= 5.1.5 - Authenticated (Subscriber+) Insecure Direct Object Reference to Arbitrary Media Deletion via 'profile-pic-url' Parameter",
       "cvss": 5.3,
-      "href": "https://www.wordfence.com/threat-intel/vulnerabilities/wordpress-plugins/user-registration/user-registration-membership-515-authenticated-subscriber-insecure-direct-object-reference-to-arbitrary-media-deletion-via-profile-pic-url-parameter"
+      "href": "https://www.wordfence.com/threat-intel/vulnerabilities/id/0def7637-edf4-4ae2-a2e7-31ccb3b52d71?source=api-prod"
     },
     {
       "id": "CVE-2026-7634",
       "title": "SlimStat Analytics <= 5.4.11 - Unauthenticated Stored Cross-Site Scripting via User-Agent Header",
       "cvss": 7.2,
-      "href": "https://www.wordfence.com/threat-intel/vulnerabilities/wordpress-plugins/wp-slimstat/slimstat-analytics-5411-unauthenticated-stored-cross-site-scripting-via-user-agent-header"
+      "href": "https://www.wordfence.com/threat-intel/vulnerabilities/id/0a309bf8-7fe3-4033-993c-3c8dba0f216d?source=api-prod"
     },
     {
       "id": "CVE-2026-4949",
       "title": "ProfilePress <= 4.16.12 - Missing Authorization to Authenticated (Subscriber+) Inactive Membership Plan Subscription",
       "cvss": 4.3,
-      "href": "https://www.wordfence.com/threat-intel/vulnerabilities/wordpress-plugins/wp-user-avatar/profilepress-41612-missing-authorization-to-authenticated-subscriber-inactive-membership-plan-subscription"
+      "href": "https://www.wordfence.com/threat-intel/vulnerabilities/id/4cc29d32-2727-42df-bd42-2caf0f182c0e?source=api-prod"
     },
     {
       "id": "CVE-2026-4409",
       "title": "Subscribe To Comments Reloaded <= 240119 - Improper Authorization to Unauthenticated Arbitrary Subscription Management",
       "cvss": 6.5,
-      "href": "https://www.wordfence.com/threat-intel/vulnerabilities/wordpress-plugins/subscribe-to-comments-reloaded/subscribe-to-comments-reloaded-240119-improper-authorization-to-unauthenticated-arbitrary-subscription-management"
+      "href": "https://www.wordfence.com/threat-intel/vulnerabilities/id/91f9235e-f578-475f-92c3-34062d6d1e3d?source=api-prod"
     },
     {
       "id": "CVE-2026-4365",
       "title": "LearnPress <= 4.3.2.8 - Missing Authorization to Unauthenticated Arbitrary Quiz Answer Deletion",
       "cvss": 9.1,
-      "href": "https://www.wordfence.com/threat-intel/vulnerabilities/wordpress-plugins/learnpress/learnpress-4328-missing-authorization-to-unauthenticated-arbitrary-quiz-answer-deletion"
+      "href": "https://www.wordfence.com/threat-intel/vulnerabilities/id/021bd566-1663-46ba-a616-ab554b691cbb?source=api-prod"
     },
     {
       "id": "CVE-2026-4136",
       "title": "Membership Plugin – Restrict Content <= 3.2.24 - Unvalidated Redirect in Password Reset Flow via rcp_redirect",
       "cvss": 4.3,
-      "href": "https://www.wordfence.com/threat-intel/vulnerabilities/wordpress-plugins/restrict-content/membership-plugin-restrict-content-3224-unvalidated-redirect-in-password-reset-flow-via-rcp-redirect"
+      "href": "https://www.wordfence.com/threat-intel/vulnerabilities/id/e4cf42d3-9864-440b-8357-36c82cbef28f?source=api-prod"
     },
     {
       "id": "CVE-2026-4109",
       "title": "Eventin – Events Calendar, Event Booking, Ticket & Registration (AI Powered) <= 4.1.8 Missing Authorization to Authenticated (Subscriber+) Order Information Exposure",
       "cvss": 4.3,
-      "href": "https://www.wordfence.com/threat-intel/vulnerabilities/wordpress-plugins/wp-event-solution/eventin-events-calendar-event-booking-ticket-registration-ai-powered-418-missing-authorization-to-authenticated-subscriber-order-information-exposure"
+      "href": "https://www.wordfence.com/threat-intel/vulnerabilities/id/87f82d5d-d89a-440d-8c23-ace5160a0739?source=api-prod"
     },
     {
       "id": "CVE-2026-4058",
       "title": "User Frontend: AI Powered Frontend Posting, User Directory, Profile, Membership & User Registration <= 4.3.2 - Missing Authorization to Authenticated (Subscriber+) Subscription Pack Cancellation",
       "cvss": 4.3,
-      "href": "https://www.wordfence.com/threat-intel/vulnerabilities/wordpress-plugins/wp-user-frontend/user-frontend-ai-powered-frontend-posting-user-directory-profile-membership-user-registration-432-missing-authorization-to-authenticated-subscriber-subscription-pack-cancellation"
+      "href": "https://www.wordfence.com/threat-intel/vulnerabilities/id/ffdf34bb-a887-444c-8a76-12901fed6662?source=api-prod"
     },
     {
       "id": "CVE-2026-4021",
       "title": "Contest Gallery <= 28.1.5 - Unauthenticated Privilege Escalation Admin Account Takeover via Registration Confirmation Email-to-ID Type Confusion",
       "cvss": 8.1,
-      "href": "https://www.wordfence.com/threat-intel/vulnerabilities/wordpress-plugins/contest-gallery/contest-gallery-2815-unauthenticated-privilege-escalation-admin-account-takeover-via-registration-confirmation-email-to-id-type-confusion"
+      "href": "https://www.wordfence.com/threat-intel/vulnerabilities/id/f1b9725b-dee5-44ca-bb33-c6812fb76adc?source=api-prod"
     },
     {
       "id": "CVE-2026-3445",
       "title": "Paid Membership Plugin, Ecommerce, User Registration Form, Login Form, User Profile & Restrict Content – ProfilePress <= 4.16.11 - Missing Authorization to Authenticated (Subscriber+) Membership Payment Bypass",
       "cvss": 7.1,
-      "href": "https://www.wordfence.com/threat-intel/vulnerabilities/wordpress-plugins/wp-user-avatar/paid-membership-plugin-ecommerce-user-registration-form-login-form-user-profile-restrict-content-profilepress-41611-missing-authorization-to-authenticated-subscriber-membership-payment-bypass"
+      "href": "https://www.wordfence.com/threat-intel/vulnerabilities/id/ae1e198b-0c0d-47aa-8a56-ec4e790c8022?source=api-prod"
     },
     {
       "id": "CVE-2026-3360",
       "title": "Tutor LMS <= 3.9.7 - Missing Authorization to Unauthenticated Arbitrary Billing Profile Overwrite via 'order_id' Parameter",
       "cvss": 7.5,
-      "href": "https://www.wordfence.com/threat-intel/vulnerabilities/wordpress-plugins/tutor/tutor-lms-397-missing-authorization-to-unauthenticated-arbitrary-billing-profile-overwrite-via-order-id-parameter"
+      "href": "https://www.wordfence.com/threat-intel/vulnerabilities/id/7f365519-dd0a-4f39-880d-7216ce2f7d1e?source=api-prod"
     },
     {
       "id": "CVE-2026-2936",
       "title": "Visitor Traffic Real Time Statistics <= 8.4 - Unauthenticated Stored Cross-Site Scripting",
       "cvss": 7.2,
-      "href": "https://www.wordfence.com/threat-intel/vulnerabilities/wordpress-plugins/visitors-traffic-real-time-statistics/visitor-traffic-real-time-statistics-84-unauthenticated-stored-cross-site-scripting"
+      "href": "https://www.wordfence.com/threat-intel/vulnerabilities/id/bd8e86b0-5e06-44e0-a94c-b05581f46e5a?source=api-prod"
     },
     {
       "id": "CVE-2026-2554",
       "title": "WCFM – Frontend Manager for WooCommerce along with Bookings Subscription Listings Compatible <= 6.7.25 - Authenticated (Vendor+) Insecure Direct Object Reference to Arbitrary User Deletion",
       "cvss": 8.1,
-      "href": "https://www.wordfence.com/threat-intel/vulnerabilities/wordpress-plugins/wc-frontend-manager/wcfm-frontend-manager-for-woocommerce-along-with-bookings-subscription-listings-compatible-6725-authenticated-vendor-insecure-direct-object-reference-to-arbitrary-user-deletion"
+      "href": "https://www.wordfence.com/threat-intel/vulnerabilities/id/21e397a4-0b32-4b13-a46b-c465acea0796?source=api-prod"
     },
     {
       "id": "CVE-2026-2233",
       "title": "User Frontend: AI Powered Frontend Posting, User Directory, Profile, Membership & User Registration <= 4.2.8 - Missing Authorization to Unauthenticated Arbitrary Post Modification via 'post_id' Parameter",
       "cvss": 5.3,
-      "href": "https://www.wordfence.com/threat-intel/vulnerabilities/wordpress-plugins/wp-user-frontend/user-frontend-ai-powered-frontend-posting-user-directory-profile-membership-user-registration-428-missing-authorization-to-unauthenticated-arbitrary-post-modification-via-post-id-parameter"
+      "href": "https://www.wordfence.com/threat-intel/vulnerabilities/id/e0a278a3-f229-4673-8b3e-5b68f383dcc7?source=api-prod"
     },
     {
       "id": "CVE-2026-2231",
       "title": "Fluent Booking <= 2.0.01 - Unauthenticated Stored Cross-Site Scripting via Multiple Parameters",
       "cvss": 7.2,
-      "href": "https://www.wordfence.com/threat-intel/vulnerabilities/wordpress-plugins/fluent-booking/fluent-booking-2001-unauthenticated-stored-cross-site-scripting-via-multiple-parameters"
+      "href": "https://www.wordfence.com/threat-intel/vulnerabilities/id/37441cc0-c43c-40e4-a170-1be59e112272?source=api-prod"
     },
     {
       "id": "CVE-2026-1869",
       "title": "User Registration & Membership <= 5.2.0 - Missing Authorization to Unauthenticated Payment Bypass",
       "cvss": 6.5,
-      "href": "https://www.wordfence.com/threat-intel/vulnerabilities/wordpress-plugins/user-registration/user-registration-membership-520-missing-authorization-to-unauthenticated-payment-bypass"
+      "href": "https://www.wordfence.com/threat-intel/vulnerabilities/id/9bf5b60b-5a4f-4227-97ac-a952019f46d9?source=api-prod"
     },
     {
       "id": "CVE-2026-1372",
       "title": "Tutor LMS Elementor Addons <= 4.0.0 - Missing Authorization to Authenticated (Subscriber+) Tutor LMS and Elementor Plugin Activation",
       "cvss": 4.3,
-      "href": "https://www.wordfence.com/threat-intel/vulnerabilities/wordpress-plugins/tutor-lms-elementor-addons/tutor-lms-elementor-addons-400-missing-authorization-to-authenticated-subscriber-tutor-lms-and-elementor-plugin-activation"
+      "href": "https://www.wordfence.com/threat-intel/vulnerabilities/id/8a276a3e-12c3-4af7-9eb8-a25d20563de7?source=api-prod"
     },
     {
       "id": "CVE-2026-1371",
       "title": "Tutor LMS <= 3.9.5 - Authenticated (Subscriber+) Information Disclosure in Coupon Details via 'tutor_coupon_details' AJAX Action",
       "cvss": 5.3,
-      "href": "https://www.wordfence.com/threat-intel/vulnerabilities/wordpress-plugins/tutor/tutor-lms-395-authenticated-subscriber-information-disclosure-in-coupon-details-via-tutor-coupon-details-ajax-action"
+      "href": "https://www.wordfence.com/threat-intel/vulnerabilities/id/7f5c5f64-a864-4ce1-9080-19f7c4418307?source=api-prod"
     },
     {
       "id": "CVE-2026-1238",
       "title": "SlimStat Analytics <= 5.3.5 - Unauthenticated Stored Cross-Site Scripting via 'fh'",
       "cvss": 7.2,
-      "href": "https://www.wordfence.com/threat-intel/vulnerabilities/wordpress-plugins/wp-slimstat/slimstat-analytics-535-unauthenticated-stored-cross-site-scripting-via-fh"
+      "href": "https://www.wordfence.com/threat-intel/vulnerabilities/id/e991fbdf-8e26-4d2e-8e3b-c8990914dcad?source=api-prod"
     },
     {
       "id": "CVE-2026-1065",
       "title": "Form Maker by 10Web <= 1.15.35 - Unauthenticated Stored Cross-Site Scripting via SVG file",
       "cvss": 7.2,
-      "href": "https://www.wordfence.com/threat-intel/vulnerabilities/wordpress-plugins/form-maker/form-maker-by-10web-11535-unauthenticated-stored-cross-site-scripting-via-svg-file"
+      "href": "https://www.wordfence.com/threat-intel/vulnerabilities/id/8230d5f8-01d9-465a-8a43-e9852248bb3d?source=api-prod"
     },
     {
       "id": "CVE-2026-1058",
       "title": "Form Maker by 10Web <= 1.15.35 - Unauthenticated Stored Cross-Site Scripting via Hidden Field",
       "cvss": 7.1,
-      "href": "https://www.wordfence.com/threat-intel/vulnerabilities/wordpress-plugins/form-maker/form-maker-by-10web-11535-unauthenticated-stored-cross-site-scripting-via-hidden-field"
+      "href": "https://www.wordfence.com/threat-intel/vulnerabilities/id/e0ec0027-2792-4069-b413-8fdd951f5fe7?source=api-prod"
     },
     {
       "id": "CVE-2026-0683",
       "title": "SupportCandy – Helpdesk & Customer Support Ticket System <= 3.4.4 - Authenticated (Subscriber+) SQL Injection via Number Field Filter",
       "cvss": 6.5,
-      "href": "https://www.wordfence.com/threat-intel/vulnerabilities/wordpress-plugins/supportcandy/supportcandy-helpdesk-customer-support-ticket-system-344-authenticated-subscriber-sql-injection-via-number-field-filter"
+      "href": "https://www.wordfence.com/threat-intel/vulnerabilities/id/a7856d0f-bc7d-436c-968c-631fd6a686ab?source=api-prod"
     },
     {
       "id": "CVE-2025-47555",
       "title": "Tutor LMS <= 3.9.4 - Authenticated (Instructor+) Insecure Direct Object Reference",
       "cvss": 4.3,
-      "href": "https://www.wordfence.com/threat-intel/vulnerabilities/wordpress-plugins/tutor/tutor-lms-394-authenticated-instructor-insecure-direct-object-reference"
+      "href": "https://www.wordfence.com/threat-intel/vulnerabilities/id/5849a9f6-715e-4ac8-a0f7-1cd0814fff58?source=api-prod"
     },
     {
       "id": "CVE-2025-15057",
       "title": "SlimStat Analytics <= 5.3.3 - Unauthenticated Stored Cross-Site Scripting via 'fh' Parameter",
       "cvss": 7.2,
-      "href": "https://www.wordfence.com/threat-intel/vulnerabilities/wordpress-plugins/wp-slimstat/slimstat-analytics-533-unauthenticated-stored-cross-site-scripting-via-fh-parameter"
+      "href": "https://www.wordfence.com/threat-intel/vulnerabilities/id/90920df9-1362-466b-b14b-4714087f556b?source=api-prod"
     },
     {
       "id": "CVE-2025-15055",
       "title": "SlimStat Analytics <= 5.3.4 - Unauthenticated Stored Cross-Site Scripting via 'notes/resource' Parameters",
       "cvss": 7.2,
-      "href": "https://www.wordfence.com/threat-intel/vulnerabilities/wordpress-plugins/wp-slimstat/slimstat-analytics-534-unauthenticated-stored-cross-site-scripting-via-notesresource-parameters"
+      "href": "https://www.wordfence.com/threat-intel/vulnerabilities/id/afbfabfc-b923-4fe9-9e8f-0cf159f488db?source=api-prod"
     },
     {
       "id": "CVE-2025-14151",
       "title": "SlimStat Analytics <= 5.3.2 - Unauthenticated Stored Cross-Site Scripting",
       "cvss": 7.2,
-      "href": "https://www.wordfence.com/threat-intel/vulnerabilities/wordpress-plugins/wp-slimstat/slimstat-analytics-532-unauthenticated-stored-cross-site-scripting"
+      "href": "https://www.wordfence.com/threat-intel/vulnerabilities/id/6ee675dd-5b43-439f-9717-6c531e9bf066?source=api-prod"
     },
     {
       "id": "CVE-2025-13964",
       "title": "LearnPress – WordPress LMS Plugin <= 4.3.2 - Missing Authentication to Unauthenticated Course Modification",
       "cvss": 5.3,
-      "href": "https://www.wordfence.com/threat-intel/vulnerabilities/wordpress-plugins/learnpress/learnpress-wordpress-lms-plugin-432-missing-authentication-to-unauthenticated-course-modification"
+      "href": "https://www.wordfence.com/threat-intel/vulnerabilities/id/ae363511-8a1f-476a-9851-61f7763428c2?source=api-prod"
     },
     {
       "id": "CVE-2025-13935",
       "title": "Tutor LMS – eLearning and online course solution <= 3.9.3 - Missing Authorization to Authenticated (Subscriber+) Arbitrary Course Completion",
       "cvss": 4.3,
-      "href": "https://www.wordfence.com/threat-intel/vulnerabilities/wordpress-plugins/tutor/tutor-lms-elearning-and-online-course-solution-393-missing-authorization-to-authenticated-subscriber-arbitrary-course-completion"
+      "href": "https://www.wordfence.com/threat-intel/vulnerabilities/id/7b8b111a-9626-41f4-8a13-51f576af0257?source=api-prod"
     },
     {
       "id": "CVE-2025-13934",
       "title": "Tutor LMS – eLearning and online course solution <= 3.9.3 - Missing Authorization to Authenticated (Subscriber+) Course Enrollment Bypass",
       "cvss": 4.3,
-      "href": "https://www.wordfence.com/threat-intel/vulnerabilities/wordpress-plugins/tutor/tutor-lms-elearning-and-online-course-solution-393-missing-authorization-to-authenticated-subscriber-course-enrollment-bypass"
+      "href": "https://www.wordfence.com/threat-intel/vulnerabilities/id/5de212c9-5c2e-4713-b1ce-022dd84520c3?source=api-prod"
     },
     {
       "id": "CVE-2025-13679",
       "title": "Tutor LMS <= 3.9.3 - Missing Authorization to Authenticated (Subscriber+) Sensitive Information Exposure via tutor_order_details",
       "cvss": 6.5,
-      "href": "https://www.wordfence.com/threat-intel/vulnerabilities/wordpress-plugins/tutor/tutor-lms-393-missing-authorization-to-authenticated-subscriber-sensitive-information-exposure-via-tutor-order-details"
+      "href": "https://www.wordfence.com/threat-intel/vulnerabilities/id/0830d0c3-99c0-423e-99ab-f0c1cbec52d9?source=api-prod"
     },
     {
       "id": "CVE-2025-13673",
       "title": "Tutor LMS <= 3.9.6 - Unauthenticated SQL Injection via coupon_code",
       "cvss": 7.5,
-      "href": "https://www.wordfence.com/threat-intel/vulnerabilities/wordpress-plugins/tutor/tutor-lms-396-unauthenticated-sql-injection-via-coupon-code"
+      "href": "https://www.wordfence.com/threat-intel/vulnerabilities/id/007df869-dacb-4b0a-9c98-50586934cdab?source=api-prod"
     },
     {
       "id": "CVE-2025-13628",
       "title": "Tutor LMS – eLearning and online course solution <= 3.9.3 - Missing Authorization to Authenticated (Subscriber+) Arbitrary Coupon Modification",
       "cvss": 4.3,
-      "href": "https://www.wordfence.com/threat-intel/vulnerabilities/wordpress-plugins/tutor/tutor-lms-elearning-and-online-course-solution-393-missing-authorization-to-authenticated-subscriber-arbitrary-coupon-modification"
+      "href": "https://www.wordfence.com/threat-intel/vulnerabilities/id/46f71f7b-7326-47b6-a23a-68a40f5bb56b?source=api-prod"
     },
     {
       "id": "CVE-2025-12984",
       "title": "Advanced Ads – Ad Manager & AdSense <= 2.0.15 - Authenticated (Admin+) SQL Injection",
       "cvss": 4.9,
-      "href": "https://www.wordfence.com/threat-intel/vulnerabilities/wordpress-plugins/advanced-ads/advanced-ads-ad-manager-adsense-2015-authenticated-admin-sql-injection"
+      "href": "https://www.wordfence.com/threat-intel/vulnerabilities/id/729e8a06-abaa-4468-8a80-1e5c6cbace92?source=api-prod"
     },
     {
       "id": "CVE-2025-12884",
       "title": "Advanced Ads – Ad Manager & AdSense <= 2.0.14 - Missing Authorization to Authenticated (Subscriber+) Ad Placements Update",
       "cvss": 4.3,
-      "href": "https://www.wordfence.com/threat-intel/vulnerabilities/wordpress-plugins/advanced-ads/advanced-ads-ad-manager-adsense-2014-missing-authorization-to-authenticated-subscriber-ad-placements-update"
+      "href": "https://www.wordfence.com/threat-intel/vulnerabilities/id/a1ad32fb-929e-4181-8789-df50a77a71ef?source=api-prod"
     },
     {
       "id": "CVE-2025-12814",
       "title": "SiteSEO – SEO Simplified <= 1.3.2 - Improper Authorization to Authenticated Settings Reset",
       "cvss": 5.3,
-      "href": "https://www.wordfence.com/threat-intel/vulnerabilities/wordpress-plugins/siteseo/siteseo-seo-simplified-132-improper-authorization-to-authenticated-settings-reset"
+      "href": "https://www.wordfence.com/threat-intel/vulnerabilities/id/a376cafb-656c-4fe1-b5c1-c7e38dc5040e?source=api-prod"
     }
   ]
 }
