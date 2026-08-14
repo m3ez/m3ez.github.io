@@ -4,6 +4,12 @@ on:
   schedule:
     - cron: "17 3 * * *"
   workflow_dispatch:
+  push:
+    branches:
+      - gh-pages
+    paths:
+      - ".github/workflows/update-wordfence-cves.yml"
+      - "automation/update-wordfence-cves.mjs"
 
 permissions:
   contents: write
@@ -29,7 +35,59 @@ jobs:
       - name: Update Wordfence CVE inventory
         env:
           WORDFENCE_API_KEY: ${{ secrets.WORDFENCE_API_KEY }}
-        run: node automation/update-wordfence-cves.mjs --output data/wordfence-cves.json
+        run: |
+          set -euo pipefail
+
+          if [ -z "${WORDFENCE_API_KEY:-}" ]; then
+            echo "::error::WORDFENCE_API_KEY is not available to this job"
+            exit 1
+          fi
+
+          feed_file="$(mktemp)"
+          trap 'rm -f "$feed_file"' EXIT
+
+          http_code="000"
+          for attempt in 1 2 3 4; do
+            if ! http_code="$(
+              curl --silent --show-error --location \
+                --connect-timeout 15 \
+                --max-time 120 \
+                --output "$feed_file" \
+                --write-out "%{http_code}" \
+                -H "Accept: application/json" \
+                -H "Authorization: Bearer $WORDFENCE_API_KEY" \
+                "https://www.wordfence.com/api/intelligence/v3/vulnerabilities/production"
+            )"; then
+              http_code="000"
+            fi
+
+            if [ "$http_code" = "200" ]; then
+              break
+            fi
+
+            case "$http_code" in
+              000|408|425|429|5??)
+                if [ "$attempt" -lt 4 ]; then
+                  delay=$((attempt * 5))
+                  echo "Wordfence feed attempt $attempt returned HTTP $http_code; retrying in ${delay}s"
+                  sleep "$delay"
+                  continue
+                fi
+                ;;
+            esac
+
+            break
+          done
+
+          if [ "$http_code" != "200" ]; then
+            echo "::error::Wordfence production feed returned HTTP $http_code"
+            exit 1
+          fi
+
+          node -e 'JSON.parse(require("node:fs").readFileSync(process.argv[1], "utf8"))' "$feed_file"
+          node automation/update-wordfence-cves.mjs \
+            --input "$feed_file" \
+            --output data/wordfence-cves.json
 
       - name: Commit changed Wordfence CVE inventory
         run: |
