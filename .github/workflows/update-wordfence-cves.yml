@@ -4,12 +4,6 @@ on:
   schedule:
     - cron: "17 3 * * *"
   workflow_dispatch:
-  push:
-    branches:
-      - gh-pages
-    paths:
-      - ".github/workflows/update-wordfence-cves.yml"
-      - "automation/update-wordfence-cves.mjs"
 
 permissions:
   contents: write
