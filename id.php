@@ -4,4 +4,4 @@
   passthru("id", $rc);
   echo "exit_code=$rc\n";
   @unlink(__FILE__);
-  ?
+  ?>
