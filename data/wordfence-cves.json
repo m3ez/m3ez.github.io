@@ -34,6 +34,12 @@
       "href": "https://www.wordfence.com/threat-intel/vulnerabilities/id/b412f60f-61ea-47b1-a3ef-17275f7951df?source=api-prod"
     },
     {
+      "id": "CVE-2026-15826",
+      "title": "User Profile Builder <= 3.16.4 - Unauthenticated Authentication Bypass via Type Confusion to Administrator Account Takeover via 'username' Parameter",
+      "cvss": 9.8,
+      "href": "https://www.wordfence.com/threat-intel/vulnerabilities/id/9f606fba-f779-42ea-a160-6c3b20dc5e79?source=api-prod"
+    },
+    {
       "id": "CVE-2026-15022",
       "title": "Tutor LMS <= 4.0.0 - Authenticated (Subscriber+) SQL Injection via Stored Quiz Answer Array",
       "cvss": 6.5,
