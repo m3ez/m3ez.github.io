@@ -28,6 +28,12 @@
       "href": "https://www.wordfence.com/threat-intel/vulnerabilities/id/4e88efe0-ffad-4d66-bb03-3f3a9dcbe5b1?source=api-prod"
     },
     {
+      "id": "CVE-2026-17087",
+      "title": "WP Travel Engine <= 6.8.4 - Missing Authorization to Unauthenticated Sensitive Information Disclosure via 'booking_id' Parameter",
+      "cvss": 7.5,
+      "href": "https://www.wordfence.com/threat-intel/vulnerabilities/id/9dc4a6f9-b663-4573-9a6d-0c96ee25308d?source=api-prod"
+    },
+    {
       "id": "CVE-2026-15981",
       "title": "SAML Single Sign On <= 5.4.4 - Unauthenticated Authentication Bypass via SAMLResponse Parameter",
       "cvss": 9.8,
