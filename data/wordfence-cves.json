@@ -22,6 +22,12 @@
       "href": "https://www.wordfence.com/threat-intel/vulnerabilities/id/24009534-3a57-4ed3-b841-72e87e2a6925?source=api-prod"
     },
     {
+      "id": "CVE-2026-19883",
+      "title": "WPeMatico RSS Feed Fetcher <= 2.8.24 - Authenticated (Subscriber+) Privilege Escalation via Arbitrary Option Update to wpematico_import_settings admin_action",
+      "cvss": 8.8,
+      "href": "https://www.wordfence.com/threat-intel/vulnerabilities/id/4e591cb4-058d-4d8e-948e-d65ab01db618?source=api-prod"
+    },
+    {
       "id": "CVE-2026-18352",
       "title": "User Access Manager <= 2.3.15 - Unauthenticated Arbitrary File Read via 'uamgetfile' Parameter",
       "cvss": 7.5,
