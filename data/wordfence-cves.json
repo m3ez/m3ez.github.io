@@ -4,6 +4,12 @@
   "profile": "https://www.wordfence.com/threat-intel/vulnerabilities/researchers/supakiad-s",
   "items": [
     {
+      "id": "CVE-2026-78291",
+      "title": "RepairBuddy – Repair Shop CRM & Booking Plugin for WordPress <= 4.1223 - Missing Authorization",
+      "cvss": 5.3,
+      "href": "https://www.wordfence.com/threat-intel/vulnerabilities/id/36fa7191-a4a9-40a5-896e-18e16525a5fb?source=api-prod"
+    },
+    {
       "id": "CVE-2026-32498",
       "title": "RegistrationMagic – Custom Registration Forms, User Registration, Payment, and User Login <= 6.0.7.6 - Missing Authorization",
       "cvss": 5.3,
