@@ -10,6 +10,12 @@
       "href": "https://www.wordfence.com/threat-intel/vulnerabilities/id/36fa7191-a4a9-40a5-896e-18e16525a5fb?source=api-prod"
     },
     {
+      "id": "CVE-2026-75865",
+      "title": "WPLP Cookie Consent <= 4.4.1 - Unauthenticated Arbitrary File Upload via 'upload-logo' REST Endpoint",
+      "cvss": 9.8,
+      "href": "https://www.wordfence.com/threat-intel/vulnerabilities/id/96a2a552-e73f-4b27-88de-50eb63a8d131?source=api-prod"
+    },
+    {
       "id": "CVE-2026-32498",
       "title": "RegistrationMagic – Custom Registration Forms, User Registration, Payment, and User Login <= 6.0.7.6 - Missing Authorization",
       "cvss": 5.3,
@@ -32,6 +38,12 @@
       "title": "WPeMatico RSS Feed Fetcher <= 2.8.24 - Authenticated (Subscriber+) Privilege Escalation via Arbitrary Option Update to wpematico_import_settings admin_action",
       "cvss": 8.8,
       "href": "https://www.wordfence.com/threat-intel/vulnerabilities/id/4e591cb4-058d-4d8e-948e-d65ab01db618?source=api-prod"
+    },
+    {
+      "id": "CVE-2026-19806",
+      "title": "Support Genix <= 1.4.52 - Authenticated (Subscriber+) Authentication Bypass to Administrator Account Takeover via 'p' Parameter Forged Guest Token",
+      "cvss": 8.8,
+      "href": "https://www.wordfence.com/threat-intel/vulnerabilities/id/188f7c1d-e8ad-4114-9aa4-c3e8b51c5f2c?source=api-prod"
     },
     {
       "id": "CVE-2026-18352",
