@@ -1,0 +1,50 @@
+name: Deploy to Surge
+
+on:
+  push:
+    branches:
+      - gh-pages
+
+  workflow_run:
+    workflows:
+      - "Update Wordfence CVE ledger"
+    types:
+      - completed
+
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-surge
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    if: >
+      github.event_name != 'workflow_run' ||
+      github.event.workflow_run.conclusion == 'success'
+
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout gh-pages
+        uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+          persist-credentials: false
+
+      - name: Deploy m3ez.surge.sh
+        env:
+          SURGE_TOKEN: ${{ secrets.SURGE_TOKEN }}
+        run: |
+          set -euo pipefail
+
+          if [ -z "${SURGE_TOKEN:-}" ]; then
+            echo "::error::SURGE_TOKEN is not configured"
+            exit 1
+          fi
+
+          npx --yes surge@0.41.2 . https://m3ez.surge.sh
