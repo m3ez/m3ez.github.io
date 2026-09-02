@@ -4,10 +4,28 @@
   "profile": "https://www.wordfence.com/threat-intel/vulnerabilities/researchers/supakiad-s",
   "items": [
     {
+      "id": "CVE-2026-81756",
+      "title": "Smart Marketing SMS and Newsletters Forms <= 5.1.24 - Unauthenticated SQL Injection",
+      "cvss": 7.5,
+      "href": "https://www.wordfence.com/threat-intel/vulnerabilities/id/168f993a-21ce-4548-9c37-7e80d5c4e00e?source=api-prod"
+    },
+    {
+      "id": "CVE-2026-78292",
+      "title": "Hash Form – Drag & Drop Form Builder <= 1.4.1 - Unauthenticated PHP Object Injection",
+      "cvss": 8.1,
+      "href": "https://www.wordfence.com/threat-intel/vulnerabilities/id/e6984f14-3b89-47f0-8137-26e447cb09f2?source=api-prod"
+    },
+    {
       "id": "CVE-2026-78291",
       "title": "RepairBuddy – Repair Shop CRM & Booking Plugin for WordPress <= 4.1223 - Missing Authorization",
       "cvss": 5.3,
       "href": "https://www.wordfence.com/threat-intel/vulnerabilities/id/36fa7191-a4a9-40a5-896e-18e16525a5fb?source=api-prod"
+    },
+    {
+      "id": "CVE-2026-78286",
+      "title": "Geo Controller <= 8.9.8 - Unauthenticated PHP Object Injection",
+      "cvss": 8.1,
+      "href": "https://www.wordfence.com/threat-intel/vulnerabilities/id/d7c9ef25-dc57-4a38-84d6-40f38bf96e4e?source=api-prod"
     },
     {
       "id": "CVE-2026-75865",
