@@ -1,0 +1,54 @@
+name: Mirror to Codeberg Pages
+
+on:
+  push:
+    branches:
+      - gh-pages
+
+  workflow_run:
+    workflows:
+      - "Update Wordfence CVE ledger"
+    types:
+      - completed
+
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: mirror-codeberg-pages
+  cancel-in-progress: true
+
+jobs:
+  mirror:
+    if: >
+      github.event_name != 'workflow_run' ||
+      github.event.workflow_run.conclusion == 'success'
+
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout gh-pages
+        uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Push to Codeberg pages branch
+        env:
+          CODEBERG_TOKEN: ${{ secrets.CODEBERG_TOKEN }}
+        run: |
+          set -euo pipefail
+
+          if [ -z "${CODEBERG_TOKEN:-}" ]; then
+            echo "::error::CODEBERG_TOKEN is not configured"
+            exit 1
+          fi
+
+          git remote add codeberg \
+            "https://m3ez:${CODEBERG_TOKEN}@codeberg.org/m3ez/pages.git"
+
+          git push --force codeberg HEAD:pages
