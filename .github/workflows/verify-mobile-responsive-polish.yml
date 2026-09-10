@@ -1,0 +1,17 @@
+name: Verify mobile responsive polish
+
+on:
+  push:
+    branches:
+      - agent/mobile-responsive-polish
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run redesign contracts
+        run: node --test tests/redesign.test.mjs tests/mobile-responsive.test.mjs
