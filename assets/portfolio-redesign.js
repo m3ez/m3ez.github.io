@@ -280,8 +280,12 @@ function start() {
   void renderResearch();
 }
 
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', start, { once: true });
+function scheduleStart() {
+  requestAnimationFrame(() => requestAnimationFrame(start));
+}
+
+if (document.readyState === 'complete') {
+  scheduleStart();
 } else {
-  start();
+  window.addEventListener('load', scheduleStart, { once: true });
 }
