@@ -8,3 +8,4 @@
 #m3ez-credential-carousel-v1 .credential-carousel-issued{grid-column:2;color:var(--muted)}
 #m3ez-credential-carousel-v1 .credential-carousel-verify{grid-column:1/-1;grid-row:4;justify-self:end;align-self:end;margin:.4rem 0 0;font-size:11px;line-height:1;white-space:nowrap}
 @media (max-width:640px){#m3ez-credential-carousel-v1 .credential-carousel-card{padding:.9rem 1rem .8rem}#m3ez-credential-carousel-v1 .credential-carousel-title{margin-top:.6rem;font-size:clamp(20px,7vw,24px)}#m3ez-credential-carousel-v1 .credential-carousel-issuer,#m3ez-credential-carousel-v1 .credential-carousel-issued,#m3ez-credential-carousel-v1 .credential-carousel-verify{font-size:10px}}
+#m3ez-credential-carousel-v1 .credential-carousel-issued{padding-left:.35em}
