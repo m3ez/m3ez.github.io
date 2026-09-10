@@ -95,3 +95,10 @@ test('CVE list keeps only outer top and bottom hairlines with no internal row bo
   assert.doesNotMatch(listRule, /border-left|border-right|border:\.5px/);
   assert.doesNotMatch(rowRule, /border-top|border-bottom|border-left|border-right/);
 });
+
+test('redesign waits for page load and paint before mutating React-hydrated markup', () => {
+  const source = readFileSync(new URL('../assets/portfolio-redesign.js', import.meta.url), 'utf8');
+  assert.match(source, /window\.addEventListener\('load', scheduleStart, \{ once: true \}\)/);
+  assert.match(source, /requestAnimationFrame\(\(\) => requestAnimationFrame\(start\)\)/);
+  assert.doesNotMatch(source, /DOMContentLoaded/);
+});
