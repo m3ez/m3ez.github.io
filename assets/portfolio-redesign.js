@@ -5,7 +5,6 @@ import {
   normalizeWordfenceDocument,
 } from './research-data.js';
 
-const LEGACY_CAROUSEL_ID = 'm3ez-credential-carousel-v1';
 const MOVED_RECOGNITION = new Set(['LLMail-Inject Challenge', '2023 MVR Volume Badge']);
 const SEVERITIES = ['All', 'Critical', 'High', 'Medium'];
 
@@ -30,31 +29,6 @@ function makeFilterButton(value, onClick) {
   button.setAttribute('aria-pressed', value === 'All' ? 'true' : 'false');
   button.addEventListener('click', () => onClick(value));
   return button;
-}
-
-function installLegacyCarouselCompatibilityStub() {
-  const existingCarousel = document.getElementById(LEGACY_CAROUSEL_ID);
-  if (existingCarousel) existingCarousel.remove();
-  const legacyStyle = document.getElementById(`${LEGACY_CAROUSEL_ID}-style`);
-  legacyStyle?.remove();
-
-  const hero = document.querySelector('.hero');
-  if (!hero) return;
-
-  const root = element('div', 'credential-carousel redesign-legacy-carousel-stub');
-  root.id = LEGACY_CAROUSEL_ID;
-  root.hidden = true;
-  root.setAttribute('aria-hidden', 'true');
-
-  const stage = element('div', 'credential-carousel-stage');
-  const previous = element('button', 'credential-carousel-arrow');
-  previous.type = 'button';
-  previous.setAttribute('aria-label', 'Previous credential');
-  const next = element('button', 'credential-carousel-arrow');
-  next.type = 'button';
-  next.setAttribute('aria-label', 'Next credential');
-  root.append(stage, previous, next);
-  hero.appendChild(root);
 }
 
 function moveRecognitionBadges() {
@@ -275,7 +249,6 @@ async function renderResearch() {
 }
 
 function start() {
-  installLegacyCarouselCompatibilityStub();
   renderCredentials();
   void renderResearch();
 }
