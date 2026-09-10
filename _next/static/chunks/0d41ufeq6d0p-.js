@@ -3,7 +3,6 @@
 ;(() => {
   const MARKER = "m3ez-credential-carousel-v1";
   const ROTATION_MS = 4500;
-
   const css = `
 .hero{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(25rem,.95fr);column-gap:clamp(2rem,5vw,4rem);align-items:center}
 .hero>.role,.hero>h1,.hero>.trust-statement,.hero>.hero-copy,.hero>.proof-links{grid-column:1}
@@ -18,219 +17,16 @@
 .credential-carousel-kicker,.credential-carousel-issuer,.credential-carousel-issued,.credential-carousel-verify{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
 .credential-carousel-kicker{color:var(--muted);font-size:10px;letter-spacing:.16em;text-transform:uppercase}
 .credential-carousel-title{margin-top:1.05rem;font-size:clamp(26px,3vw,34px);line-height:1;letter-spacing:-.025em}
-.credential-carousel-issuer{margin-top:.7rem;font-size:13px}.credential-carousel-issued{margin-top:.2rem;color:var(--muted);font-size:11px}
-.credential-carousel-verify{align-self:flex-end;margin-top:auto;font-size:12px}
+.credential-carousel-issuer{margin-top:.7rem;font-size:13px}.credential-carousel-issued{margin-top:.2rem;color:var(--muted);font-size:11px}.credential-carousel-verify{align-self:flex-end;margin-top:auto;font-size:12px}
 .credential-carousel-controls{display:grid;grid-template-columns:44px minmax(0,1fr) 44px;gap:.25rem;align-items:center;width:min(100%,30rem);margin:.1rem auto 0}
 .credential-carousel-arrow,.credential-carousel-dot{font:inherit;cursor:pointer}.credential-carousel-arrow{min-width:44px;min-height:44px;padding:0;border:0;background:transparent;color:var(--ink);opacity:0;pointer-events:none;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:20px}
 .credential-carousel:hover .credential-carousel-arrow,.credential-carousel:focus-within .credential-carousel-arrow{opacity:1;pointer-events:auto}
 .credential-carousel-dots{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:0 .05rem}.credential-carousel-dot{position:relative;width:18px;min-height:36px;padding:0;border:0;background:transparent}
 .credential-carousel-dot::before{position:absolute;top:50%;left:50%;width:6px;height:6px;background:var(--line);clip-path:circle(50%);content:"";transform:translate(-50%,-50%)}.credential-carousel-dot.is-active::before{background:var(--black)}
-@media (hover:none){.credential-carousel-arrow{opacity:1;pointer-events:auto}}
-@media (prefers-reduced-motion:reduce){.credential-carousel-card{transition:none}}
+@media (hover:none){.credential-carousel-arrow{opacity:1;pointer-events:auto}}@media (prefers-reduced-motion:reduce){.credential-carousel-card{transition:none}}
 @media (max-width:880px){.hero{grid-template-columns:1fr;column-gap:0}.credential-carousel{grid-column:1;grid-row:auto;max-width:36rem;justify-self:center;margin-top:1.75rem}}
 @media (max-width:640px){.credential-carousel-stage{height:12.5rem}.credential-carousel-card{width:min(72%,17rem);height:11.5rem;padding:1rem}.credential-carousel-card[data-position="previous"]{left:9%}.credential-carousel-card[data-position="next"]{left:91%}.credential-carousel-card[data-position="past"]{left:-24%}.credential-carousel-card[data-position="future"]{left:124%}.credential-carousel-title{font-size:clamp(24px,9vw,30px)}.credential-carousel-controls{width:100%}.credential-carousel-dot{width:16px;min-height:32px}.credential-carousel-arrow{opacity:1;pointer-events:auto}}
 `;
-
-  function mount() {
-    if (document.getElementById(MARKER)) return;
-
-    const hero = document.querySelector(".hero");
-    if (!hero) return;
-
-    const sourceItems = [...document.querySelectorAll('.credential-list li[data-kind="credential"]')]
-      .map((li) => {
-        const link = li.querySelector("a");
-        if (!link) return null;
-        const meta = li.querySelector(".record-meta")?.textContent || "";
-        const [issuer = "", issued = ""] = meta.split("·").map((value) => value.trim());
-        return {
-          title: (link.textContent || "").trim(),
-          issuer,
-          issued: issued.slice(0, 4),
-          href: link.href,
-        };
-      })
-      .filter(Boolean);
-
-    const items = sourceItems;
-    if (items.length < 2) return;
-
-    const style = document.createElement("style");
-    style.id = `${MARKER}-style`;
-    style.textContent = css;
-    document.head.appendChild(style);
-
-    const root = document.createElement("div");
-    root.id = MARKER;
-    root.className = "credential-carousel";
-    root.setAttribute("role", "region");
-    root.setAttribute("aria-roledescription", "carousel");
-    root.setAttribute("aria-label", "Credentials");
-
-    const stage = document.createElement("div");
-    stage.className = "credential-carousel-stage";
-    root.appendChild(stage);
-
-    const cards = items.map((item, index) => {
-      const card = document.createElement("a");
-      card.className = "credential-carousel-card";
-      card.href = item.href;
-      card.target = "_blank";
-      card.rel = "noopener noreferrer";
-      card.dataset.index = String(index);
-
-      const kicker = document.createElement("span");
-      kicker.className = "credential-carousel-kicker";
-      kicker.textContent = "Certification";
-
-      const title = document.createElement("strong");
-      title.className = "credential-carousel-title";
-      title.textContent = item.title;
-
-      const issuer = document.createElement("span");
-      issuer.className = "credential-carousel-issuer";
-      issuer.textContent = item.issuer;
-
-      const issued = document.createElement("span");
-      issued.className = "credential-carousel-issued";
-      issued.textContent = item.issued;
-
-      const verify = document.createElement("span");
-      verify.className = "credential-carousel-verify";
-
-      card.append(kicker, title, issuer, issued, verify);
-      stage.appendChild(card);
-      return { card, verify, item };
-    });
-
-    const controls = document.createElement("div");
-    controls.className = "credential-carousel-controls";
-
-    const previous = document.createElement("button");
-    previous.className = "credential-carousel-arrow";
-    previous.type = "button";
-    previous.setAttribute("aria-label", "Previous credential");
-    previous.textContent = "←";
-
-    const dots = document.createElement("div");
-    dots.className = "credential-carousel-dots";
-    dots.setAttribute("aria-label", "Choose credential");
-
-    const dotButtons = items.map((item, index) => {
-      const dot = document.createElement("button");
-      dot.className = "credential-carousel-dot";
-      dot.type = "button";
-      dot.setAttribute("aria-label", `Show ${item.title} credential`);
-      dot.addEventListener("click", () => select(index));
-      dots.appendChild(dot);
-      return dot;
-    });
-
-    const next = document.createElement("button");
-    next.className = "credential-carousel-arrow";
-    next.type = "button";
-    next.setAttribute("aria-label", "Next credential");
-    next.textContent = "→";
-
-    controls.append(previous, dots, next);
-    root.appendChild(controls);
-    hero.appendChild(root);
-
-    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
-    let activeIndex = 0;
-    let paused = false;
-    let timer = 0;
-
-    function positionFor(index) {
-      if (index === activeIndex) return "current";
-      const forward = (index - activeIndex + items.length) % items.length;
-      if (forward === 1) return "next";
-      if (forward === items.length - 1) return "previous";
-      return forward <= items.length / 2 ? "future" : "past";
-    }
-
-    function render() {
-      cards.forEach(({ card, verify, item }, index) => {
-        const position = positionFor(index);
-        const current = position === "current";
-        const visible = current || position === "previous" || position === "next";
-        card.dataset.position = position;
-        card.tabIndex = visible ? 0 : -1;
-        if (visible) card.removeAttribute("aria-hidden");
-        else card.setAttribute("aria-hidden", "true");
-        if (current) card.setAttribute("aria-current", "true");
-        else card.removeAttribute("aria-current");
-        card.setAttribute("aria-label", current ? `Verify ${item.title} credential (opens in new tab)` : `Show ${item.title} credential`);
-        verify.textContent = current ? "Verified ↗" : "";
-      });
-
-      dotButtons.forEach((dot, index) => {
-        dot.classList.toggle("is-active", index === activeIndex);
-        if (index === activeIndex) dot.setAttribute("aria-current", "true");
-        else dot.removeAttribute("aria-current");
-      });
-    }
-
-    function clearTimer() {
-      if (timer) window.clearTimeout(timer);
-      timer = 0;
-    }
-
-    function schedule() {
-      clearTimer();
-      if (paused || reducedMotion.matches) return;
-      timer = window.setTimeout(() => {
-        activeIndex = (activeIndex + 1) % items.length;
-        render();
-        schedule();
-      }, ROTATION_MS);
-    }
-
-    function select(index) {
-      activeIndex = (index + items.length) % items.length;
-      render();
-      schedule();
-    }
-
-    previous.addEventListener("click", () => select(activeIndex - 1));
-    next.addEventListener("click", () => select(activeIndex + 1));
-
-    cards.forEach(({ card }, index) => {
-      card.addEventListener("click", (event) => {
-        if (index !== activeIndex) {
-          event.preventDefault();
-          select(index);
-        }
-      });
-    });
-
-    root.addEventListener("mouseenter", () => {
-      paused = true;
-      clearTimer();
-    });
-
-    root.addEventListener("mouseleave", () => {
-      paused = root.contains(document.activeElement);
-      if (!paused) schedule();
-    });
-
-    root.addEventListener("focusin", () => {
-      paused = true;
-      clearTimer();
-    });
-
-    root.addEventListener("focusout", (event) => {
-      if (!root.contains(event.relatedTarget)) {
-        paused = root.matches(":hover");
-        if (!paused) schedule();
-      }
-    });
-
-    reducedMotion.addEventListener?.("change", schedule);
-    render();
-    schedule();
-  }
-
-  if (document.readyState === "complete") requestAnimationFrame(mount);
-  else window.addEventListener("load", () => requestAnimationFrame(mount), { once: true });
+  function mount(){if(document.getElementById(MARKER))return;const hero=document.querySelector(".hero");if(!hero)return;const sourceItems=[...document.querySelectorAll('.credential-list li[data-kind="credential"]')].map(li=>{const link=li.querySelector("a");if(!link)return null;const meta=li.querySelector(".record-meta")?.textContent||"";const[issuer="",issued=""]=meta.split("·").map(v=>v.trim());return{title:(link.textContent||"").trim(),issuer,issued:issued.slice(0,4),href:link.href}}).filter(Boolean);const items=sourceItems;if(items.length<2)return;const style=document.createElement("style");style.id=`${MARKER}-style`;style.textContent=css;document.head.appendChild(style);const root=document.createElement("div");root.id=MARKER;root.className="credential-carousel";root.setAttribute("role","region");root.setAttribute("aria-roledescription","carousel");root.setAttribute("aria-label","Credentials");const stage=document.createElement("div");stage.className="credential-carousel-stage";root.appendChild(stage);const cards=items.map((item,index)=>{const card=document.createElement("a");card.className="credential-carousel-card";card.href=item.href;card.target="_blank";card.rel="noopener noreferrer";card.dataset.index=String(index);const kicker=document.createElement("span");kicker.className="credential-carousel-kicker";kicker.textContent="Certification";const title=document.createElement("strong");title.className="credential-carousel-title";title.textContent=item.title;const issuer=document.createElement("span");issuer.className="credential-carousel-issuer";issuer.textContent=item.issuer;const issued=document.createElement("span");issued.className="credential-carousel-issued";issued.textContent=item.issued;const verify=document.createElement("span");verify.className="credential-carousel-verify";card.append(kicker,title,issuer,issued,verify);stage.appendChild(card);return{card,verify,item}});const controls=document.createElement("div");controls.className="credential-carousel-controls";const previous=document.createElement("button");previous.className="credential-carousel-arrow";previous.type="button";previous.setAttribute("aria-label","Previous credential");previous.textContent="←";const dots=document.createElement("div");dots.className="credential-carousel-dots";dots.setAttribute("aria-label","Choose credential");const dotButtons=items.map((item,index)=>{const dot=document.createElement("button");dot.className="credential-carousel-dot";dot.type="button";dot.setAttribute("aria-label",`Show ${item.title} credential`);dot.addEventListener("click",()=>select(index));dots.appendChild(dot);return dot});const next=document.createElement("button");next.className="credential-carousel-arrow";next.type="button";next.setAttribute("aria-label","Next credential");next.textContent="→";controls.append(previous,dots,next);root.appendChild(controls);hero.appendChild(root);const reducedMotion=window.matchMedia("(prefers-reduced-motion: reduce)");let activeIndex=0,paused=false,timer=0;function positionFor(index){if(index===activeIndex)return"current";const forward=(index-activeIndex+items.length)%items.length;if(forward===1)return"next";if(forward===items.length-1)return"previous";return forward<=items.length/2?"future":"past"}function render(){cards.forEach(({card,verify,item},index)=>{const position=positionFor(index),current=position==="current",visible=current||position==="previous"||position==="next";card.dataset.position=position;card.tabIndex=visible?0:-1;if(visible)card.removeAttribute("aria-hidden");else card.setAttribute("aria-hidden","true");if(current)card.setAttribute("aria-current","true");else card.removeAttribute("aria-current");card.setAttribute("aria-label",current?`Verify ${item.title} credential (opens in new tab)`:`Show ${item.title} credential`);verify.textContent=current?"Verified ↗":""});dotButtons.forEach((dot,index)=>{dot.classList.toggle("is-active",index===activeIndex);if(index===activeIndex)dot.setAttribute("aria-current","true");else dot.removeAttribute("aria-current")})}function clearTimer(){if(timer)window.clearTimeout(timer);timer=0}function schedule(){clearTimer();if(paused||reducedMotion.matches)return;timer=window.setTimeout(()=>{activeIndex=(activeIndex+1)%items.length;render();schedule()},ROTATION_MS)}function select(index){activeIndex=(index+items.length)%items.length;render();schedule()}previous.addEventListener("click",()=>select(activeIndex-1));next.addEventListener("click",()=>select(activeIndex+1));cards.forEach(({card},index)=>card.addEventListener("click",event=>{if(index!==activeIndex){event.preventDefault();select(index)}}));root.addEventListener("mouseenter",()=>{paused=true;clearTimer()});root.addEventListener("mouseleave",()=>{paused=root.contains(document.activeElement);if(!paused)schedule()});root.addEventListener("focusin",()=>{paused=true;clearTimer()});root.addEventListener("focusout",event=>{if(!root.contains(event.relatedTarget)){paused=root.matches(":hover");if(!paused)schedule()}});reducedMotion.addEventListener?.("change",schedule);render();schedule()}
+  if(document.readyState==="complete")requestAnimationFrame(mount);else window.addEventListener("load",()=>requestAnimationFrame(mount),{once:true});
 })();
