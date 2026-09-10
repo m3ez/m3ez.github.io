@@ -97,6 +97,14 @@ test('CVE list keeps only outer top and bottom hairlines with no internal row bo
   assert.doesNotMatch(rowRule, /border-top|border-bottom|border-left|border-right/);
 });
 
+test('CVE severity chip is centered in its desktop column and right aligned on mobile', () => {
+  const css = readFileSync(new URL('../assets/research-credentials.css', import.meta.url), 'utf8');
+  const chipRule = css.match(/\.severity-chip\{([^}]*)\}/)?.[1] ?? '';
+  assert.match(chipRule, /justify-self:center/);
+  assert.match(chipRule, /text-align:center/);
+  assert.match(css, /@media \(max-width:760px\)\{[\s\S]*?\.severity-chip\{[^}]*justify-self:end[^}]*\}/);
+});
+
 test('redesign waits for page load and paint before mutating React-hydrated markup', () => {
   const source = readFileSync(new URL('../assets/portfolio-redesign.js', import.meta.url), 'utf8');
   assert.match(source, /window\.addEventListener\('load', scheduleStart, \{ once: true \}\)/);
