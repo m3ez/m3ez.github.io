@@ -79,10 +79,11 @@ test('document normalization adds stats while preserving valid top-level identit
   assert.equal(doc.items[0].class, 'SQLi');
 });
 
-test('redesign removes both legacy credential render paths', () => {
+test('redesign preserves hero carousel and removes only the legacy static credential list', () => {
   const source = readFileSync(new URL('../assets/portfolio-redesign.js', import.meta.url), 'utf8');
-  assert.match(source, /existingCarousel\.remove\(\)/);
-  assert.match(source, /legacyStyle\?\.remove\(\)/);
+  assert.doesNotMatch(source, /existingCarousel\.remove\(\)/);
+  assert.doesNotMatch(source, /legacyStyle\?\.remove\(\)/);
+  assert.doesNotMatch(source, /redesign-legacy-carousel-stub/);
   assert.match(source, /legacyList\.remove\(\)/);
 });
 
