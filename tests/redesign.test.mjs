@@ -100,7 +100,7 @@ test('CVE list keeps only outer top and bottom hairlines with no internal row bo
 test('CVE severity and score are centered in desktop columns and right aligned on mobile', () => {
   const css = readFileSync(new URL('../assets/research-credentials.css', import.meta.url), 'utf8');
   const chipRule = css.match(/\.severity-chip\{([^}]*)\}/)?.[1] ?? '';
-  const scoreRule = css.match(/\.cve-score-v2\{([^}]*)\}/)?.[1] ?? '';
+  const scoreRule = css.match(/(?:^|\n)\.cve-score-v2\{([^}]*)\}/)?.[1] ?? '';
   assert.match(chipRule, /justify-self:center/);
   assert.match(chipRule, /text-align:center/);
   assert.match(scoreRule, /justify-self:center/);
