@@ -47,6 +47,7 @@
   const SWIPE_THRESHOLD = 48;
 
   function enhance() {
+    if (!document.querySelector(".hero")) return;
     if (document.documentElement.dataset.m3ezSwipeNav === MARKER) return;
     document.documentElement.dataset.m3ezSwipeNav = MARKER;
 
