@@ -33,7 +33,11 @@ function makeFilterButton(value, onClick) {
 }
 
 function installLegacyCarouselCompatibilityStub() {
-  if (document.getElementById(LEGACY_CAROUSEL_ID)) return;
+  const existingCarousel = document.getElementById(LEGACY_CAROUSEL_ID);
+  if (existingCarousel) existingCarousel.remove();
+  const legacyStyle = document.getElementById(`${LEGACY_CAROUSEL_ID}-style`);
+  legacyStyle?.remove();
+
   const hero = document.querySelector('.hero');
   if (!hero) return;
 
@@ -99,10 +103,7 @@ function renderCredentials() {
   }
 
   const legacyList = section.querySelector('.credential-list');
-  if (legacyList) {
-    legacyList.classList.add('legacy-credentials');
-    legacyList.hidden = true;
-  }
+  if (legacyList) legacyList.remove();
 
   const controls = element('div', 'credential-filter-row filter-row');
   controls.setAttribute('role', 'group');
