@@ -246,3 +246,59 @@
   if (document.readyState === "complete") start();
   else window.addEventListener("load", start, { once: true });
 })();
+
+;(() => {
+  const MARKER = "m3ez-back-to-top-v1";
+  const SHOW_AFTER = 200;
+  const css = `
+#${MARKER}{position:fixed;right:1rem;bottom:1rem;z-index:30;width:32px;height:32px;padding:0;border:1px solid var(--black);border-radius:0;background:var(--paper);color:var(--ink);display:grid;place-items:center;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:16px;line-height:1;cursor:pointer;opacity:0;visibility:hidden;pointer-events:none;transition:opacity 120ms ease,background-color 120ms ease,color 120ms ease}
+#${MARKER}.is-visible{opacity:1;visibility:visible;pointer-events:auto}
+#${MARKER}:hover,#${MARKER}:focus-visible{background:var(--black);color:var(--paper)}
+@media (max-width:640px){#${MARKER}{right:.75rem;bottom:.75rem}}
+@media (prefers-reduced-motion:reduce){#${MARKER}{transition:none}}
+`;
+
+  function mount() {
+    if (document.getElementById(MARKER)) return;
+
+    const style = document.createElement("style");
+    style.id = `${MARKER}-style`;
+    style.textContent = css;
+    document.head.appendChild(style);
+
+    const button = document.createElement("button");
+    button.id = MARKER;
+    button.type = "button";
+    button.setAttribute("aria-label", "Back to top");
+    button.setAttribute("aria-hidden", "true");
+    button.tabIndex = -1;
+    button.textContent = "↑";
+
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+    let ticking = false;
+
+    function sync() {
+      const visible = window.scrollY > SHOW_AFTER;
+      button.classList.toggle("is-visible", visible);
+      button.setAttribute("aria-hidden", visible ? "false" : "true");
+      button.tabIndex = visible ? 0 : -1;
+      ticking = false;
+    }
+
+    window.addEventListener("scroll", () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(sync);
+    }, { passive: true });
+
+    button.addEventListener("click", () => {
+      window.scrollTo({ top: 0, behavior: reducedMotion.matches ? "auto" : "smooth" });
+    });
+
+    document.body.appendChild(button);
+    sync();
+  }
+
+  if (document.readyState === "complete") requestAnimationFrame(mount);
+  else window.addEventListener("load", () => requestAnimationFrame(mount), { once: true });
+})();
