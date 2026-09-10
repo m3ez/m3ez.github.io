@@ -41,3 +41,112 @@
   if (document.readyState === "complete") requestAnimationFrame(updateMethod);
   else window.addEventListener("load", () => requestAnimationFrame(updateMethod), { once: true });
 })();
+
+;(() => {
+  const MARKER = "m3ez-swipe-nav-v1";
+  const SWIPE_THRESHOLD = 48;
+
+  function enhance() {
+    if (document.documentElement.dataset.m3ezSwipeNav === MARKER) return;
+    document.documentElement.dataset.m3ezSwipeNav = MARKER;
+
+    const nav = document.querySelector(".site-header nav");
+    if (nav && !nav.querySelector('a[href="#credentials"]')) {
+      const credentials = document.createElement("a");
+      credentials.href = "#credentials";
+      credentials.className = "nav-credentials";
+      credentials.textContent = "Credentials";
+      const consulting = nav.querySelector(".nav-consulting");
+      nav.insertBefore(credentials, consulting || nav.lastElementChild);
+    }
+
+    const root = document.getElementById("m3ez-credential-carousel-v1");
+    const stage = root?.querySelector(".credential-carousel-stage");
+    const previous = root?.querySelector('button[aria-label="Previous credential"]');
+    const next = root?.querySelector('button[aria-label="Next credential"]');
+    if (!root || !stage || !previous || !next) {
+      delete document.documentElement.dataset.m3ezSwipeNav;
+      requestAnimationFrame(enhance);
+      return;
+    }
+
+    stage.style.touchAction = "pan-y";
+    stage.style.cursor = "grab";
+    stage.style.willChange = "transform";
+
+    let pointerId = null;
+    let startX = 0;
+    let startY = 0;
+    let dragging = false;
+    let suppressClick = false;
+
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+    function resetStage() {
+      stage.style.transition = reducedMotion.matches ? "none" : "transform 160ms ease";
+      stage.style.transform = "translate3d(0,0,0)";
+      stage.style.cursor = "grab";
+      stage.style.userSelect = "";
+    }
+
+    function finish(event, cancelled = false) {
+      if (pointerId === null || event.pointerId !== pointerId) return;
+      const dx = event.clientX - startX;
+      const dy = event.clientY - startY;
+      const horizontal = Math.abs(dx) > Math.abs(dy);
+      const shouldMove = !cancelled && horizontal && Math.abs(dx) >= SWIPE_THRESHOLD;
+
+      if (stage.hasPointerCapture?.(pointerId)) stage.releasePointerCapture(pointerId);
+      pointerId = null;
+      resetStage();
+
+      if (shouldMove) {
+        suppressClick = true;
+        (dx < 0 ? next : previous).click();
+        window.setTimeout(() => { suppressClick = false; }, 0);
+      }
+
+      root.dispatchEvent(new Event("mouseleave"));
+      dragging = false;
+    }
+
+    stage.addEventListener("pointerdown", (event) => {
+      if (event.pointerType === "mouse" && event.button !== 0) return;
+      pointerId = event.pointerId;
+      startX = event.clientX;
+      startY = event.clientY;
+      dragging = false;
+      stage.style.transition = "none";
+      stage.style.cursor = "grabbing";
+      stage.style.userSelect = "none";
+      stage.setPointerCapture?.(pointerId);
+      root.dispatchEvent(new Event("mouseenter"));
+    });
+
+    stage.addEventListener("pointermove", (event) => {
+      if (pointerId === null || event.pointerId !== pointerId) return;
+      const dx = event.clientX - startX;
+      const dy = event.clientY - startY;
+      if (Math.abs(dx) <= Math.abs(dy) || Math.abs(dx) < 6) return;
+      dragging = true;
+      event.preventDefault();
+      const offset = Math.max(-90, Math.min(90, dx * 0.35));
+      stage.style.transform = `translate3d(${offset}px,0,0)`;
+    });
+
+    stage.addEventListener("pointerup", (event) => finish(event));
+    stage.addEventListener("pointercancel", (event) => finish(event, true));
+    stage.addEventListener("dragstart", (event) => event.preventDefault());
+    stage.addEventListener("click", (event) => {
+      if (!suppressClick && !dragging) return;
+      event.preventDefault();
+      event.stopPropagation();
+      suppressClick = false;
+      dragging = false;
+    }, true);
+  }
+
+  const start = () => requestAnimationFrame(() => requestAnimationFrame(enhance));
+  if (document.readyState === "complete") start();
+  else window.addEventListener("load", start, { once: true });
+})();
