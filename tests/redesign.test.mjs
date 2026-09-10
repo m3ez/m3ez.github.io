@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import { certs, CATEGORIES, issuerMonogram } from '../assets/certs.js';
 import {
   classifyCve,
@@ -76,4 +77,21 @@ test('document normalization adds stats while preserving valid top-level identit
   assert.equal(doc.source, 'Wordfence');
   assert.equal(doc.stats.total, 1);
   assert.equal(doc.items[0].class, 'SQLi');
+});
+
+test('redesign removes both legacy credential render paths', () => {
+  const source = readFileSync(new URL('../assets/portfolio-redesign.js', import.meta.url), 'utf8');
+  assert.match(source, /existingCarousel\.remove\(\)/);
+  assert.match(source, /legacyStyle\?\.remove\(\)/);
+  assert.match(source, /legacyList\.remove\(\)/);
+});
+
+test('CVE list keeps only outer top and bottom hairlines with no internal row borders', () => {
+  const css = readFileSync(new URL('../assets/research-credentials.css', import.meta.url), 'utf8');
+  const listRule = css.match(/\.cve-row-list-v2\{([^}]*)\}/)?.[1] ?? '';
+  const rowRule = css.match(/\.cve-row-v2\{([^}]*)\}/)?.[1] ?? '';
+  assert.match(listRule, /border-top:\.5px solid var\(--line\)/);
+  assert.match(listRule, /border-bottom:\.5px solid var\(--line\)/);
+  assert.doesNotMatch(listRule, /border-left|border-right|border:\.5px/);
+  assert.doesNotMatch(rowRule, /border-top|border-bottom|border-left|border-right/);
 });
