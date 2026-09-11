@@ -31,23 +31,22 @@ function makeFilterButton(value, onClick) {
   return button;
 }
 
-function addSpecialMentionRecognition() {
+function normalizeSpecialMentionRecognition() {
   const recognitionList = document.querySelector('#recognition .recognition-list');
-  if (!recognitionList || recognitionList.querySelector('[data-msrc-special-mention="2026"]')) return;
+  if (!recognitionList) return;
 
-  const entry = element('div', 'recognition-special-mention-entry');
-  entry.dataset.msrcSpecialMention = '2026';
-  const term = element('dt', '', '2026');
-  const detail = element('dd');
-  const anchor = element('a', '', 'Special Mentions | MSRC Researcher Portal');
-  anchor.href = 'https://msrc.microsoft.com/special-mention';
-  anchor.target = '_blank';
-  anchor.rel = 'noopener noreferrer';
+  const anchor = recognitionList.querySelector('a[href="https://msrc.microsoft.com/special-mention"]');
+  if (!anchor) return;
+
+  const entry = anchor.closest('div');
+  const term = entry?.querySelector('dt');
+  const note = entry?.querySelector('dd span');
+  if (!entry || !term) return;
+
+  term.textContent = '2026';
+  anchor.textContent = 'Special Mentions | MSRC Researcher Portal';
   anchor.setAttribute('aria-label', 'Special Mentions | MSRC Researcher Portal (external link)');
-  const note = element('span', '', 'Microsoft Security · researcher recognition');
-  detail.append(anchor, note);
-  entry.append(term, detail);
-  recognitionList.prepend(entry);
+  if (note) note.textContent = 'Microsoft Security · researcher recognition';
 }
 
 function moveRecognitionBadges() {
@@ -268,7 +267,7 @@ async function renderResearch() {
 }
 
 function start() {
-  addSpecialMentionRecognition();
+  normalizeSpecialMentionRecognition();
   renderCredentials();
   void renderResearch();
 }
