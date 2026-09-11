@@ -1,0 +1,17 @@
+name: Verify recognition year filter
+
+on:
+  push:
+    branches:
+      - agent/recognition-year-filter
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run portfolio contracts
+        run: node --test tests/redesign.test.mjs tests/mobile-responsive.test.mjs tests/recognition.test.mjs
