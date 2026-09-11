@@ -87,6 +87,16 @@ test('redesign preserves hero carousel and removes only the legacy static creden
   assert.match(source, /legacyList\.remove\(\)/);
 });
 
+test('redesign adds the 2026 MSRC Special Mentions recognition once at the top', () => {
+  const source = readFileSync(new URL('../assets/portfolio-redesign.js', import.meta.url), 'utf8');
+  assert.match(source, /Special Mentions \| MSRC Researcher Portal/);
+  assert.match(source, /https:\/\/msrc\.microsoft\.com\/special-mention/);
+  assert.match(source, /Microsoft Security · researcher recognition/);
+  assert.match(source, /dataset\.msrcSpecialMention = '2026'/);
+  assert.match(source, /querySelector\('\[data-msrc-special-mention="2026"\]'\)/);
+  assert.match(source, /recognitionList\.prepend\(entry\)/);
+});
+
 test('CVE list keeps only outer top and bottom hairlines with no internal row borders', () => {
   const css = readFileSync(new URL('../assets/research-credentials.css', import.meta.url), 'utf8');
   const listRule = css.match(/\.cve-row-list-v2\{([^}]*)\}/)?.[1] ?? '';
