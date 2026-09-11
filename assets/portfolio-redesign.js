@@ -1,11 +1,11 @@
 import { CATEGORIES, certs, issuerMonogram } from './certs.js';
+import { RECOGNITION_YEARS, recognitionItems, filterRecognition } from './recognition-data.js';
 import {
   deriveClassOptions,
   filterAndSort,
   normalizeWordfenceDocument,
 } from './research-data.js';
 
-const MOVED_RECOGNITION = new Set(['LLMail-Inject Challenge', '2023 MVR Volume Badge']);
 const SEVERITIES = ['All', 'Critical', 'High', 'Medium'];
 
 function element(tag, className, text) {
@@ -31,61 +31,69 @@ function makeFilterButton(value, onClick) {
   return button;
 }
 
-function normalizeSpecialMentionRecognition() {
-  const recognitionList = document.querySelector('#recognition .recognition-list');
-  if (!recognitionList) return;
+function renderRecognitionItems(container, items) {
+  container.replaceChildren();
 
-  const anchor = recognitionList.querySelector('a[href="https://msrc.microsoft.com/special-mention"]');
-  if (!anchor) return;
+  for (const item of items) {
+    const entry = element('div', 'recognition-entry-v2');
+    entry.dataset.recognitionYear = item.year;
+    const term = element('dt', 'recognition-date-v2', item.dateLabel);
+    const detail = element('dd');
 
-  const entry = anchor.closest('div');
-  const term = entry?.querySelector('dt');
-  const note = entry?.querySelector('dd span');
-  if (!entry || !term) return;
-
-  term.textContent = '2026';
-  anchor.textContent = 'Special Mentions | MSRC Researcher Portal';
-  anchor.setAttribute('aria-label', 'Special Mentions | MSRC Researcher Portal (external link)');
-  if (note) note.textContent = 'Microsoft Security · researcher recognition';
-}
-
-function moveRecognitionBadges() {
-  const credentialItems = [...document.querySelectorAll('#credentials .credential-list li')];
-  const recognitionList = document.querySelector('#recognition .recognition-list');
-  if (!recognitionList) return;
-
-  for (const item of credentialItems) {
-    const link = item.querySelector('a');
-    const title = link?.textContent?.trim() ?? '';
-    const alreadyMoved = [...recognitionList.querySelectorAll('[data-moved-badge]')]
-      .some((entry) => entry.dataset.movedBadge === title);
-    if (!MOVED_RECOGNITION.has(title) || alreadyMoved) {
-      continue;
+    let title;
+    if (item.href) {
+      title = element('a', 'recognition-title-v2', item.title);
+      title.href = item.href;
+      title.target = '_blank';
+      title.rel = 'noopener noreferrer';
+      title.setAttribute('aria-label', `${item.title} (external link)`);
+    } else {
+      title = element('span', 'recognition-title-v2', item.title);
     }
 
-    const meta = item.querySelector('.record-meta')?.textContent?.trim() ?? 'Microsoft Security';
-    const [issuer = 'Microsoft Security', issued = ''] = meta.split('·').map((part) => part.trim());
-    const entry = element('div', 'recognition-badge-entry');
-    entry.dataset.movedBadge = title;
-    const term = element('dt', '', issued || 'Recognition');
-    const detail = element('dd');
-    const anchor = element('a', '', title);
-    anchor.href = link?.href ?? '#';
-    anchor.target = '_blank';
-    anchor.rel = 'noopener noreferrer';
-    anchor.setAttribute('aria-label', `${title} recognition badge (external link)`);
-    const note = element('span', '', `${issuer} · issuer-verified recognition badge.`);
-    detail.append(anchor, note);
+    const meta = element(
+      'span',
+      'recognition-meta-v2',
+      [item.organization, item.detail].filter(Boolean).join(' · '),
+    );
+    detail.append(title, meta);
     entry.append(term, detail);
-    recognitionList.appendChild(entry);
+    container.appendChild(entry);
   }
+}
+
+function renderRecognition() {
+  const section = document.getElementById('recognition');
+  if (!section || section.querySelector('.recognition-filter-row')) return;
+
+  const recognitionList = section.querySelector('.recognition-list');
+  if (!recognitionList) return;
+
+  recognitionList.classList.add('recognition-list-v2');
+  recognitionList.replaceChildren();
+
+  const controls = element('div', 'recognition-filter-row filter-row');
+  controls.setAttribute('role', 'group');
+  controls.setAttribute('aria-label', 'Filter recognition by year');
+
+  let activeYear = 'All';
+  const refresh = () => {
+    renderRecognitionItems(recognitionList, filterRecognition(recognitionItems, activeYear));
+  };
+  const buttons = RECOGNITION_YEARS.map((year) => makeFilterButton(year, (value) => {
+    activeYear = value;
+    setPressed(buttons, activeYear);
+    refresh();
+  }));
+  setPressed(buttons, activeYear);
+  controls.append(...buttons);
+  recognitionList.before(controls);
+  refresh();
 }
 
 function renderCredentials() {
   const section = document.getElementById('credentials');
   if (!section || section.querySelector('.credential-grid-v2')) return;
-
-  moveRecognitionBadges();
 
   const heading = section.querySelector('.section-heading');
   const intro = heading?.querySelector('p');
@@ -267,7 +275,7 @@ async function renderResearch() {
 }
 
 function start() {
-  normalizeSpecialMentionRecognition();
+  renderRecognition();
   renderCredentials();
   void renderResearch();
 }
