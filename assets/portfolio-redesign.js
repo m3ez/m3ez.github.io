@@ -31,6 +31,24 @@ function makeFilterButton(value, onClick) {
   return button;
 }
 
+function normalizeSpecialMentionRecognition() {
+  const recognitionList = document.querySelector('#recognition .recognition-list');
+  if (!recognitionList) return;
+
+  const anchor = recognitionList.querySelector('a[href="https://msrc.microsoft.com/special-mention"]');
+  if (!anchor) return;
+
+  const entry = anchor.closest('div');
+  const term = entry?.querySelector('dt');
+  const note = entry?.querySelector('dd span');
+  if (!entry || !term) return;
+
+  term.textContent = '2026';
+  anchor.textContent = 'Special Mentions | MSRC Researcher Portal';
+  anchor.setAttribute('aria-label', 'Special Mentions | MSRC Researcher Portal (external link)');
+  if (note) note.textContent = 'Microsoft Security · researcher recognition';
+}
+
 function moveRecognitionBadges() {
   const credentialItems = [...document.querySelectorAll('#credentials .credential-list li')];
   const recognitionList = document.querySelector('#recognition .recognition-list');
@@ -249,6 +267,7 @@ async function renderResearch() {
 }
 
 function start() {
+  normalizeSpecialMentionRecognition();
   renderCredentials();
   void renderResearch();
 }
