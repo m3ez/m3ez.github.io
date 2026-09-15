@@ -19,9 +19,11 @@ test('mobile CVE rows use ID severity score on the first line and summary below'
   assert.match(css, /@media \(max-width:760px\)\{[\s\S]*?\.cve-summary-v2\{[^}]*grid-column:1\/-1[^}]*grid-row:2/);
 });
 
-test('phone layout uses one credential card per row and full-width primary actions', () => {
+test('phone layout wraps hero proof links naturally while keeping one credential card per row', () => {
   assert.match(css, /@media \(max-width:560px\)\{[\s\S]*?\.credential-grid-v2\{[^}]*grid-template-columns:1fr/);
-  assert.match(css, /@media \(max-width:560px\)\{[\s\S]*?\.proof-links\{[^}]*display:grid[^}]*grid-template-columns:1fr/);
+  assert.match(css, /@media \(max-width:560px\)\{[\s\S]*?\.proof-links\{[^}]*display:flex[^}]*flex-wrap:wrap/);
+  assert.doesNotMatch(css, /@media \(max-width:560px\)\{[\s\S]*?\.proof-links\{[^}]*grid-template-columns:1fr/);
+  assert.doesNotMatch(css, /@media \(max-width:560px\)\{[\s\S]*?\.proof-links a\{[^}]*min-height:/);
   assert.match(css, /@media \(max-width:560px\)\{[\s\S]*?\.primary-action\{[^}]*width:100%[^}]*justify-content:center/);
   assert.match(css, /@media \(max-width:560px\)\{[\s\S]*?#m3ez-credential-carousel-v1 \.credential-carousel-stage\{[^}]*height:/);
 });
