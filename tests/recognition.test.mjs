@@ -45,7 +45,9 @@ test('recognition data covers approved achievements from 2020 through 2026', asy
   assert.ok(recognitionItems.some((item) => item.title.includes('Thailand Cyber Top Talent 2021') && item.title.includes('Participant')));
   assert.ok(recognitionItems.some((item) => item.title.includes('UTCC Cyber Security #2') && item.title.includes('Participant')));
   assert.ok(recognitionItems.some((item) => item.title.includes('White Hat Hacking for Security') && item.title.includes('Winner')));
-  assert.ok(recognitionItems.some((item) => item.title === 'Special Mentions | MSRC Researcher Portal' && item.year === '2026'));
+  const specialMention = recognitionItems.find((item) => item.title === 'Special Mentions | MSRC Researcher Portal');
+  assert.equal(specialMention?.year, '2026');
+  assert.equal(specialMention?.dateLabel, 'July 2025 – June 2026');
   assert.ok(recognitionItems.some((item) => item.title === 'LLMail-Inject Challenge' && item.year === '2026'));
   assert.ok(recognitionItems.some((item) => item.title === '2023 MVR Volume Badge' && item.year === '2023'));
 });
