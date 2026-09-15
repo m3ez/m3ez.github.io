@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 
+// Locks the approved personal References set and prevents generic vendor/legal links from returning.
 const source = readFileSync(new URL('../assets/portfolio-redesign.js', import.meta.url), 'utf8');
 
 const expectedLinks = [
