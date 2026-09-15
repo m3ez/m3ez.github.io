@@ -5,7 +5,7 @@ const ZERO_DAY_QUEST_PROOF = 'https://www.linkedin.com/posts/supakiad-satuwan_ms
 export const recognitionItems = [
   {
     year: '2026',
-    dateLabel: '2026 · July 2025 – June 2026',
+    dateLabel: 'July 2025 – June 2026',
     title: 'Special Mentions | MSRC Researcher Portal',
     organization: 'Microsoft Security',
     detail: 'Researcher recognition',
