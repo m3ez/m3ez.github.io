@@ -241,6 +241,7 @@ async function renderResearch() {
   rows.id = 'wordpress-cve-rows-v2';
   const resultMeta = element('p', 'research-result-meta');
   resultMeta.setAttribute('aria-live', 'polite');
+  const footer = element('div', 'research-footer');
 
   const pagination = element('div', 'research-pagination filter-row');
   pagination.setAttribute('role', 'group');
@@ -252,6 +253,7 @@ async function renderResearch() {
   showLessButton.type = 'button';
   showLessButton.setAttribute('aria-controls', rows.id);
   pagination.append(showMoreButton, showLessButton);
+  footer.append(resultMeta, pagination);
 
   const resetVisibleLimit = () => {
     state.visibleLimit = CVE_PAGE_SIZE;
@@ -304,7 +306,7 @@ async function renderResearch() {
   sortWrap.appendChild(sortControls.group);
 
   controls.append(severityControls.group, classControls.group, sortWrap);
-  section.append(controls, resultMeta, rows, pagination);
+  section.append(controls, rows, footer);
 
   const other = ledger.querySelector(':scope > section[aria-labelledby="other-cves-title"]');
   ledger.insertBefore(section, other ?? ledger.firstChild);
