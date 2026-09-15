@@ -17,6 +17,19 @@ const HERO_PROOF_LINKS = [
   { label: 'Patchstack Researcher', href: 'https://patchstack.com/database/researchers/d7a606d8-9d89-4bcf-a973-f8ebe721b82f' },
 ];
 
+const REFERENCE_LINKS = [
+  { text: 'GitHub Profile', href: 'https://github.com/m3ez' },
+  { text: 'Medium Articles', href: 'https://m3ez.medium.com/' },
+  { text: 'YouTube', href: 'https://www.youtube.com/@SupakiadS' },
+  { text: 'Wordfence Researcher', href: 'https://www.wordfence.com/threat-intel/vulnerabilities/researchers/supakiad-s' },
+  { text: 'Patchstack Researcher', href: 'https://patchstack.com/database/researchers/d7a606d8-9d89-4bcf-a973-f8ebe721b82f' },
+  { text: 'GitHub Advisory Credits', href: 'https://github.com/advisories?query=credit%3Am3ez' },
+  { text: 'OffSec Credential', href: 'https://credentials.offsec.com/profile/supakiadsatuwan533944/wallet' },
+  { text: 'Accredible Credential', href: 'https://www.credential.net/profile/supakiadsatuwan533944/wallet' },
+  { text: 'Credly Badges', href: 'https://www.credly.com/users/supakiad-satuwan/badges/credly' },
+  { text: 'Portfolio Source', href: 'https://github.com/m3ez/m3ez-security-portfolio' },
+];
+
 function element(tag, className, text) {
   const node = document.createElement(tag);
   if (className) node.className = className;
@@ -52,6 +65,23 @@ function renderHeroProofLinks() {
     link.target = '_blank';
     link.rel = 'noopener noreferrer';
     link.setAttribute('aria-label', `${item.label} (external link)`);
+    listItem.appendChild(link);
+    list.appendChild(listItem);
+  }
+}
+
+function renderReferences() {
+  const list = document.querySelector('#contact .references .reference-list');
+  if (!list) return;
+
+  list.replaceChildren();
+  for (const item of REFERENCE_LINKS) {
+    const listItem = element('li');
+    const link = element('a', '', item.text);
+    link.href = item.href;
+    link.target = '_blank';
+    link.rel = 'noopener noreferrer';
+    link.setAttribute('aria-label', `${item.text} (external link)`);
     listItem.appendChild(link);
     list.appendChild(listItem);
   }
@@ -340,6 +370,7 @@ async function renderResearch() {
 
 function start() {
   renderHeroProofLinks();
+  renderReferences();
   renderRecognition();
   renderCredentials();
   void renderResearch();
