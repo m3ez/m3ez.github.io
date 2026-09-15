@@ -8,6 +8,14 @@ import {
 
 const SEVERITIES = ['All', 'Critical', 'High', 'Medium'];
 const CVE_PAGE_SIZE = 10;
+const HERO_PROOF_LINKS = [
+  { label: 'YouTube', href: 'https://www.youtube.com/@SupakiadS' },
+  { label: 'OffSec Credential', href: 'https://credentials.offsec.com/profile/supakiadsatuwan533944/wallet' },
+  { label: 'Accredible Credential', href: 'https://www.credential.net/profile/supakiadsatuwan533944/wallet' },
+  { label: 'Credly Badges', href: 'https://www.credly.com/users/supakiad-satuwan/badges/credly' },
+  { label: 'Wordfence Researcher', href: 'https://www.wordfence.com/threat-intel/vulnerabilities/researchers/supakiad-s' },
+  { label: 'Patchstack Researcher', href: 'https://patchstack.com/database/researchers/d7a606d8-9d89-4bcf-a973-f8ebe721b82f' },
+];
 
 function element(tag, className, text) {
   const node = document.createElement(tag);
@@ -30,6 +38,23 @@ function makeFilterButton(value, onClick) {
   button.setAttribute('aria-pressed', value === 'All' ? 'true' : 'false');
   button.addEventListener('click', () => onClick(value));
   return button;
+}
+
+function renderHeroProofLinks() {
+  const list = document.querySelector('#top .proof-links');
+  if (!list) return;
+
+  list.replaceChildren();
+  for (const item of HERO_PROOF_LINKS) {
+    const listItem = element('li');
+    const link = element('a', '', item.label);
+    link.href = item.href;
+    link.target = '_blank';
+    link.rel = 'noopener noreferrer';
+    link.setAttribute('aria-label', `${item.label} (external link)`);
+    listItem.appendChild(link);
+    list.appendChild(listItem);
+  }
 }
 
 function renderRecognitionItems(container, items) {
@@ -314,6 +339,7 @@ async function renderResearch() {
 }
 
 function start() {
+  renderHeroProofLinks();
   renderRecognition();
   renderCredentials();
   void renderResearch();
