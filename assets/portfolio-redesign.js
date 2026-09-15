@@ -7,6 +7,7 @@ import {
 } from './research-data.js';
 
 const SEVERITIES = ['All', 'Critical', 'High', 'Medium'];
+const CVE_PAGE_SIZE = 10;
 
 function element(tag, className, text) {
   const node = document.createElement(tag);
@@ -222,7 +223,12 @@ async function renderResearch() {
   const legacyWordPress = ledger.querySelector(':scope > section[aria-labelledby="wordpress-cves-title"]');
   if (legacyWordPress) legacyWordPress.hidden = true;
 
-  const state = { severity: 'All', vulnerabilityClass: 'All', sort: 'cvss' };
+  const state = {
+    severity: 'All',
+    vulnerabilityClass: 'All',
+    sort: 'cvss',
+    visibleLimit: CVE_PAGE_SIZE,
+  };
   const section = element('section', 'research-index-v2');
   section.setAttribute('aria-labelledby', 'wordpress-cves-title-v2');
   const heading = element('div', 'research-index-heading');
@@ -232,17 +238,46 @@ async function renderResearch() {
 
   const controls = element('div', 'research-controls');
   const rows = element('ul', 'cve-row-list-v2');
+  rows.id = 'wordpress-cve-rows-v2';
   const resultMeta = element('p', 'research-result-meta');
   resultMeta.setAttribute('aria-live', 'polite');
 
-  const refresh = () => {
-    const visible = filterAndSort([...documentData.items], state);
-    renderResearchRows(rows, visible);
-    resultMeta.textContent = `Showing ${visible.length} of ${documentData.items.length}`;
+  const pagination = element('div', 'research-pagination filter-row');
+  pagination.setAttribute('role', 'group');
+  pagination.setAttribute('aria-label', 'WordPress CVE list controls');
+  const showMoreButton = element('button', 'filter-button', 'Show more CVEs');
+  showMoreButton.type = 'button';
+  showMoreButton.setAttribute('aria-controls', rows.id);
+  const showLessButton = element('button', 'filter-button', 'Show less');
+  showLessButton.type = 'button';
+  showLessButton.setAttribute('aria-controls', rows.id);
+  pagination.append(showMoreButton, showLessButton);
+
+  const resetVisibleLimit = () => {
+    state.visibleLimit = CVE_PAGE_SIZE;
   };
+
+  const refresh = () => {
+    const matched = filterAndSort([...documentData.items], state);
+    const visible = matched.slice(0, state.visibleLimit);
+    renderResearchRows(rows, visible);
+    resultMeta.textContent = `Showing ${visible.length} of ${matched.length}`;
+    showMoreButton.hidden = visible.length >= matched.length;
+    showLessButton.hidden = state.visibleLimit <= CVE_PAGE_SIZE;
+  };
+
+  showMoreButton.addEventListener('click', () => {
+    state.visibleLimit += CVE_PAGE_SIZE;
+    refresh();
+  });
+  showLessButton.addEventListener('click', () => {
+    state.visibleLimit = CVE_PAGE_SIZE;
+    refresh();
+  });
 
   const severityControls = createButtonGroup('Filter CVEs by severity', SEVERITIES, state.severity, (value) => {
     state.severity = value;
+    resetVisibleLimit();
     refresh();
   });
   const classControls = createButtonGroup(
@@ -251,6 +286,7 @@ async function renderResearch() {
     state.vulnerabilityClass,
     (value) => {
       state.vulnerabilityClass = value;
+      resetVisibleLimit();
       refresh();
     },
   );
@@ -259,6 +295,7 @@ async function renderResearch() {
   sortWrap.appendChild(element('span', 'research-sort-label', 'Sort'));
   const sortControls = createButtonGroup('Sort CVEs', ['CVSS', 'Date'], 'CVSS', (value) => {
     state.sort = value === 'Date' ? 'date' : 'cvss';
+    resetVisibleLimit();
     refresh();
   });
   for (const button of sortControls.buttons) {
@@ -267,7 +304,7 @@ async function renderResearch() {
   sortWrap.appendChild(sortControls.group);
 
   controls.append(severityControls.group, classControls.group, sortWrap);
-  section.append(controls, resultMeta, rows);
+  section.append(controls, resultMeta, rows, pagination);
 
   const other = ledger.querySelector(':scope > section[aria-labelledby="other-cves-title"]');
   ledger.insertBefore(section, other ?? ledger.firstChild);
