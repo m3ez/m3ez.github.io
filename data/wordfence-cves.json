@@ -95,6 +95,19 @@
       "shortTitle": "Unauthenticated Arbitrary File Upload via 'upload-logo' REST Endpoint"
     },
     {
+      "id": "CVE-2026-62135",
+      "title": "Booktics – Appointment Booking Calendar for Service Businesses <= 1.0.24 - Missing Authorization",
+      "cvss": 5.3,
+      "href": "https://www.wordfence.com/threat-intel/vulnerabilities/id/b4e3abaf-be4d-4405-9dbe-f62f038c5a69?source=api-prod",
+      "severity": "Medium",
+      "class": "Missing authz",
+      "authContext": "Unknown",
+      "unauthenticated": false,
+      "target": "Booktics – Appointment Booking Calendar for Service Businesses",
+      "year": 2026,
+      "shortTitle": "Missing Authorization"
+    },
+    {
       "id": "CVE-2026-32498",
       "title": "RegistrationMagic – Custom Registration Forms, User Registration, Payment, and User Login <= 6.0.7.6 - Missing Authorization",
       "cvss": 5.3,
@@ -707,7 +720,7 @@
     }
   ],
   "stats": {
-    "total": 54,
+    "total": 55,
     "critical": 5,
     "high": 23,
     "unauthenticated": 28
