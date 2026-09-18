@@ -4,6 +4,45 @@
   "profile": "https://www.wordfence.com/threat-intel/vulnerabilities/researchers/supakiad-s",
   "items": [
     {
+      "id": "CVE-2026-89413",
+      "title": "Filter Gallery <= 1.1.4 - Missing Authorization to Authenticated (Subscriber+) Arbitrary Gallery Deletion via 'ufg_gallery_id' Parameter",
+      "cvss": 8.1,
+      "href": "https://www.wordfence.com/threat-intel/vulnerabilities/id/0487c6dd-7453-4473-9a13-6b699623f8a9?source=api-prod",
+      "severity": "High",
+      "class": "Missing authz",
+      "authContext": "Subscriber+",
+      "unauthenticated": false,
+      "target": "Filter Gallery",
+      "year": 2026,
+      "shortTitle": "Missing Authorization to Authenticated (Subscriber+) Arbitrary Gallery Deletion via 'ufg_gallery_id' Parameter"
+    },
+    {
+      "id": "CVE-2026-89278",
+      "title": "GPTranslate <= 2.34.6 - Unauthenticated Sensitive Information Exposure in Public Frontend Inline Script",
+      "cvss": 5.3,
+      "href": "https://www.wordfence.com/threat-intel/vulnerabilities/id/b7676362-4373-4c9a-b3cd-73fad9ff5477?source=api-prod",
+      "severity": "Medium",
+      "class": "Info disclosure",
+      "authContext": "Unauthenticated",
+      "unauthenticated": true,
+      "target": "GPTranslate",
+      "year": 2026,
+      "shortTitle": "Unauthenticated Sensitive Information Exposure in Public Frontend Inline Script"
+    },
+    {
+      "id": "CVE-2026-89138",
+      "title": "Filter Gallery <= 1.1.4 - Missing Authorization to Authenticated (Subscriber+) Arbitrary Post Modification via 'image_id' Parameter via ufg_save_gallery AJAX Action",
+      "cvss": 4.3,
+      "href": "https://www.wordfence.com/threat-intel/vulnerabilities/id/73577a0d-8aac-4369-8022-98c198f79224?source=api-prod",
+      "severity": "Medium",
+      "class": "Missing authz",
+      "authContext": "Subscriber+",
+      "unauthenticated": false,
+      "target": "Filter Gallery",
+      "year": 2026,
+      "shortTitle": "Missing Authorization to Authenticated (Subscriber+) Arbitrary Post Modification via 'image_id' Parameter via ufg_save_gallery AJAX Action"
+    },
+    {
       "id": "CVE-2026-85309",
       "title": "Ultimate Maps by Supsystic <= 1.5.3 - Missing Authorization",
       "cvss": 5.3,
@@ -720,9 +759,9 @@
     }
   ],
   "stats": {
-    "total": 55,
+    "total": 58,
     "critical": 5,
-    "high": 23,
-    "unauthenticated": 28
+    "high": 24,
+    "unauthenticated": 29
   }
 }
