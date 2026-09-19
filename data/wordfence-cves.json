@@ -17,6 +17,19 @@
       "shortTitle": "Missing Authorization to Authenticated (Subscriber+) Arbitrary Gallery Deletion via 'ufg_gallery_id' Parameter"
     },
     {
+      "id": "CVE-2026-89334",
+      "title": "Better Messages <= 2.15.33 - Missing Authorization to Authenticated (Custom+) Chat-Room Transcript Disclosure via '/thread/<id>' REST Endpoint",
+      "cvss": 6.5,
+      "href": "https://www.wordfence.com/threat-intel/vulnerabilities/id/b3243fe4-9d11-49f0-884b-0162cd776993?source=api-prod",
+      "severity": "Medium",
+      "class": "Missing authz",
+      "authContext": "Custom+",
+      "unauthenticated": false,
+      "target": "Better Messages",
+      "year": 2026,
+      "shortTitle": "Missing Authorization to Authenticated (Custom+) Chat-Room Transcript Disclosure via '/thread/<id>' REST Endpoint"
+    },
+    {
       "id": "CVE-2026-89278",
       "title": "GPTranslate <= 2.34.6 - Unauthenticated Sensitive Information Exposure in Public Frontend Inline Script",
       "cvss": 5.3,
@@ -759,7 +772,7 @@
     }
   ],
   "stats": {
-    "total": 58,
+    "total": 59,
     "critical": 5,
     "high": 24,
     "unauthenticated": 29
