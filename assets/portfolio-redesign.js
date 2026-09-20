@@ -1,4 +1,5 @@
 import { CATEGORIES, certs, issuerMonogram } from './certs.js';
+import { initializeInteractions } from './portfolio-interactions.js';
 import { RECOGNITION_YEARS, recognitionItems, filterRecognition } from './recognition-data.js';
 import {
   deriveClassOptions,
@@ -369,6 +370,7 @@ async function renderResearch() {
 }
 
 function start() {
+  initializeInteractions();
   renderHeroProofLinks();
   renderReferences();
   renderRecognition();
@@ -376,12 +378,9 @@ function start() {
   void renderResearch();
 }
 
-function scheduleStart() {
-  requestAnimationFrame(() => requestAnimationFrame(start));
-}
-
-if (document.readyState === 'complete') {
-  scheduleStart();
+// This module owns the static page's enhancements; no React hydration runs here.
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', start, { once: true });
 } else {
-  window.addEventListener('load', scheduleStart, { once: true });
+  start();
 }

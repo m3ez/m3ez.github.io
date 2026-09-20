@@ -116,10 +116,3 @@ test('CVE severity and score are centered in desktop columns and right aligned o
   assert.match(css, /@media \(max-width:760px\)\{[\s\S]*?\.severity-chip\{[^}]*justify-self:end[^}]*\}/);
   assert.match(css, /@media \(max-width:760px\)\{[\s\S]*?\.cve-score-v2\{[^}]*justify-self:end[^}]*\}/);
 });
-
-test('redesign waits for page load and paint before mutating React-hydrated markup', () => {
-  const source = readFileSync(new URL('../assets/portfolio-redesign.js', import.meta.url), 'utf8');
-  assert.match(source, /window\.addEventListener\('load', scheduleStart, \{ once: true \}\)/);
-  assert.match(source, /requestAnimationFrame\(\(\) => requestAnimationFrame\(start\)\)/);
-  assert.doesNotMatch(source, /DOMContentLoaded/);
-});
