@@ -56,6 +56,19 @@
       "shortTitle": "Missing Authorization to Authenticated (Subscriber+) Arbitrary Post Modification via 'image_id' Parameter via ufg_save_gallery AJAX Action"
     },
     {
+      "id": "CVE-2026-85682",
+      "title": "YOP Poll <= 7.0.10 - Unauthenticated Origin Validation Error to Administrator Account Takeover via '/auth/wp-login-redirect' REST Route",
+      "cvss": 8.8,
+      "href": "https://www.wordfence.com/threat-intel/vulnerabilities/id/b3574182-1bda-49b2-aac7-60f862891b46?source=api-prod",
+      "severity": "High",
+      "class": "Other",
+      "authContext": "Unauthenticated",
+      "unauthenticated": true,
+      "target": "YOP Poll",
+      "year": 2026,
+      "shortTitle": "Unauthenticated Origin Validation Error to Administrator Account Takeover via '/auth/wp-login-redirect' REST Route"
+    },
+    {
       "id": "CVE-2026-85309",
       "title": "Ultimate Maps by Supsystic <= 1.5.3 - Missing Authorization",
       "cvss": 5.3,
@@ -772,9 +785,9 @@
     }
   ],
   "stats": {
-    "total": 59,
+    "total": 60,
     "critical": 5,
-    "high": 24,
-    "unauthenticated": 29
+    "high": 25,
+    "unauthenticated": 30
   }
 }
