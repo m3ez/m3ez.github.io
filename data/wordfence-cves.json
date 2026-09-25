@@ -17,6 +17,19 @@
       "shortTitle": "Missing Authorization to Authenticated (Subscriber+) Arbitrary Gallery Deletion via 'ufg_gallery_id' Parameter"
     },
     {
+      "id": "CVE-2026-89406",
+      "title": "Modula Image Gallery <= 3.0.1 - Missing Authorization to Unauthenticated Private Gallery Image Disclosure via 'modula_gallery_id' and 'modula_image_id' Parameters",
+      "cvss": 7.5,
+      "href": "https://www.wordfence.com/threat-intel/vulnerabilities/id/a369dff6-feca-47cf-8511-dc75c4ffdd29?source=api-prod",
+      "severity": "High",
+      "class": "Missing authz",
+      "authContext": "Unauthenticated",
+      "unauthenticated": true,
+      "target": "Modula Image Gallery",
+      "year": 2026,
+      "shortTitle": "Missing Authorization to Unauthenticated Private Gallery Image Disclosure via 'modula_gallery_id' and 'modula_image_id' Parameters"
+    },
+    {
       "id": "CVE-2026-89334",
       "title": "Better Messages <= 2.15.33 - Missing Authorization to Authenticated (Custom+) Chat-Room Transcript Disclosure via '/thread/<id>' REST Endpoint",
       "cvss": 6.5,
@@ -236,6 +249,19 @@
       "target": "Support Genix",
       "year": 2026,
       "shortTitle": "Authenticated (Subscriber+) Authentication Bypass to Administrator Account Takeover via 'p' Parameter Forged Guest Token"
+    },
+    {
+      "id": "CVE-2026-19804",
+      "title": "s2Member <= 260814 - Unauthenticated Remote Code Execution via 'first_name' Parameter in PayPal Proxy Return",
+      "cvss": 8.8,
+      "href": "https://www.wordfence.com/threat-intel/vulnerabilities/id/e87da8fa-04cc-4b9a-9dde-be7d4f2bd76e?source=api-prod",
+      "severity": "High",
+      "class": "Other",
+      "authContext": "Unauthenticated",
+      "unauthenticated": true,
+      "target": "s2Member",
+      "year": 2026,
+      "shortTitle": "Unauthenticated Remote Code Execution via 'first_name' Parameter in PayPal Proxy Return"
     },
     {
       "id": "CVE-2026-18352",
@@ -785,9 +811,9 @@
     }
   ],
   "stats": {
-    "total": 60,
+    "total": 62,
     "critical": 5,
-    "high": 25,
-    "unauthenticated": 30
+    "high": 27,
+    "unauthenticated": 32
   }
 }
