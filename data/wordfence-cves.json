@@ -69,6 +69,19 @@
       "shortTitle": "Missing Authorization to Authenticated (Subscriber+) Arbitrary Post Modification via 'image_id' Parameter via ufg_save_gallery AJAX Action"
     },
     {
+      "id": "CVE-2026-85984",
+      "title": "miniOrange OTP Login, Verification and SMS Notifications <= 5.5.5 - Unauthenticated Authentication Bypass via 'mo_wp_login_intent' Parameter",
+      "cvss": 9.8,
+      "href": "https://www.wordfence.com/threat-intel/vulnerabilities/id/2895f0c2-41b6-4b11-9865-3bded4402aa9?source=api-prod",
+      "severity": "Critical",
+      "class": "Auth bypass",
+      "authContext": "Unauthenticated",
+      "unauthenticated": true,
+      "target": "miniOrange OTP Login, Verification and SMS Notifications",
+      "year": 2026,
+      "shortTitle": "Unauthenticated Authentication Bypass via 'mo_wp_login_intent' Parameter"
+    },
+    {
       "id": "CVE-2026-85682",
       "title": "YOP Poll <= 7.0.10 - Unauthenticated Origin Validation Error to Administrator Account Takeover via '/auth/wp-login-redirect' REST Route",
       "cvss": 8.8,
@@ -106,6 +119,19 @@
       "target": "VikAppointments Services Booking Calendar",
       "year": 2026,
       "shortTitle": "Unauthenticated SQL Injection"
+    },
+    {
+      "id": "CVE-2026-82901",
+      "title": "Ultra Addons for Contact Form 7 <= 3.5.50 - Unauthenticated Arbitrary File Upload via Signature Form Field",
+      "cvss": 9.8,
+      "href": "https://www.wordfence.com/threat-intel/vulnerabilities/id/872e1a05-aacc-44fa-93c1-8c3f7b2fb46d?source=api-prod",
+      "severity": "Critical",
+      "class": "File upload",
+      "authContext": "Unauthenticated",
+      "unauthenticated": true,
+      "target": "Ultra Addons for Contact Form 7",
+      "year": 2026,
+      "shortTitle": "Unauthenticated Arbitrary File Upload via Signature Form Field"
     },
     {
       "id": "CVE-2026-81756",
@@ -811,9 +837,9 @@
     }
   ],
   "stats": {
-    "total": 62,
-    "critical": 5,
+    "total": 64,
+    "critical": 7,
     "high": 27,
-    "unauthenticated": 32
+    "unauthenticated": 34
   }
 }
