@@ -6,6 +6,7 @@ const source = readFileSync(new URL('../assets/portfolio-redesign.js', import.me
 
 const expectedLinks = [
   ['YouTube', 'https://www.youtube.com/@SupakiadS'],
+  ['Medium', 'https://m3ez.medium.com/'],
   ['OffSec Credential', 'https://credentials.offsec.com/profile/supakiadsatuwan533944/wallet'],
   ['Accredible Credential', 'https://www.credential.net/profile/supakiadsatuwan533944/wallet'],
   ['Credly Badges', 'https://www.credly.com/users/supakiad-satuwan/badges/credly'],
@@ -13,13 +14,20 @@ const expectedLinks = [
   ['Patchstack Researcher', 'https://patchstack.com/database/researchers/d7a606d8-9d89-4bcf-a973-f8ebe721b82f'],
 ];
 
-test('hero proof links use the approved six labels and destinations', () => {
-  assert.match(source, /const HERO_PROOF_LINKS = \[/);
+test('hero proof links use the approved seven labels and destinations in order', () => {
+  const block = source.match(/const HERO_PROOF_LINKS = \[([\s\S]*?)\];/);
+  assert.ok(block, 'HERO_PROOF_LINKS constant is missing');
+
+  let lastIndex = -1;
   for (const [label, href] of expectedLinks) {
-    assert.ok(source.includes(`label: '${label}'`), `missing label: ${label}`);
-    assert.ok(source.includes(`href: '${href}'`), `missing href: ${href}`);
+    const entry = `{ label: '${label}', href: '${href}' }`;
+    const index = block[1].indexOf(entry);
+    assert.notEqual(index, -1, `missing hero link: ${label}`);
+    assert.ok(index > lastIndex, `hero link is out of order: ${label}`);
+    lastIndex = index;
   }
-  assert.equal((source.match(/label: '/g) ?? []).length, expectedLinks.length);
+
+  assert.equal((block[1].match(/label: '/g) ?? []).length, expectedLinks.length);
 });
 
 test('hero proof links replace the legacy set and always open external tabs safely', () => {
