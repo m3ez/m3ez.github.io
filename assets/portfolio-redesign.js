@@ -11,6 +11,7 @@ const SEVERITIES = ['All', 'Critical', 'High', 'Medium'];
 const CVE_PAGE_SIZE = 10;
 const HERO_PROOF_LINKS = [
   { label: 'YouTube', href: 'https://www.youtube.com/@SupakiadS' },
+  { label: 'Medium', href: 'https://m3ez.medium.com/' },
   { label: 'OffSec Credential', href: 'https://credentials.offsec.com/profile/supakiadsatuwan533944/wallet' },
   { label: 'Accredible Credential', href: 'https://www.credential.net/profile/supakiadsatuwan533944/wallet' },
   { label: 'Credly Badges', href: 'https://www.credly.com/users/supakiad-satuwan/badges/credly' },
