@@ -211,17 +211,6 @@ export function initializeInteractions() {
   })();
 
   (() => {
-    const METHOD_LINE =
-      "Map > Trace > Analyze > Exploit > Verify > Document > Report";
-    const updateMethod = () => {
-      const methodLine = document.querySelector(".method-line");
-      if (methodLine) methodLine.textContent = METHOD_LINE;
-    };
-
-    updateMethod();
-  })();
-
-  (() => {
     const MARKER = "m3ez-swipe-nav-v1";
     const SWIPE_THRESHOLD = 48;
 

@@ -1,5 +1,6 @@
 import { CATEGORIES, certs, issuerMonogram } from './certs.js';
 import { initializeInteractions } from './portfolio-interactions.js';
+import { initializeMethodWorkflow } from './method-workflow.js';
 import { initializeScrollMotion } from './scroll-motion.js';
 import { RECOGNITION_YEARS, recognitionItems, filterRecognition } from './recognition-data.js';
 import {
@@ -510,6 +511,7 @@ async function renderResearch() {
 
 function start() {
   initializeInteractions();
+  initializeMethodWorkflow();
   renderHeroProofLinks();
   renderReferences();
   renderRecognition();
