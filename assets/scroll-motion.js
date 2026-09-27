@@ -153,7 +153,7 @@ export function initializeScrollMotion() {
           observer.unobserve(entry.target);
         }
       },
-      { threshold: 0.01, rootMargin: '0px 0px 15% 0px' },
+      { threshold: 0.08, rootMargin: '0px 0px 0px 0px' },
     );
   }
 
@@ -181,7 +181,7 @@ export function initializeScrollMotion() {
 
     for (const selector of STAGGER_SELECTORS) {
       [...document.querySelectorAll(selector)].forEach((target, index) => {
-        registerTarget(target, Math.min(index * 15, 60));
+        registerTarget(target, Math.min(index * 25, 100));
       });
     }
   }
