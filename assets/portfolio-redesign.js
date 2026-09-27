@@ -210,7 +210,7 @@ function renderCredentials() {
     );
     const name = element('strong', 'credential-name', cert.name);
     link.append(top, name);
-    if (cert.flagship) link.appendChild(element('span', 'credential-proof', cert.description));
+    link.appendChild(element('span', 'credential-proof', cert.description));
     link.appendChild(element('span', 'credential-meta', `${cert.issuer} · ${cert.year}`));
     listItem.appendChild(link);
     grid.appendChild(listItem);
