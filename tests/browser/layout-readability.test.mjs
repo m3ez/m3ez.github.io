@@ -126,57 +126,52 @@ for (const width of [390, 1440]) {
   });
 }
 
-test('pointer Pause survives focus, hover exit and manual slide selection until Play', async () => {
-  await withPage(1200, async page => {
-    const control = page.locator('.credential-carousel-rotation');
-    assert.equal(await control.count(), 1);
-    assert.equal(await control.textContent(), 'Pause');
-    const first = await page.locator(currentCard).getAttribute('href');
-    await control.click();
-    assert.equal(await control.textContent(), 'Play');
-    await page.mouse.move(0, 0);
-    await page.clock.fastForward(15000);
-    assert.equal(await page.locator(currentCard).getAttribute('href'), first);
-    await page.getByRole('button', { name: 'Next credential', exact: true }).click();
-    const manual = await page.locator(currentCard).getAttribute('href');
-    assert.notEqual(manual, first);
-    await page.mouse.move(0, 0);
-    await page.clock.fastForward(15000);
-    assert.equal(await page.locator(currentCard).getAttribute('href'), manual);
-    await control.click();
-    assert.equal(await control.textContent(), 'Pause');
-    await page.mouse.move(0, 0);
-    await page.clock.fastForward(5000);
-    assert.notEqual(await page.locator(currentCard).getAttribute('href'), manual);
-  }, { reducedMotion: 'no-preference' });
+test('carousel omits Pause/Play and retains a centered three-part navigation at all sizes', async () => {
+  for (const width of [320, 390, 768, 1440]) {
+    await withPage(width, async page => {
+      const root = page.locator(carousel);
+      assert.equal(await root.locator('.credential-carousel-rotation').count(), 0);
+      assert.equal(await root.getByRole('button', { name: /pause|play|automatic credential rotation/i }).count(), 0);
+      const parts = await root.locator('.credential-carousel-controls').evaluate(node => ({
+        children: [...node.children].map(child => child.className),
+        columns: getComputedStyle(node).gridTemplateColumns.split(' ').length,
+      }));
+      assert.deepEqual(parts.children, ['credential-carousel-arrow', 'credential-carousel-dots', 'credential-carousel-arrow']);
+      assert.equal(parts.columns, 3);
+      assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
+      await root.hover();
+      const first = await page.locator(currentCard).getAttribute('href');
+      await root.getByRole('button', { name: 'Next credential', exact: true }).click();
+      assert.notEqual(await page.locator(currentCard).getAttribute('href'), first);
+      await root.getByRole('button', { name: 'Previous credential', exact: true }).click();
+      assert.equal(await page.locator(currentCard).getAttribute('href'), first);
+      await root.locator('.credential-carousel-dot').nth(2).click();
+      assert.equal(await page.locator(currentCard).getAttribute('data-index'), '2');
+    });
+  }
 });
 
-test('rotation control is first in tab order and keyboard focus requires explicit restart', async () => {
+test('keyboard focus pauses rotation and leaving the carousel resumes without a Play control', async () => {
   await withPage(1200, async page => {
-    const control = page.locator('.credential-carousel-rotation');
-    assert.equal(await control.count(), 1);
     await page.locator('#top .proof-links a').last().focus();
     await page.keyboard.press('Tab');
-    assert.equal(await control.evaluate(node => node === document.activeElement), true);
-    assert.equal(await control.textContent(), 'Play');
-    assert.match(await control.getAttribute('aria-label'), /^Play /);
-    assert.equal(await control.getAttribute('aria-pressed'), null);
+    assert.ok(await page.evaluate(() => document.activeElement.matches('.credential-carousel-card')));
     const first = await page.locator(currentCard).getAttribute('href');
+    await page.clock.fastForward(10000);
+    assert.equal(await page.locator(currentCard).getAttribute('href'), first);
+    // Moving the pointer away must not resume while keyboard focus remains inside.
+    await page.locator(carousel).hover();
+    await page.mouse.move(0, 0);
     await page.clock.fastForward(10000);
     assert.equal(await page.locator(currentCard).getAttribute('href'), first);
     await page.locator('.wordmark').focus();
-    await page.clock.fastForward(10000);
-    assert.equal(await page.locator(currentCard).getAttribute('href'), first);
-    await control.focus();
-    await page.keyboard.press('Space');
     await page.clock.fastForward(5000);
     assert.notEqual(await page.locator(currentCard).getAttribute('href'), first);
   }, { reducedMotion: 'no-preference' });
 });
 
-test('hover pauses temporarily without discarding enabled autoplay', async () => {
+test('hover pauses temporarily and leaving resumes automatic rotation', async () => {
   await withPage(1200, async page => {
-    assert.equal(await page.locator('.credential-carousel-rotation').count(), 1);
     await page.locator(carousel).hover();
     const first = await page.locator(currentCard).getAttribute('href');
     await page.clock.fastForward(10000);
@@ -187,31 +182,49 @@ test('hover pauses temporarily without discarding enabled autoplay', async () =>
   }, { reducedMotion: 'no-preference' });
 });
 
-test('reduced-motion changes stop autoplay without restarting it when the preference clears', async () => {
+test('reduced motion disables autoplay but preserves manual navigation without a rotation button', async () => {
   await withPage(1200, async page => {
-    const control = page.locator('.credential-carousel-rotation');
-    assert.equal(await control.count(), 1);
+    // Reading .matches alone does not establish that queued change listeners ran.
+    await page.evaluate(() => {
+      window.__carouselMotionChanges = [];
+      matchMedia('(prefers-reduced-motion: reduce)').addEventListener('change', event => {
+        window.__carouselMotionChanges.push(event.matches);
+      });
+    });
     await page.emulateMedia({ reducedMotion: 'reduce' });
-    await page.waitForFunction(() => document.querySelector('.credential-carousel-rotation').disabled);
+    await page.waitForFunction(() => window.__carouselMotionChanges.at(-1) === true);
     const first = await page.locator(currentCard).getAttribute('href');
     await page.clock.fastForward(10000);
     assert.equal(await page.locator(currentCard).getAttribute('href'), first);
-    // Desktop arrows appear on hover or focus; exercise the real pointer path.
     await page.locator(carousel).hover();
     await page.getByRole('button', { name: 'Next credential', exact: true }).click();
     const manual = await page.locator(currentCard).getAttribute('href');
     assert.notEqual(manual, first);
-    await page.emulateMedia({ reducedMotion: 'no-preference' });
-    await page.waitForFunction(() => !document.querySelector('.credential-carousel-rotation').disabled);
-    assert.equal(await control.textContent(), 'Play');
+    await page.locator('.wordmark').focus();
     await page.mouse.move(0, 0);
     await page.clock.fastForward(10000);
     assert.equal(await page.locator(currentCard).getAttribute('href'), manual);
-    await control.click();
-    await page.mouse.move(0, 0);
+    await page.emulateMedia({ reducedMotion: 'no-preference' });
+    await page.waitForFunction(() => window.__carouselMotionChanges.at(-1) === false);
     await page.clock.fastForward(5000);
     assert.notEqual(await page.locator(currentCard).getAttribute('href'), manual);
   }, { reducedMotion: 'no-preference' });
+});
+
+test('mobile credential swipe keeps its navigation behavior', async () => {
+  await withPage(390, async page => {
+    const stage = page.locator(`${carousel} .credential-carousel-stage`);
+    await stage.scrollIntoViewIfNeeded();
+    const box = await stage.boundingBox();
+    assert.ok(box);
+    const first = await page.locator(currentCard).getAttribute('href');
+    await page.mouse.move(box.x + box.width * 0.7, box.y + box.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(box.x + box.width * 0.25, box.y + box.height / 2, { steps: 8 });
+    await page.mouse.up();
+    assert.notEqual(await page.locator(currentCard).getAttribute('href'), first);
+    assert.equal(await page.locator('.credential-carousel-card').count(), await page.locator('.credential-carousel-dot').count());
+  });
 });
 
 test('legacy research remains readable when JavaScript is unavailable', async () => {
