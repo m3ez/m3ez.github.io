@@ -58,7 +58,7 @@ test('stagger is 15ms and capped at 60ms', () => {
 
 test('scroll CSS keeps anchor offsets and reduced-motion fallback', () => {
   assert.match(css, /html\{scroll-behavior:smooth;scroll-padding-top:4\.5rem\}/);
-  assert.match(css, /#research,#recognition,#credentials,#method,#contact\{scroll-margin-top:4\.5rem\}/);
+  assert.match(css, /#research,#recognition,#consulting,#credentials,#method,#contact\{scroll-margin-top:4\.5rem\}/);
   assert.match(css, /@media \(prefers-reduced-motion:reduce\)\{[\s\S]*?html\{scroll-behavior:auto\}/);
   assert.match(css, /\.scroll-reveal-item\{opacity:1;transform:none;transition:none\}/);
 });
