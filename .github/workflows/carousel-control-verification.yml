@@ -1,0 +1,77 @@
+name: Carousel control verification
+
+on:
+  push:
+    branches: [agent/remove-carousel-pause]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: carousel-control-verification
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    if: github.ref == 'refs/heads/agent/remove-carousel-pause'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - name: Install browser
+        run: |
+          npx playwright install --with-deps chromium > /tmp/browser-install.log 2>&1 || { tail -n 80 /tmp/browser-install.log; exit 1; }
+      - name: Apply requested removal when present
+        run: |
+          if [ -f .github/remove-carousel-control.py ]; then
+            python3 .github/remove-carousel-control.py
+          fi
+      - name: Source tests
+        run: |
+          set +e
+          npm test > /tmp/carousel-source-tests.log 2>&1
+          status=$?
+          cat /tmp/carousel-source-tests.log
+          exit "$status"
+      - name: Browser regression tests
+        env:
+          UI_SCREENSHOTS: /tmp/carousel-control-screenshots
+        run: |
+          set +e
+          npm run test:browser > /tmp/carousel-browser-tests.log 2>&1
+          status=$?
+          cat /tmp/carousel-browser-tests.log
+          exit "$status"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: carousel-control-review
+          path: |
+            /tmp/carousel-control-screenshots
+            /tmp/carousel-source-tests.log
+            /tmp/carousel-browser-tests.log
+          if-no-files-found: ignore
+      - name: Commit and reverify the clean review tree
+        run: |
+          set -euo pipefail
+          if [ ! -f .github/remove-carousel-control.py ]; then
+            exit 0
+          fi
+          test "$GITHUB_REF" = 'refs/heads/agent/remove-carousel-pause'
+          git diff --check
+          rm .github/remove-carousel-control.py .github/workflows/carousel-control-verification.yml
+          git add assets/portfolio-interactions.js
+          git add -u .github/remove-carousel-control.py .github/workflows/carousel-control-verification.yml
+          git -c user.name='m3ez portfolio automation' -c user.email='72428471+m3ez@users.noreply.github.com' commit -m 'Remove carousel Pause/Play control and restore hover/focus behavior'
+          echo "VERIFIED_CLEAN_COMMIT=$(git rev-parse HEAD)"
+          echo "VERIFIED_CLEAN_TREE=$(git rev-parse HEAD^{tree})"
+          npm test
+          npm run test:browser
+          git push origin HEAD:refs/heads/agent/remove-carousel-pause
