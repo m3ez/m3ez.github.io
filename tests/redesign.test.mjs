@@ -19,6 +19,7 @@ test('credentials source contains 13 certifications with flagships first', () =>
   assert.equal(certs.some((cert) => /LLMail|MVR Volume/i.test(cert.name)), false);
   assert.equal(issuerMonogram('TCM Security'), 'TCM');
   assert.equal(issuerMonogram('Altered Security'), 'Altered');
+  assert.ok(certs.every((cert) => typeof cert.description === 'string' && cert.description.trim().length > 0));
 });
 
 test('classifier enriches a raw CVE with requested research metadata', () => {
@@ -85,6 +86,12 @@ test('redesign preserves hero carousel and removes only the legacy static creden
   assert.doesNotMatch(source, /legacyStyle\?\.remove\(\)/);
   assert.doesNotMatch(source, /redesign-legacy-carousel-stub/);
   assert.match(source, /legacyList\.remove\(\)/);
+});
+
+test('every credential card renders its brief description', () => {
+  const source = readFileSync(new URL('../assets/portfolio-redesign.js', import.meta.url), 'utf8');
+  assert.match(source, /link\.appendChild\(element\('span', 'credential-proof', cert\.description\)\);/);
+  assert.doesNotMatch(source, /if \(cert\.flagship\).*credential-proof/);
 });
 
 test('recognition rendering supersedes legacy one-off recognition mutations', () => {
