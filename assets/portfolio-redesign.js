@@ -373,19 +373,19 @@ async function renderResearch() {
   refresh();
 }
 
-async function start() {
+function start() {
   initializeInteractions();
   renderHeroProofLinks();
   renderReferences();
   renderRecognition();
   renderCredentials();
-  await renderResearch();
   initializeScrollMotion();
+  void renderResearch();
 }
 
 // This module owns the static page's enhancements; no React hydration runs here.
 if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', () => void start(), { once: true });
+  document.addEventListener('DOMContentLoaded', start, { once: true });
 } else {
-  void start();
+  start();
 }
