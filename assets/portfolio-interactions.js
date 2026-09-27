@@ -461,10 +461,13 @@ export function initializeInteractions() {
     function syncActiveSection() {
       const markerY = Math.min(window.innerHeight * 0.35, 280);
       let activeId = null;
+      let closestTop = Number.NEGATIVE_INFINITY;
 
       for (const section of sections) {
-        if (section.getBoundingClientRect().top <= markerY) {
+        const top = section.getBoundingClientRect().top;
+        if (top <= markerY && top > closestTop) {
           activeId = section.id;
+          closestTop = top;
         }
       }
 
