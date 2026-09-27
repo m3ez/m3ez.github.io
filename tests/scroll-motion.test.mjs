@@ -23,10 +23,10 @@ test('scroll motion targets small elements instead of whole sections', () => {
   assert.doesNotMatch(motion, /section\.classList\.add\('scroll-reveal'/);
 });
 
-test('scroll motion triggers just before elements enter the viewport', () => {
+test('scroll motion triggers as elements enter the viewport', () => {
   assert.match(motion, /new IntersectionObserver/);
-  assert.match(motion, /threshold: 0\.01/);
-  assert.match(motion, /rootMargin: '0px 0px 15% 0px'/);
+  assert.match(motion, /threshold: 0\.08/);
+  assert.match(motion, /rootMargin: '0px 0px 0px 0px'/);
   assert.match(motion, /observer\.unobserve\(entry\.target\)/);
   assert.match(motion, /prefers-reduced-motion: reduce/);
 });
@@ -39,21 +39,21 @@ test('scroll progress keeps the lightweight requestAnimationFrame path', () => {
   assert.match(motion, /\{ passive: true \}/);
 });
 
-test('reveal items begin nearly visible with tiny fast movement', () => {
+test('reveal items visibly fade and lift into place', () => {
   const rule = css.match(/\.scroll-reveal-item\{([^}]*)\}/)?.[1] ?? '';
-  assert.match(rule, /opacity:\.9[02]/);
-  assert.match(rule, /transform:translateY\(2px\)/);
-  assert.match(rule, /transition:opacity 170ms/);
-  assert.match(rule, /transform 170ms/);
+  assert.match(rule, /opacity:\.35/);
+  assert.match(rule, /transform:translateY\(6px\)/);
+  assert.match(rule, /transition:opacity 300ms/);
+  assert.match(rule, /transform 300ms/);
   assert.match(rule, /transition-delay:var\(--reveal-delay,0ms\)/);
   assert.match(css, /\.scroll-reveal-item\.is-visible\{opacity:1;transform:none\}/);
   assert.doesNotMatch(css, /\.scroll-reveal\{opacity:/);
 });
 
-test('stagger is 15ms and capped at 60ms', () => {
-  assert.match(motion, /Math\.min\(index \* 15, 60\)/);
+test('stagger is 25ms and capped at 100ms', () => {
+  assert.match(motion, /Math\.min\(index \* 25, 100\)/);
   assert.match(motion, /--reveal-delay/);
-  assert.doesNotMatch(css, /transition-delay:(?:75|100|125|150|200|250|300|350)ms/);
+  assert.doesNotMatch(css, /transition-delay:(?:125|150|200|250|300|350)ms/);
 });
 
 test('scroll CSS keeps anchor offsets and reduced-motion fallback', () => {
