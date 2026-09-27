@@ -1,0 +1,150 @@
+name: Numberless Method verification
+on:
+  push:
+    branches: [agent/method-workflow]
+permissions:
+  contents: write
+concurrency:
+  group: method-numberless-verification
+  cancel-in-progress: false
+defaults:
+  run:
+    shell: bash
+jobs:
+  verify:
+    if: github.ref == 'refs/heads/agent/method-workflow'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+      - name: Guard reviewed baseline
+        run: |
+          test "$(git rev-parse HEAD^)" = '223266568d66105aef1250df8258b67b6ca567e3'
+          mkdir -p /tmp/method-numberless-review
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium > /tmp/browser-install.log 2>&1 || { tail -n 50 /tmp/browser-install.log; exit 1; }
+      - name: Add numberless regression expectations
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('tests/method-workflow.test.mjs')
+          s=p.read_text()
+          s += '''\n\ntest('Method nodes contain only labels and descriptions, without step numbers', () => {
+            const nodes = [...section.matchAll(/<div class="method-node">([\\s\\S]*?)<\\/div>/g)];
+            assert.equal(nodes.length, 8);
+            for (const [, node] of nodes) {
+              assert.match(node, /^<strong class="method-label">[^<]+<\\/strong><span class="method-detail">[^<]+<\\/span>$/);
+            }
+          });\n'''
+          p.write_text(s)
+          p=Path('tests/browser/method-workflow.test.mjs'); s=p.read_text()
+          old="      assert.equal(await graph.locator('li').count(), 8);"
+          new=old+'''
+                assert.equal(await graph.locator('.method-step').count(), 0, 'remove number markup, not only its visibility');
+                const contents = await graph.locator('.method-node').evaluateAll(nodes => nodes.map(node => ({
+                  parts: [...node.children].map(child => child.className),
+                  text: node.textContent,
+                  columns: getComputedStyle(node).gridTemplateColumns.split(' ').length,
+                  display: getComputedStyle(node).display,
+                  clipped: node.scrollHeight > node.clientHeight + 1,
+                })));
+                for (const content of contents) {
+                  assert.deepEqual(content.parts, ['method-label', 'method-detail']);
+                  assert.doesNotMatch(content.text, /\\d/);
+                  assert.equal(content.clipped, false, 'node text must fit vertically');
+                  if (width <= 980) {
+                    assert.equal(content.display, 'grid');
+                    assert.equal(content.columns, 2, 'mobile must not reserve an empty number column');
+                  }
+                }
+                assert.equal(await graph.evaluate(node => getComputedStyle(node).listStyleType), 'none');'''
+          assert s.count(old)==1
+          p.write_text(s.replace(old,new))
+          PY
+      - name: Prove assertions reject numbered nodes
+        run: |
+          if npm test > /tmp/method-numberless-review/red-source.log 2>&1; then
+            echo 'Expected the new source test to reject the numbered baseline'; exit 1
+          fi
+          grep -q '^# fail 1$' /tmp/method-numberless-review/red-source.log
+          if node --test --test-name-pattern='Method keeps eight readable nodes' tests/browser/method-workflow.test.mjs > /tmp/method-numberless-review/red-browser.log 2>&1; then
+            echo 'Expected all six layout cases to reject numbered nodes'; exit 1
+          fi
+          grep -q '^# fail 6$' /tmp/method-numberless-review/red-browser.log
+          grep -q 'remove number markup' /tmp/method-numberless-review/red-browser.log
+          tail -n 12 /tmp/method-numberless-review/red-source.log
+          tail -n 12 /tmp/method-numberless-review/red-browser.log
+      - name: Remove step numbers and reserved spacing
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          p=Path('index.html'); html=p.read_text()
+          match=re.search(r'<section\b[^>]*id="method"[^>]*>.*?</section>', html, re.S)
+          assert match
+          section,count=re.subn(r'<span class="method-step" aria-hidden="true">0[1-8]</span>', '', match[0])
+          assert count == 8, f'Expected exactly 8 step numbers, found {count}'
+          p.write_text(html[:match.start()]+section+html[match.end():])
+          p=Path('assets/research-credentials.css'); css=p.read_text()
+          rule='#method .method-step{color:var(--muted);font:400 10px/1 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;letter-spacing:.06em}\n'
+          assert css.count(rule)==1
+          css=css.replace(rule,'')
+          old='#method .method-node{position:relative;display:flex;flex-direction:column;gap:.35rem;height:100%;min-height:6.5rem;'
+          new=old.replace('min-height:6.5rem','min-height:5.5rem')
+          assert css.count(old)==1
+          css=css.replace(old,new)
+          old='#method .method-node{display:grid;grid-template-columns:1.5rem 5.75rem minmax(0,1fr);'
+          new=old.replace('1.5rem 5.75rem','5.75rem')
+          assert css.count(old)==1
+          p.write_text(css.replace(old,new))
+          PY
+      - name: Full source and browser suites
+        env:
+          UI_SCREENSHOTS: /tmp/method-numberless-review/screenshots
+        run: |
+          npm test | tee /tmp/method-numberless-review/source.log
+          npm run test:browser | tee /tmp/method-numberless-review/browser.log
+      - name: Commit and reverify the clean review tree
+        env:
+          UI_SCREENSHOTS: /tmp/method-numberless-review/screenshots
+        run: |
+          test "$GITHUB_REF" = 'refs/heads/agent/method-workflow'
+          git diff --check
+          git rm .github/workflows/method-numberless-verification.yml
+          git add index.html assets/research-credentials.css tests/method-workflow.test.mjs tests/browser/method-workflow.test.mjs
+          git -c user.name='m3ez portfolio automation' -c user.email='72428471+m3ez@users.noreply.github.com' commit -m 'Remove Method step numbers and compact node spacing'
+          python3 - <<'PY'
+          import subprocess
+          from pathlib import Path
+          import re
+          base='223266568d66105aef1250df8258b67b6ca567e3'
+          changed=set(subprocess.check_output(['git','diff','--name-only',base,'HEAD'],text=True).splitlines())
+          assert changed == {'index.html','assets/research-credentials.css','tests/method-workflow.test.mjs','tests/browser/method-workflow.test.mjs'}, changed
+          old=subprocess.check_output(['git','show',base+':index.html'],text=True)
+          current=Path('index.html').read_text()
+          pattern=r'<section\b[^>]*id="method"[^>]*>.*?</section>'
+          assert re.sub(pattern,'',old,flags=re.S)==re.sub(pattern,'',current,flags=re.S)
+          PY
+          echo "VERIFIED_COMMIT=$(git rev-parse HEAD)" | tee /tmp/method-numberless-review/final.txt
+          echo "VERIFIED_TREE=$(git rev-parse HEAD^{tree})" | tee -a /tmp/method-numberless-review/final.txt
+          git diff --stat 223266568d66105aef1250df8258b67b6ca567e3 HEAD | tee -a /tmp/method-numberless-review/final.txt
+          npm test | tee /tmp/method-numberless-review/source.log
+          npm run test:browser | tee /tmp/method-numberless-review/browser.log
+          git diff --exit-code
+          git archive --format=tar HEAD > /tmp/method-numberless-review/reviewed-source.tar
+          test "$(git ls-remote origin refs/heads/agent/method-workflow | cut -f1)" = "$GITHUB_SHA"
+          git push origin HEAD:refs/heads/agent/method-workflow
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: method-numberless-review
+          path: /tmp/method-numberless-review
+          if-no-files-found: error
