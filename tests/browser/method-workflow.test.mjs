@@ -71,8 +71,6 @@ async function screenshot(page, name) {
 }
 
 const phases = ['Discover', 'Test', 'Deliver'];
-const numbers = ['01','02','03','04','05','06','07','08'];
-
 async function feedbackGeometry(page, width) {
   const geometry = await page.locator(selector).evaluate(node => {
     const feedback = node.querySelector('.method-feedback');
@@ -108,7 +106,7 @@ for (const [width, javaScriptEnabled] of [[320,true],[390,true],[768,true],[980,
       const graph = page.locator(selector);
       assert.deepEqual(await graph.locator('.method-phase-title').allTextContents(), phases);
       assert.deepEqual(await graph.locator('.method-label').allTextContents(), expected);
-      assert.deepEqual(await graph.locator('.method-step').allTextContents(), numbers);
+      assert.equal(await graph.locator('.method-step').count(), 0);
       assert.deepEqual(await graph.locator('.method-strip').evaluateAll(lists => lists.map(list => list.children.length)), [3,3,2]);
       assert.equal(await graph.locator('.method-connector, .method-arrow, .method-pulse').count(), 0);
       assert.equal(await graph.locator('button, a, [tabindex], [aria-live]').count(), 0);
@@ -120,7 +118,7 @@ for (const [width, javaScriptEnabled] of [[320,true],[390,true],[768,true],[980,
       boxes.forEach(box => {
         assert.ok(box.x >= 0 && box.right <= width + 1, JSON.stringify(box));
         assert.equal(box.clipped, false, 'node content must not clip');
-        assert.equal(box.textFits, true, 'titles and numbers fit inside boxes');
+        assert.equal(box.textFits, true, 'titles and details fit inside boxes');
       });
       for (let i=1; i<boxes.length; i++) {
         if (width > 980) {

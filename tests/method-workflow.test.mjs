@@ -22,8 +22,9 @@ test('Discover Test Deliver phases group the approved stages in order', () => {
   assert.deepEqual(groups, [labels.slice(0, 3), labels.slice(3, 6), labels.slice(6)]);
 });
 
-test('segmented nodes restore small mono numbers and mark Report as the endpoint', () => {
-  assert.deepEqual([...section.matchAll(/class="method-step" aria-hidden="true">(\d+)</g)].map(match => match[1]), ['01','02','03','04','05','06','07','08']);
+test('segmented nodes carry no step numbers and mark Report as the endpoint', () => {
+  assert.doesNotMatch(section, /method-step/);
+  assert.doesNotMatch(css, /\.method-step/);
   assert.equal((section.match(/method-node-final/g) ?? []).length, 1);
   assert.match(section, /class="method-node method-node-final"[^>]*>[\s\S]*?class="method-label">Report</);
   assert.match(css, /\.method-node-final\{[^}]*background:var\(--black\)/);
