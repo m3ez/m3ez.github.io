@@ -1,11 +1,12 @@
-// Semantic HTML stays readable; the decorative signal loops only while visible.
+// Semantic HTML stays readable; strip highlights loop only while visible.
 export function initializeMethodWorkflow() {
   const workflow = document.querySelector('#method .method-workflow');
   if (!workflow || workflow.dataset.methodInitialized) return;
   workflow.dataset.methodInitialized = 'true';
 
-  const steps = [...workflow.children];
-  const stepMs = 480;
+  const steps = [...workflow.querySelectorAll('.method-node')];
+  const stepMs = 600;
+  const restMs = 800; // Let the Report endpoint rest before the next pass.
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
   let inView = false;
 
@@ -15,7 +16,7 @@ export function initializeMethodWorkflow() {
     return;
   }
 
-  workflow.style.setProperty('--method-cycle', `${steps.length * stepMs}ms`);
+  workflow.style.setProperty('--method-cycle', `${steps.length * stepMs + restMs}ms`);
   steps.forEach((step, index) => {
     step.style.setProperty('--method-delay', `${index * stepMs}ms`);
   });
