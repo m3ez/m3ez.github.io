@@ -20,6 +20,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.sha }}
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -28,11 +29,6 @@ jobs:
       - name: Install browser
         run: |
           npx playwright install --with-deps chromium > /tmp/browser-install.log 2>&1 || { tail -n 80 /tmp/browser-install.log; exit 1; }
-      - name: Apply requested removal when present
-        run: |
-          if [ -f .github/remove-carousel-control.py ]; then
-            python3 .github/remove-carousel-control.py
-          fi
       - name: Source tests
         run: |
           set +e
@@ -61,17 +57,14 @@ jobs:
       - name: Commit and reverify the clean review tree
         run: |
           set -euo pipefail
-          if [ ! -f .github/remove-carousel-control.py ]; then
-            exit 0
-          fi
           test "$GITHUB_REF" = 'refs/heads/agent/remove-carousel-pause'
-          git diff --check
-          rm .github/remove-carousel-control.py .github/workflows/carousel-control-verification.yml
-          git add assets/portfolio-interactions.js
-          git add -u .github/remove-carousel-control.py .github/workflows/carousel-control-verification.yml
-          git -c user.name='m3ez portfolio automation' -c user.email='72428471+m3ez@users.noreply.github.com' commit -m 'Remove carousel Pause/Play control and restore hover/focus behavior'
+          git diff --check 6cab7c3c167fde2af2e6d5668c03c53f85b4f8a8 HEAD
+          git rm .github/workflows/carousel-control-verification.yml
+          git -c user.name='m3ez portfolio automation' -c user.email='72428471+m3ez@users.noreply.github.com' commit -m 'Remove temporary carousel verification workflow after successful checks'
           echo "VERIFIED_CLEAN_COMMIT=$(git rev-parse HEAD)"
           echo "VERIFIED_CLEAN_TREE=$(git rev-parse HEAD^{tree})"
+          git diff --stat 6cab7c3c167fde2af2e6d5668c03c53f85b4f8a8 HEAD
+          test "$(git diff --name-only 6cab7c3c167fde2af2e6d5668c03c53f85b4f8a8 HEAD | wc -l)" -eq 2
           npm test
           npm run test:browser
           git push origin HEAD:refs/heads/agent/remove-carousel-pause
