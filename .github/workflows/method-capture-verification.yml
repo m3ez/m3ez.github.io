@@ -1,9 +1,12 @@
-name: Segmented Method final capture
+name: Method merge readiness
 on:
   push:
     branches: [agent/method-workflow]
 permissions:
   contents: write
+concurrency:
+  group: method-merge-readiness
+  cancel-in-progress: false
 jobs:
   verify:
     if: github.ref == 'refs/heads/agent/method-workflow'
@@ -14,77 +17,42 @@ jobs:
         with:
           ref: ${{ github.sha }}
           fetch-depth: 0
-      - name: Guard tested product tree
+      - name: Guard current product tree
         run: |
+          set -euo pipefail
           test "$GITHUB_REF" = 'refs/heads/agent/method-workflow'
-          git diff --exit-code f69c864dc0ba6c3915ea6a27c7e0f64cd79d2c6f HEAD -- . ':(exclude).github/workflows/method-capture-verification.yml'
-          mkdir -p /tmp/method-final-review
+          git diff --exit-code 28fd82f26dbc3f8e193221625a4e040f85b8ed91 HEAD -- . ':(exclude).github/workflows/method-capture-verification.yml'
+          mkdir -p /tmp/method-merge-review
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
         with:
           node-version: 22
           cache: npm
       - run: npm ci --ignore-scripts
-      - name: Install browser
+      - name: Install Chromium
         run: npx playwright install --with-deps chromium > /tmp/browser-install.log 2>&1 || { tail -n 60 /tmp/browser-install.log; exit 1; }
-      - name: Correct screenshot framing and verify Report visibility
-        run: |
-          python <<'PY'
-          from pathlib import Path
-          p = Path('tests/browser/method-workflow.test.mjs')
-          s = p.read_text()
-          old = "  await page.locator('#method').screenshot({ path: resolve(process.env.UI_SCREENSHOTS, name) });"
-          new = """  const section = page.locator('#method');
-            const viewport = page.viewportSize();
-            const box = await section.boundingBox();
-            // Give a tall mobile section a full capture viewport, including space for
-            // the fixed navigation and Back to Top control; never clip the last cell.
-            const height = Math.max(viewport.height, Math.ceil(box.height) + 180);
-            try {
-              await page.setViewportSize({ width: viewport.width, height });
-              await section.evaluate(node => node.scrollIntoView({ behavior: 'instant', block: 'center' }));
-              await page.evaluate(() => new Promise(done => requestAnimationFrame(() => requestAnimationFrame(done))));
-              await section.screenshot({ path: resolve(process.env.UI_SCREENSHOTS, name) });
-            } finally {
-              await page.setViewportSize(viewport);
-            }"""
-          assert s.count(old) == 1
-          s = s.replace(old, new)
-          needle = "      await feedbackGeometry(page, width);\n      assert.ok(await page.evaluate"
-          replacement = """      await feedbackGeometry(page, width);
-                await graph.locator('.method-node-final').scrollIntoViewIfNeeded();
-                assert.ok(await graph.locator('.method-node-final').evaluate(node => {
-                  const detail = node.querySelector('.method-detail').getBoundingClientRect();
-                  return node.contains(document.elementFromPoint(detail.x + detail.width / 2, detail.y + detail.height / 2));
-                }), 'Report details must be readable after scrolling, not covered or clipped');
-                assert.ok(await page.evaluate"""
-          assert s.count(needle) == 1
-          p.write_text(s.replace(needle, replacement))
-          PY
       - name: Full source and browser validation
-        env:
-          UI_SCREENSHOTS: /tmp/method-final-review/screenshots
         run: |
           set -euo pipefail
           git diff --check
-          npm test | tee /tmp/method-final-review/source.log
-          npm run test:browser | tee /tmp/method-final-review/browser.log
-      - name: Commit clean test revision and verify exact final tree
-        env:
-          UI_SCREENSHOTS: /tmp/method-final-review/screenshots
+          npm test | tee /tmp/method-merge-review/source-before.log
+          npm run test:browser | tee /tmp/method-merge-review/browser-before.log
+      - name: Remove temporary workflow and verify final commit
         run: |
           set -euo pipefail
           git rm .github/workflows/method-capture-verification.yml
-          git add tests/browser/method-workflow.test.mjs
-          test "$(git write-tree)" = '51a634607a7cf7334a8e8e8c2ca5164dbac0157f'
-          git -c user.name='m3ez portfolio automation' -c user.email='72428471+m3ez@users.noreply.github.com' commit -m 'Verify Report visibility and frame full mobile Method previews'
-          printf 'VERIFIED_COMMIT=%s\nVERIFIED_TREE=%s\n' "$(git rev-parse HEAD)" "$(git rev-parse HEAD^{tree})" | tee /tmp/method-final-review/final.txt
-          npm test | tee /tmp/method-final-review/source.log
-          npm run test:browser | tee /tmp/method-final-review/browser.log
-          git archive --format=tar HEAD > /tmp/method-final-review/reviewed-source.tar
+          git diff --cached --check
+          git -c user.name='m3ez portfolio automation' -c user.email='72428471+m3ez@users.noreply.github.com' commit -m 'Remove temporary Method capture verification workflow'
+          git diff --exit-code 28fd82f26dbc3f8e193221625a4e040f85b8ed91 HEAD -- . ':(exclude).github/workflows/method-capture-verification.yml'
+          test "$(git diff --name-only 6cfd39d026b21961d0b080c0a69a1c645ab3a5e9 HEAD | wc -l)" -eq 7
+          printf 'VERIFIED_COMMIT=%s\nVERIFIED_TREE=%s\n' "$(git rev-parse HEAD)" "$(git rev-parse HEAD^{tree})" | tee /tmp/method-merge-review/final.txt
+          git diff --stat 6cfd39d026b21961d0b080c0a69a1c645ab3a5e9 HEAD | tee /tmp/method-merge-review/diff-stat.txt
+          npm test | tee /tmp/method-merge-review/source.log
+          npm run test:browser | tee /tmp/method-merge-review/browser.log
+          git archive --format=tar HEAD > /tmp/method-merge-review/reviewed-source.tar
           git push origin HEAD:refs/heads/agent/method-workflow
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         if: always()
         with:
-          name: method-segmented-final-review
-          path: /tmp/method-final-review
+          name: method-merge-review
+          path: /tmp/method-merge-review
           if-no-files-found: error
