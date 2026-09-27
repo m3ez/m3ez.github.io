@@ -3,7 +3,7 @@ on:
   push:
     branches: [agent/contact-x-link]
 permissions:
-  contents: read
+  contents: write
 concurrency:
   group: contact-x-verification
   cancel-in-progress: false
@@ -24,7 +24,57 @@ jobs:
       - run: npm ci --ignore-scripts
       - name: Install Chromium
         run: npx playwright install --with-deps chromium > /tmp/browser-install.log 2>&1 || { tail -n 50 /tmp/browser-install.log; exit 1; }
-      - name: Existing source suite
+      - name: Add requested contact link
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          path = Path('index.html')
+          html = path.read_text(encoding='utf-8')
+          old = '<div class="contact-actions"><a class="primary-action" href="https://www.linkedin.com/in/supakiad-satuwan" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn (external link)">LinkedIn</a></div>'
+          assert html.count(old) == 1, 'Expected the existing LinkedIn contact action exactly once'
+          link = '<a class="primary-action" href="https://x.com/Supakiad_Mee" target="_blank" rel="noopener noreferrer" aria-label="X (Twitter) — @Supakiad_Mee (external link)">X (Twitter)</a>'
+          path.write_text(html.replace(old, old[:-6] + link + '</div>'), encoding='utf-8')
+          css_path = Path('assets/research-credentials.css')
+          css = css_path.read_text(encoding='utf-8')
+          css_path.write_text(css + '\n\n/* Contact actions share a row on desktop and stack with a gap on phones. */\n#contact .contact-actions{display:flex;flex-wrap:wrap;gap:.65rem}\n', encoding='utf-8')
+          PY
+      - name: Source suite
         run: npm test > /tmp/contact-source.log 2>&1 && tail -n 12 /tmp/contact-source.log || { cat /tmp/contact-source.log; exit 1; }
-      - name: Contact regression tests
-        run: node --test tests/browser/contact-links.test.mjs
+      - name: Browser suite
+        env:
+          UI_SCREENSHOTS: /tmp/contact-screenshots
+        run: npm run test:browser > /tmp/contact-browser.log 2>&1 && tail -n 12 /tmp/contact-browser.log || { cat /tmp/contact-browser.log; exit 1; }
+      - name: Commit and verify final tree
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF" = 'refs/heads/agent/contact-x-link'
+          git diff --check
+          git add -- index.html assets/research-credentials.css
+          git rm .github/workflows/contact-x-verification.yml
+          git -c user.name='m3ez portfolio automation' -c user.email='72428471+m3ez@users.noreply.github.com' commit -m 'Add X (Twitter) to the Contact section'
+          git diff --check 9d7c8edc1916ecb77b86cf7b0c7cecae8418fd2d HEAD
+          python3 - <<'PY'
+          import subprocess
+          actual = subprocess.check_output(['git', 'diff', '--name-only', '9d7c8edc1916ecb77b86cf7b0c7cecae8418fd2d', 'HEAD'], text=True).splitlines()
+          assert sorted(actual) == ['assets/research-credentials.css', 'index.html', 'tests/browser/contact-links.test.mjs'], actual
+          PY
+          echo "VERIFIED_COMMIT=$(git rev-parse HEAD)" | tee /tmp/contact-final.txt
+          echo "VERIFIED_TREE=$(git rev-parse HEAD^{tree})" | tee -a /tmp/contact-final.txt
+          git diff --stat 9d7c8edc1916ecb77b86cf7b0c7cecae8418fd2d HEAD | tee -a /tmp/contact-final.txt
+          npm test > /tmp/contact-source.log 2>&1 || { cat /tmp/contact-source.log; exit 1; }
+          tail -n 12 /tmp/contact-source.log
+          UI_SCREENSHOTS=/tmp/contact-screenshots npm run test:browser > /tmp/contact-browser.log 2>&1 || { cat /tmp/contact-browser.log; exit 1; }
+          tail -n 12 /tmp/contact-browser.log
+          git archive --format=tar HEAD > /tmp/contact-reviewed-source.tar
+          git push origin HEAD:refs/heads/agent/contact-x-link
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: contact-x-review
+          path: |
+            /tmp/contact-screenshots
+            /tmp/contact-source.log
+            /tmp/contact-browser.log
+            /tmp/contact-final.txt
+            /tmp/contact-reviewed-source.tar
+          if-no-files-found: ignore
