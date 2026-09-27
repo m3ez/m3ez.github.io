@@ -59,7 +59,7 @@ test('cold loads preserve the redesigned content without hydration errors', asyn
       await page.goto(origin, { waitUntil: 'networkidle' });
       await ready(page);
       assert.deepEqual(errors, []);
-      assert.equal(await page.locator('#top .proof-links a').count(), 6);
+      assert.equal(await page.locator('#top .proof-links a').count(), 7);
       assert.equal(await page.locator('.credential-grid-item').count(), 13);
     } finally {
       await page.close();
