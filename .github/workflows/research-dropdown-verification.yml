@@ -24,6 +24,12 @@ jobs:
       - run: npm ci --ignore-scripts
       - name: Install browser
         run: npx playwright install --with-deps chromium > /tmp/browser-install.log 2>&1 || { tail -n 60 /tmp/browser-install.log; exit 1; }
+      - name: Apply approved dropdown changes
+        run: |
+          if [ -f .github/implement-dropdowns.patch ]; then
+            git apply --check .github/implement-dropdowns.patch
+            git apply .github/implement-dropdowns.patch
+          fi
       - name: Source suite
         run: |
           set -o pipefail
@@ -38,12 +44,14 @@ jobs:
         run: |
           set -euo pipefail
           test "$GITHUB_REF" = 'refs/heads/agent/research-compact-dropdowns'
-          git diff --check 6cab7c3c167fde2af2e6d5668c03c53f85b4f8a8 HEAD
-          git rm .github/workflows/research-dropdown-verification.yml
-          git -c user.name='m3ez portfolio automation' -c user.email='72428471+m3ez@users.noreply.github.com' commit -m 'Remove temporary dropdown verification workflow after successful checks'
+          git diff --check
+          git rm .github/workflows/research-dropdown-verification.yml .github/implement-dropdowns.patch
+          git add assets/portfolio-redesign.js assets/research-credentials.css tests/browser/research-dropdowns.test.mjs
+          git -c user.name='m3ez portfolio automation' -c user.email='72428471+m3ez@users.noreply.github.com' commit -m 'Use compact auto-closing Type and Sort dropdowns'
           echo "VERIFIED_COMMIT=$(git rev-parse HEAD)" | tee /tmp/dropdown-final.txt
           echo "VERIFIED_TREE=$(git rev-parse HEAD^{tree})" | tee -a /tmp/dropdown-final.txt
           git diff --stat 6cab7c3c167fde2af2e6d5668c03c53f85b4f8a8 HEAD | tee -a /tmp/dropdown-final.txt
+          test "$(git diff --name-only 6cab7c3c167fde2af2e6d5668c03c53f85b4f8a8 HEAD | wc -l)" -eq 3
           npm test | tee /tmp/dropdown-source.log
           UI_SCREENSHOTS=/tmp/dropdown-screenshots npm run test:browser | tee /tmp/dropdown-browser.log
           git archive --format=tar HEAD > /tmp/dropdown-reviewed-source.tar
