@@ -139,7 +139,7 @@ test('a failed CVE refresh preserves the exported research and other interaction
 });
 
 
-test('ultra-smooth motion keeps sections static and reveals only small elements', async () => {
+test('visible reveal motion keeps sections static and animates small elements', async () => {
   const page = await browser.newPage({ viewport: { width: 1200, height: 900 } });
   try {
     await page.goto(origin, { waitUntil: 'networkidle' });
@@ -164,9 +164,9 @@ test('ultra-smooth motion keeps sections static and reveals only small elements'
       transform: getComputedStyle(node).transform,
       duration: Math.max(...getComputedStyle(node).transitionDuration.split(',').map(value => Number.parseFloat(value))),
     }));
-    assert.ok(preReveal.opacity >= 0.9);
+    assert.ok(preReveal.opacity >= 0.34 && preReveal.opacity <= 0.36);
     assert.notEqual(preReveal.transform, 'none');
-    assert.ok(preReveal.duration <= 0.18);
+    assert.ok(preReveal.duration >= 0.29 && preReveal.duration <= 0.31);
 
     const progress = page.locator('#m3ez-scroll-progress-v1');
     assert.equal(await progress.count(), 1);
@@ -179,7 +179,7 @@ test('ultra-smooth motion keeps sections static and reveals only small elements'
     const delays = await page.locator('#credentials .credential-grid-item').evaluateAll(nodes =>
       [nodes[0], nodes[1], nodes.at(-1)].map(node => Number.parseFloat(getComputedStyle(node).transitionDelay)));
     assert.notEqual(delays[0], delays[1]);
-    assert.ok(Math.max(...delays) <= 0.06);
+    assert.ok(Math.max(...delays) <= 0.1);
 
     await contact.scrollIntoViewIfNeeded();
     await page.waitForFunction(() =>
