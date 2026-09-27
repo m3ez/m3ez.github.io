@@ -1,0 +1,61 @@
+name: Research dropdown verification
+on:
+  push:
+    branches: [agent/research-compact-dropdowns]
+permissions:
+  contents: write
+concurrency:
+  group: research-dropdown-verification
+  cancel-in-progress: false
+jobs:
+  verify:
+    if: github.ref == 'refs/heads/agent/research-compact-dropdowns'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - name: Install browser
+        run: npx playwright install --with-deps chromium > /tmp/browser-install.log 2>&1 || { tail -n 60 /tmp/browser-install.log; exit 1; }
+      - name: Source suite
+        run: |
+          set -o pipefail
+          npm test | tee /tmp/dropdown-source.log
+      - name: Browser suite
+        env:
+          UI_SCREENSHOTS: /tmp/dropdown-screenshots
+        run: |
+          set -o pipefail
+          npm run test:browser | tee /tmp/dropdown-browser.log
+      - name: Verify clean review tree
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF" = 'refs/heads/agent/research-compact-dropdowns'
+          git diff --check 6cab7c3c167fde2af2e6d5668c03c53f85b4f8a8 HEAD
+          git rm .github/workflows/research-dropdown-verification.yml
+          git -c user.name='m3ez portfolio automation' -c user.email='72428471+m3ez@users.noreply.github.com' commit -m 'Remove temporary dropdown verification workflow after successful checks'
+          echo "VERIFIED_COMMIT=$(git rev-parse HEAD)" | tee /tmp/dropdown-final.txt
+          echo "VERIFIED_TREE=$(git rev-parse HEAD^{tree})" | tee -a /tmp/dropdown-final.txt
+          git diff --stat 6cab7c3c167fde2af2e6d5668c03c53f85b4f8a8 HEAD | tee -a /tmp/dropdown-final.txt
+          npm test | tee /tmp/dropdown-source.log
+          UI_SCREENSHOTS=/tmp/dropdown-screenshots npm run test:browser | tee /tmp/dropdown-browser.log
+          git archive --format=tar HEAD > /tmp/dropdown-reviewed-source.tar
+          git push origin HEAD:refs/heads/agent/research-compact-dropdowns
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: research-dropdown-review
+          path: |
+            /tmp/dropdown-screenshots
+            /tmp/dropdown-source.log
+            /tmp/dropdown-browser.log
+            /tmp/dropdown-final.txt
+            /tmp/dropdown-reviewed-source.tar
+          if-no-files-found: ignore
