@@ -8,7 +8,7 @@ const redesign = readFileSync(new URL('../assets/portfolio-redesign.js', import.
 const css = readFileSync(new URL('../assets/research-credentials.css', import.meta.url), 'utf8');
 
 test('scroll motion targets small elements instead of whole sections', () => {
-  assert.match(redesign, /await renderResearch\(\);\s*initializeScrollMotion\(\);/);
+  assert.match(redesign, /renderCredentials\(\);\s*initializeScrollMotion\(\);\s*void renderResearch\(\);/);
   assert.match(motion, /#research > \.section-heading/);
   assert.match(motion, /#recognition > \.section-heading/);
   assert.match(motion, /#credentials > \.section-heading/);
