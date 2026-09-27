@@ -1,0 +1,27 @@
+name: Verify interaction polish final tree
+
+on:
+  push:
+    branches:
+      - agent/nav-tactile-interactions
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 0523efd975d5944b2a97881d62959fcf6d3ed8da
+      - name: Verify exact tested SHA
+        run: test "$(git rev-parse HEAD)" = "0523efd975d5944b2a97881d62959fcf6d3ed8da"
+      - name: Install dependencies
+        run: npm ci
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Run source tests
+        run: npm test
+      - name: Run browser tests
+        run: npm run test:browser
