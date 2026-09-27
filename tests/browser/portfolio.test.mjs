@@ -215,3 +215,71 @@ test('ultra-smooth motion keeps sections static and reveals only small elements'
     await reduced.close();
   }
 });
+
+
+test('desktop wheel input glides through real inertial scrolling while reduced motion stays native', async () => {
+  const page = await browser.newPage({ viewport: { width: 1200, height: 900 } });
+  try {
+    await page.goto(origin, { waitUntil: 'networkidle' });
+    await ready(page);
+    assert.equal(
+      await page.evaluate(() => matchMedia('(pointer: fine) and (hover: hover)').matches),
+      true,
+    );
+
+    await page.evaluate(() => window.scrollTo(0, 0));
+    const sample = await page.evaluate(async () => {
+      const event = new WheelEvent('wheel', {
+        deltaY: 600,
+        bubbles: true,
+        cancelable: true,
+      });
+      document.body.dispatchEvent(event);
+      const immediate = scrollY;
+      await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+      const afterTwoFrames = scrollY;
+      await new Promise(resolve => setTimeout(resolve, 120));
+      return {
+        prevented: event.defaultPrevented,
+        immediate,
+        afterTwoFrames,
+        later: scrollY,
+        mode: document.documentElement.dataset.m3ezInertialScroll,
+      };
+    });
+
+    assert.equal(sample.prevented, true);
+    assert.equal(sample.mode, 'ready');
+    assert.ok(sample.afterTwoFrames > sample.immediate);
+    assert.ok(sample.later > sample.afterTwoFrames);
+    assert.ok(sample.later < 600);
+    await page.waitForFunction(() => Math.abs(scrollY - 600) < 2);
+  } finally {
+    await page.close();
+  }
+
+  const reduced = await browser.newPage({
+    viewport: { width: 1200, height: 900 },
+    reducedMotion: 'reduce',
+  });
+  try {
+    await reduced.goto(origin, { waitUntil: 'networkidle' });
+    await ready(reduced);
+    const sample = await reduced.evaluate(() => {
+      const event = new WheelEvent('wheel', {
+        deltaY: 600,
+        bubbles: true,
+        cancelable: true,
+      });
+      document.body.dispatchEvent(event);
+      return {
+        prevented: event.defaultPrevented,
+        mode: document.documentElement.dataset.m3ezInertialScroll,
+      };
+    });
+    assert.equal(sample.prevented, false);
+    assert.equal(sample.mode, 'native');
+  } finally {
+    await reduced.close();
+  }
+});
