@@ -19,8 +19,7 @@ export function initializeInteractions() {
 .credential-carousel-kicker{color:var(--muted);font-size:10px;letter-spacing:.16em;text-transform:uppercase}
 .credential-carousel-title{margin-top:1.05rem;font-size:clamp(26px,3vw,34px);line-height:1;letter-spacing:-.025em}
 .credential-carousel-issuer{margin-top:.7rem;font-size:13px}.credential-carousel-issued{margin-top:.2rem;color:var(--muted);font-size:11px}.credential-carousel-verify{align-self:flex-end;margin-top:auto;font-size:12px}
-.credential-carousel-controls{order:1;display:grid;grid-template-columns:3.5rem 44px minmax(0,1fr) 44px;gap:.25rem;align-items:center;width:min(100%,30rem);margin:.1rem auto 0}
-.credential-carousel-rotation{min-height:44px;padding:0 .35rem;border:1px solid var(--line);border-radius:0;background:var(--paper);color:var(--ink);font:12px/1.2 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;cursor:pointer}.credential-carousel-rotation:disabled{color:var(--muted);cursor:default}
+.credential-carousel-controls{order:1;display:grid;grid-template-columns:44px minmax(0,1fr) 44px;gap:.25rem;align-items:center;width:min(100%,30rem);margin:.1rem auto 0}
 .credential-carousel-arrow,.credential-carousel-dot{font:inherit;cursor:pointer}.credential-carousel-arrow{min-width:44px;min-height:44px;padding:0;border:0;background:transparent;color:var(--ink);opacity:0;pointer-events:none;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:20px}
 .credential-carousel:hover .credential-carousel-arrow,.credential-carousel:focus-within .credential-carousel-arrow{opacity:1;pointer-events:auto}
 .credential-carousel-dots{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:0 .05rem}.credential-carousel-dot{position:relative;width:18px;min-height:36px;padding:0;border:0;background:transparent}
@@ -67,7 +66,6 @@ export function initializeInteractions() {
       root.setAttribute("aria-label", "Credentials");
       const stage = document.createElement("div");
       stage.className = "credential-carousel-stage";
-      stage.id = `${MARKER}-slides`;
       root.appendChild(stage);
       const cards = items.map((item, index) => {
         const card = document.createElement("a");
@@ -96,10 +94,6 @@ export function initializeInteractions() {
       });
       const controls = document.createElement("div");
       controls.className = "credential-carousel-controls";
-      const rotation = document.createElement("button");
-      rotation.className = "credential-carousel-rotation";
-      rotation.type = "button";
-      rotation.setAttribute("aria-controls", stage.id);
       const previous = document.createElement("button");
       previous.className = "credential-carousel-arrow";
       previous.type = "button";
@@ -122,17 +116,14 @@ export function initializeInteractions() {
       next.type = "button";
       next.setAttribute("aria-label", "Next credential");
       next.textContent = "→";
-      controls.append(rotation, previous, dots, next);
-      // Controls remain visually below the cards, with Pause first in tab order.
-      root.insertBefore(controls, stage);
+      controls.append(previous, dots, next);
+      root.appendChild(controls);
       hero.appendChild(root);
       const reducedMotion = window.matchMedia(
         "(prefers-reduced-motion: reduce)",
       );
       let activeIndex = 0,
-        hoverPaused = false,
-        rotationEnabled = !reducedMotion.matches,
-        pointerAction = null,
+        paused = false,
         timer = 0;
       function positionFor(index) {
         if (index === activeIndex) return "current";
@@ -172,16 +163,7 @@ export function initializeInteractions() {
       }
       function schedule() {
         clearTimer();
-        const stopped = !rotationEnabled || reducedMotion.matches;
-        rotation.disabled = reducedMotion.matches;
-        rotation.textContent = stopped ? "Play" : "Pause";
-        rotation.setAttribute("aria-label", reducedMotion.matches
-          ? "Automatic credential rotation disabled by reduced motion"
-          : `${stopped ? "Play" : "Pause"} automatic credential rotation`);
-        rotation.title = reducedMotion.matches
-          ? "Automatic rotation is disabled by your reduced-motion preference."
-          : "";
-        if (hoverPaused || stopped) return;
+        if (paused || reducedMotion.matches) return;
         timer = window.setTimeout(() => {
           activeIndex = (activeIndex + 1) % items.length;
           render();
@@ -193,21 +175,6 @@ export function initializeInteractions() {
         render();
         schedule();
       }
-      // Pointer focus pauses before click; preserve the action the user pressed.
-      rotation.addEventListener("pointerdown", () => {
-        pointerAction = rotationEnabled;
-      });
-      rotation.addEventListener("pointercancel", () => {
-        pointerAction = null;
-      });
-      rotation.addEventListener("click", (event) => {
-        const wasEnabled = event.detail > 0 && pointerAction !== null
-          ? pointerAction
-          : rotationEnabled;
-        pointerAction = null;
-        rotationEnabled = !wasEnabled;
-        schedule();
-      });
       previous.addEventListener("click", () => select(activeIndex - 1));
       next.addEventListener("click", () => select(activeIndex + 1));
       cards.forEach(({ card }, index) =>
@@ -219,22 +186,24 @@ export function initializeInteractions() {
         }),
       );
       root.addEventListener("mouseenter", () => {
-        hoverPaused = true;
-        schedule();
+        paused = true;
+        clearTimer();
       });
       root.addEventListener("mouseleave", () => {
-        hoverPaused = false;
-        schedule();
+        paused = root.contains(document.activeElement);
+        if (!paused) schedule();
       });
       root.addEventListener("focusin", () => {
-        // Leaving the carousel must not restart rotation without explicit Play.
-        rotationEnabled = false;
-        schedule();
+        paused = true;
+        clearTimer();
       });
-      reducedMotion.addEventListener?.("change", () => {
-        if (reducedMotion.matches) rotationEnabled = false;
-        schedule();
+      root.addEventListener("focusout", (event) => {
+        if (!root.contains(event.relatedTarget)) {
+          paused = root.matches(":hover");
+          if (!paused) schedule();
+        }
       });
+      reducedMotion.addEventListener?.("change", schedule);
       render();
       schedule();
     }
