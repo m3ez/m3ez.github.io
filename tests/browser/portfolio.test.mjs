@@ -148,6 +148,12 @@ test('scroll motion reveals once, updates progress, staggers cards, and animates
     const contact = page.locator('#contact');
     assert.ok(await contact.evaluate(node => node.classList.contains('scroll-reveal')));
     assert.equal(await contact.evaluate(node => node.classList.contains('is-visible')), false);
+    const sectionMotion = await contact.evaluate(node => ({
+      transform: getComputedStyle(node).transform,
+      durations: getComputedStyle(node).transitionDuration.split(',').map(value => Number.parseFloat(value)),
+    }));
+    assert.equal(sectionMotion.transform, 'none');
+    assert.ok(Math.max(...sectionMotion.durations) <= 0.3);
 
     const progress = page.locator('#m3ez-scroll-progress-v1');
     assert.equal(await progress.count(), 1);
@@ -157,8 +163,9 @@ test('scroll motion reveals once, updates progress, staggers cards, and animates
     await credentials.scrollIntoViewIfNeeded();
     await page.waitForFunction(() => document.querySelector('#credentials')?.classList.contains('is-visible'));
     const delays = await page.locator('.credential-grid-item').evaluateAll(nodes =>
-      nodes.slice(0, 2).map(node => getComputedStyle(node).transitionDelay));
+      [nodes[0], nodes[1], nodes.at(-1)].map(node => Number.parseFloat(getComputedStyle(node).transitionDelay)));
     assert.notEqual(delays[0], delays[1]);
+    assert.ok(Math.max(...delays) <= 0.125);
 
     await contact.scrollIntoViewIfNeeded();
     await page.waitForFunction(() => document.querySelector('#contact')?.classList.contains('is-visible'));
