@@ -1,5 +1,6 @@
 import { CATEGORIES, certs, issuerMonogram } from './certs.js';
 import { initializeInteractions } from './portfolio-interactions.js';
+import { initializeScrollMotion } from './scroll-motion.js';
 import { RECOGNITION_YEARS, recognitionItems, filterRecognition } from './recognition-data.js';
 import {
   deriveClassOptions,
@@ -210,15 +211,16 @@ function severityChip(item) {
   return chip;
 }
 
-function renderResearchRows(container, items) {
+function renderResearchRows(container, items, animateFrom = items.length) {
   container.replaceChildren();
   if (items.length === 0) {
     container.appendChild(element('li', 'cve-empty', 'No CVEs match these filters.'));
     return;
   }
 
-  for (const item of items) {
+  for (const [index, item] of items.entries()) {
     const row = element('li', 'cve-row-v2');
+    if (index >= animateFrom) row.classList.add('cve-row-enter');
     const id = element('a', 'cve-id-v2', item.id);
     id.href = item.href;
     id.target = '_blank';
@@ -316,18 +318,19 @@ async function renderResearch() {
     state.visibleLimit = CVE_PAGE_SIZE;
   };
 
-  const refresh = () => {
+  const refresh = (animateFrom) => {
     const matched = filterAndSort([...documentData.items], state);
     const visible = matched.slice(0, state.visibleLimit);
-    renderResearchRows(rows, visible);
+    renderResearchRows(rows, visible, animateFrom);
     resultMeta.textContent = `Showing ${visible.length} of ${matched.length}`;
     showMoreButton.hidden = visible.length >= matched.length;
     showLessButton.hidden = state.visibleLimit <= CVE_PAGE_SIZE;
   };
 
   showMoreButton.addEventListener('click', () => {
+    const revealFrom = rows.querySelectorAll('.cve-row-v2').length;
     state.visibleLimit += CVE_PAGE_SIZE;
-    refresh();
+    refresh(revealFrom);
   });
   showLessButton.addEventListener('click', () => {
     state.visibleLimit = CVE_PAGE_SIZE;
@@ -376,6 +379,7 @@ function start() {
   renderReferences();
   renderRecognition();
   renderCredentials();
+  initializeScrollMotion();
   void renderResearch();
 }
 
