@@ -60,6 +60,21 @@ function renderHeroProofLinks() {
   const list = document.querySelector('#top .proof-links');
   if (!list) return;
 
+  if (!list.closest('.hero-profiles')) {
+    const actions = element('div', 'hero-actions');
+    actions.setAttribute('role', 'group');
+    actions.setAttribute('aria-label', 'Portfolio actions');
+    for (const [label, href] of [['View Research', '#research'], ['Contact', '#contact']]) {
+      const link = element('a', 'primary-action', label);
+      link.href = href;
+      actions.appendChild(link);
+    }
+    const profiles = element('div', 'hero-profiles');
+    const label = element('p', 'hero-profiles-label', 'Profiles & verification');
+    list.before(actions, profiles);
+    profiles.append(label, list);
+  }
+
   list.replaceChildren();
   for (const item of HERO_PROOF_LINKS) {
     const listItem = element('li');

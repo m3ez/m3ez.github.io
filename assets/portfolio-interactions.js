@@ -7,8 +7,8 @@ export function initializeInteractions() {
     const css = `
 .hero{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(25rem,.95fr);column-gap:clamp(2rem,5vw,4rem);align-items:center}
 .hero>.role,.hero>h1,.hero>.trust-statement,.hero>.hero-copy,.hero>.proof-links{grid-column:1}
-.credential-carousel{grid-column:2;grid-row:1/6;width:100%;max-width:38rem;min-width:0;justify-self:end}
-.credential-carousel-stage{position:relative;height:15rem;overflow:hidden}
+.credential-carousel{display:flex;flex-direction:column;grid-column:2;grid-row:1/7;width:100%;max-width:38rem;min-width:0;justify-self:end}
+.credential-carousel-stage{order:0;flex:none;position:relative;height:15rem;overflow:hidden}
 .credential-carousel-card{position:absolute;top:50%;left:50%;z-index:0;display:flex;flex-direction:column;width:min(58%,18rem);height:12.75rem;padding:1.15rem;border:1px solid var(--line);background:var(--paper);color:var(--ink);opacity:0;transform:translate(-50%,-50%) scale(.68);pointer-events:none;text-decoration:none;cursor:pointer;transition:left 400ms ease,opacity 400ms ease,transform 400ms ease,border-color 400ms ease}
 .credential-carousel-card[data-position="current"]{left:50%;z-index:3;border-color:var(--black);opacity:1;transform:translate(-50%,-50%) scale(1);pointer-events:auto}
 .credential-carousel-card[data-position="previous"]{left:18%;z-index:2;opacity:.46;transform:translate(-50%,calc(-50% + .6rem)) scale(.78);pointer-events:auto}
@@ -19,7 +19,8 @@ export function initializeInteractions() {
 .credential-carousel-kicker{color:var(--muted);font-size:10px;letter-spacing:.16em;text-transform:uppercase}
 .credential-carousel-title{margin-top:1.05rem;font-size:clamp(26px,3vw,34px);line-height:1;letter-spacing:-.025em}
 .credential-carousel-issuer{margin-top:.7rem;font-size:13px}.credential-carousel-issued{margin-top:.2rem;color:var(--muted);font-size:11px}.credential-carousel-verify{align-self:flex-end;margin-top:auto;font-size:12px}
-.credential-carousel-controls{display:grid;grid-template-columns:44px minmax(0,1fr) 44px;gap:.25rem;align-items:center;width:min(100%,30rem);margin:.1rem auto 0}
+.credential-carousel-controls{order:1;display:grid;grid-template-columns:3.5rem 44px minmax(0,1fr) 44px;gap:.25rem;align-items:center;width:min(100%,30rem);margin:.1rem auto 0}
+.credential-carousel-rotation{min-height:44px;padding:0 .35rem;border:1px solid var(--line);border-radius:0;background:var(--paper);color:var(--ink);font:12px/1.2 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;cursor:pointer}.credential-carousel-rotation:disabled{color:var(--muted);cursor:default}
 .credential-carousel-arrow,.credential-carousel-dot{font:inherit;cursor:pointer}.credential-carousel-arrow{min-width:44px;min-height:44px;padding:0;border:0;background:transparent;color:var(--ink);opacity:0;pointer-events:none;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:20px}
 .credential-carousel:hover .credential-carousel-arrow,.credential-carousel:focus-within .credential-carousel-arrow{opacity:1;pointer-events:auto}
 .credential-carousel-dots{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:0 .05rem}.credential-carousel-dot{position:relative;width:18px;min-height:36px;padding:0;border:0;background:transparent}
@@ -66,6 +67,7 @@ export function initializeInteractions() {
       root.setAttribute("aria-label", "Credentials");
       const stage = document.createElement("div");
       stage.className = "credential-carousel-stage";
+      stage.id = `${MARKER}-slides`;
       root.appendChild(stage);
       const cards = items.map((item, index) => {
         const card = document.createElement("a");
@@ -94,6 +96,10 @@ export function initializeInteractions() {
       });
       const controls = document.createElement("div");
       controls.className = "credential-carousel-controls";
+      const rotation = document.createElement("button");
+      rotation.className = "credential-carousel-rotation";
+      rotation.type = "button";
+      rotation.setAttribute("aria-controls", stage.id);
       const previous = document.createElement("button");
       previous.className = "credential-carousel-arrow";
       previous.type = "button";
@@ -116,14 +122,17 @@ export function initializeInteractions() {
       next.type = "button";
       next.setAttribute("aria-label", "Next credential");
       next.textContent = "→";
-      controls.append(previous, dots, next);
-      root.appendChild(controls);
+      controls.append(rotation, previous, dots, next);
+      // Controls remain visually below the cards, with Pause first in tab order.
+      root.insertBefore(controls, stage);
       hero.appendChild(root);
       const reducedMotion = window.matchMedia(
         "(prefers-reduced-motion: reduce)",
       );
       let activeIndex = 0,
-        paused = false,
+        hoverPaused = false,
+        rotationEnabled = !reducedMotion.matches,
+        pointerAction = null,
         timer = 0;
       function positionFor(index) {
         if (index === activeIndex) return "current";
@@ -163,7 +172,16 @@ export function initializeInteractions() {
       }
       function schedule() {
         clearTimer();
-        if (paused || reducedMotion.matches) return;
+        const stopped = !rotationEnabled || reducedMotion.matches;
+        rotation.disabled = reducedMotion.matches;
+        rotation.textContent = stopped ? "Play" : "Pause";
+        rotation.setAttribute("aria-label", reducedMotion.matches
+          ? "Automatic credential rotation disabled by reduced motion"
+          : `${stopped ? "Play" : "Pause"} automatic credential rotation`);
+        rotation.title = reducedMotion.matches
+          ? "Automatic rotation is disabled by your reduced-motion preference."
+          : "";
+        if (hoverPaused || stopped) return;
         timer = window.setTimeout(() => {
           activeIndex = (activeIndex + 1) % items.length;
           render();
@@ -175,6 +193,21 @@ export function initializeInteractions() {
         render();
         schedule();
       }
+      // Pointer focus pauses before click; preserve the action the user pressed.
+      rotation.addEventListener("pointerdown", () => {
+        pointerAction = rotationEnabled;
+      });
+      rotation.addEventListener("pointercancel", () => {
+        pointerAction = null;
+      });
+      rotation.addEventListener("click", (event) => {
+        const wasEnabled = event.detail > 0 && pointerAction !== null
+          ? pointerAction
+          : rotationEnabled;
+        pointerAction = null;
+        rotationEnabled = !wasEnabled;
+        schedule();
+      });
       previous.addEventListener("click", () => select(activeIndex - 1));
       next.addEventListener("click", () => select(activeIndex + 1));
       cards.forEach(({ card }, index) =>
@@ -186,24 +219,22 @@ export function initializeInteractions() {
         }),
       );
       root.addEventListener("mouseenter", () => {
-        paused = true;
-        clearTimer();
+        hoverPaused = true;
+        schedule();
       });
       root.addEventListener("mouseleave", () => {
-        paused = root.contains(document.activeElement);
-        if (!paused) schedule();
+        hoverPaused = false;
+        schedule();
       });
       root.addEventListener("focusin", () => {
-        paused = true;
-        clearTimer();
+        // Leaving the carousel must not restart rotation without explicit Play.
+        rotationEnabled = false;
+        schedule();
       });
-      root.addEventListener("focusout", (event) => {
-        if (!root.contains(event.relatedTarget)) {
-          paused = root.matches(":hover");
-          if (!paused) schedule();
-        }
+      reducedMotion.addEventListener?.("change", () => {
+        if (reducedMotion.matches) rotationEnabled = false;
+        schedule();
       });
-      reducedMotion.addEventListener?.("change", schedule);
       render();
       schedule();
     }
@@ -505,7 +536,7 @@ export function initializeInteractions() {
     const MARKER = "m3ez-back-to-top-v1";
     const SHOW_AFTER = 200;
     const css = `
-#${MARKER}{position:fixed;right:1rem;bottom:1rem;z-index:30;width:32px;height:32px;padding:0;border:1px solid var(--black);border-radius:0;background:var(--paper);color:var(--ink);display:grid;place-items:center;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:16px;line-height:1;cursor:pointer;opacity:0;visibility:hidden;pointer-events:none;transition:opacity 120ms ease,background-color 120ms ease,color 120ms ease}
+#${MARKER}{position:fixed;right:1rem;bottom:1rem;z-index:30;width:44px;height:44px;padding:0;border:1px solid var(--black);border-radius:0;background:var(--paper);color:var(--ink);display:grid;place-items:center;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:16px;line-height:1;cursor:pointer;opacity:0;visibility:hidden;pointer-events:none;transition:opacity 120ms ease,background-color 120ms ease,color 120ms ease}
 #${MARKER}.is-visible{opacity:1;visibility:visible;pointer-events:auto}
 #${MARKER}:hover,#${MARKER}:focus-visible{background:var(--black);color:var(--paper)}
 @media (max-width:640px){#${MARKER}{right:.75rem;bottom:.75rem}}
