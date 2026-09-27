@@ -59,7 +59,7 @@ test('cold loads preserve the redesigned content without hydration errors', asyn
       await page.goto(origin, { waitUntil: 'networkidle' });
       await ready(page);
       assert.deepEqual(errors, []);
-      assert.equal(await page.locator('#top .proof-links a').count(), 6);
+      assert.equal(await page.locator('#top .proof-links a').count(), 7);
       assert.equal(await page.locator('.credential-grid-item').count(), 13);
     } finally {
       await page.close();
@@ -135,5 +135,151 @@ test('a failed CVE refresh preserves the exported research and other interaction
     assert.ok(await page.locator('#m3ez-credential-carousel-v1').isVisible());
   } finally {
     await page.close();
+  }
+});
+
+
+test('visible reveal motion keeps sections static and animates small elements', async () => {
+  const page = await browser.newPage({ viewport: { width: 1200, height: 900 } });
+  try {
+    await page.goto(origin, { waitUntil: 'networkidle' });
+    await ready(page);
+
+    const contact = page.locator('#contact');
+    const sectionStyle = await contact.evaluate(node => ({
+      opacity: getComputedStyle(node).opacity,
+      transform: getComputedStyle(node).transform,
+      transitionDuration: getComputedStyle(node).transitionDuration,
+      revealClass: node.classList.contains('scroll-reveal'),
+    }));
+    assert.equal(sectionStyle.opacity, '1');
+    assert.equal(sectionStyle.transform, 'none');
+    assert.equal(sectionStyle.revealClass, false);
+
+    const contactHeading = page.locator('#contact > .section-heading');
+    assert.ok(await contactHeading.evaluate(node => node.classList.contains('scroll-reveal-item')));
+    assert.equal(await contactHeading.evaluate(node => node.classList.contains('is-visible')), false);
+    const preReveal = await contactHeading.evaluate(node => ({
+      opacity: Number.parseFloat(getComputedStyle(node).opacity),
+      transform: getComputedStyle(node).transform,
+      duration: Math.max(...getComputedStyle(node).transitionDuration.split(',').map(value => Number.parseFloat(value))),
+    }));
+    assert.ok(preReveal.opacity >= 0.34 && preReveal.opacity <= 0.36);
+    assert.notEqual(preReveal.transform, 'none');
+    assert.ok(preReveal.duration >= 0.29 && preReveal.duration <= 0.31);
+
+    const progress = page.locator('#m3ez-scroll-progress-v1');
+    assert.equal(await progress.count(), 1);
+
+    const credentials = page.locator('#credentials');
+    await credentials.scrollIntoViewIfNeeded();
+    await page.waitForFunction(() =>
+      [...document.querySelectorAll('#credentials .credential-grid-item')]
+        .some(node => node.classList.contains('is-visible')));
+    const delays = await page.locator('#credentials .credential-grid-item').evaluateAll(nodes =>
+      [nodes[0], nodes[1], nodes.at(-1)].map(node => Number.parseFloat(getComputedStyle(node).transitionDelay)));
+    assert.notEqual(delays[0], delays[1]);
+    assert.ok(Math.max(...delays) <= 0.1);
+
+    await contact.scrollIntoViewIfNeeded();
+    await page.waitForFunction(() =>
+      document.querySelector('#contact > .section-heading')?.classList.contains('is-visible'));
+    const ratio = await progress.evaluate(node => Number(node.style.transform.match(/scaleX\(([^)]+)\)/)?.[1] || 0));
+    assert.ok(ratio > 0);
+
+    await page.evaluate(() => window.scrollTo(0, 0));
+    await page.waitForFunction(() => scrollY === 0);
+    assert.equal(await contactHeading.evaluate(node => node.classList.contains('is-visible')), true);
+
+    await page.getByRole('button', { name: 'Show more CVEs', exact: true }).click();
+    assert.equal(await page.locator('.cve-row-enter').count(), 10);
+    const cveAnimation = await page.locator('.cve-row-enter').first().evaluate(node => ({
+      transform: getComputedStyle(node).transform,
+      duration: getComputedStyle(node).animationDuration,
+    }));
+    assert.equal(cveAnimation.transform, 'none');
+    assert.equal(cveAnimation.duration, '0.12s');
+  } finally {
+    await page.close();
+  }
+
+  const reduced = await browser.newPage({ viewport: { width: 1200, height: 900 }, reducedMotion: 'reduce' });
+  try {
+    await reduced.goto(origin, { waitUntil: 'networkidle' });
+    await ready(reduced);
+    const target = reduced.locator('#contact > .section-heading');
+    assert.equal(await target.evaluate(node => getComputedStyle(node).opacity), '1');
+    assert.equal(await target.evaluate(node => getComputedStyle(node).transform), 'none');
+    assert.equal(await reduced.evaluate(() => getComputedStyle(document.documentElement).scrollBehavior), 'auto');
+  } finally {
+    await reduced.close();
+  }
+});
+
+
+test('desktop wheel input glides through real inertial scrolling while reduced motion stays native', async () => {
+  const page = await browser.newPage({ viewport: { width: 1200, height: 900 } });
+  try {
+    await page.goto(origin, { waitUntil: 'networkidle' });
+    await ready(page);
+    assert.equal(
+      await page.evaluate(() => matchMedia('(pointer: fine) and (hover: hover)').matches),
+      true,
+    );
+
+    await page.evaluate(() => window.scrollTo(0, 0));
+    const sample = await page.evaluate(async () => {
+      const event = new WheelEvent('wheel', {
+        deltaY: 180,
+        bubbles: true,
+        cancelable: true,
+      });
+      document.body.dispatchEvent(event);
+      const immediate = scrollY;
+      await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+      const afterTwoFrames = scrollY;
+      await new Promise(resolve => setTimeout(resolve, 120));
+      return {
+        prevented: event.defaultPrevented,
+        immediate,
+        afterTwoFrames,
+        later: scrollY,
+        mode: document.documentElement.dataset.m3ezInertialScroll,
+      };
+    });
+
+    assert.equal(sample.prevented, true);
+    assert.equal(sample.mode, 'ready');
+    assert.ok(sample.afterTwoFrames > sample.immediate);
+    assert.ok(sample.later > sample.afterTwoFrames);
+    assert.ok(sample.later < 180);
+    await page.waitForFunction(() => Math.abs(scrollY - 180) < 2);
+  } finally {
+    await page.close();
+  }
+
+  const reduced = await browser.newPage({
+    viewport: { width: 1200, height: 900 },
+    reducedMotion: 'reduce',
+  });
+  try {
+    await reduced.goto(origin, { waitUntil: 'networkidle' });
+    await ready(reduced);
+    const sample = await reduced.evaluate(() => {
+      const event = new WheelEvent('wheel', {
+        deltaY: 600,
+        bubbles: true,
+        cancelable: true,
+      });
+      document.body.dispatchEvent(event);
+      return {
+        prevented: event.defaultPrevented,
+        mode: document.documentElement.dataset.m3ezInertialScroll,
+      };
+    });
+    assert.equal(sample.prevented, false);
+    assert.equal(sample.mode, 'native');
+  } finally {
+    await reduced.close();
   }
 });
