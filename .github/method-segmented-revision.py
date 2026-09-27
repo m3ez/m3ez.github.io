@@ -1,16 +1,85 @@
 from pathlib import Path
-import sys, json, base64, zlib
-
-TESTS = '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'
-PRODUCT = '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'
-
-def decode(value):
-    return zlib.decompress(base64.b64decode(value)).decode()
-
-if sys.argv[1] == 'tests':
-    for path, content in json.loads(decode(TESTS)).items():
-        Path(path).write_text(content)
-elif sys.argv[1] == 'product':
-    exec(compile(decode(PRODUCT), 'approved-segmented-method', 'exec'))
-else:
-    raise SystemExit('expected tests or product')
+import re, html
+w = Path('.')
+phases = [('discover','Discover',[('Scope','Target & boundaries'),('Map','Attack surface'),('Trace','Code & data paths')]),('test','Test',[('Analyze','Root cause'),('Exploit','Controlled proof'),('Verify','Repro & impact')]),('deliver','Deliver',[('Document','Evidence'),('Report','Findings & fixes')])]
+parts = ['<section class="trace-section method-section" id="method" aria-labelledby="method-title"><h2 id="method-title">Method</h2><p class="method-line">From attack surface to validated findings.</p><div class="method-workflow" role="group" aria-label="Assessment and research workflow">']
+step = 1
+for key, title, items in phases:
+    parts.append(f'<div class="method-phase" data-phase="{key}"><h3 class="method-phase-title" id="method-phase-{key}">{title}</h3><div class="method-phase-flow"><ol class="method-strip" role="list" aria-labelledby="method-phase-{key}" start="{step}">')
+    for label, desc in items:
+        cls = 'method-node method-node-final' if label == 'Report' else 'method-node'
+        parts.append(f'<li><div class="{cls}" id="method-{label.lower()}"><span class="method-step" aria-hidden="true">{step:02}</span><strong class="method-label">{label}</strong><span class="method-detail">{html.escape(desc)}</span></div></li>')
+        step += 1
+    parts.append('</ol>')
+    if key == 'test':
+        parts.append('<div class="method-feedback" data-from="method-verify" data-to="method-analyze"><svg class="method-feedback-horizontal" viewBox="0 0 300 28" preserveAspectRatio="none" aria-hidden="true" focusable="false"><path class="method-feedback-path" d="M250 1V20H50V1" fill="none" stroke="currentColor" stroke-width="1" stroke-dasharray="3 4" vector-effect="non-scaling-stroke"/><path d="m46 5 4-4 4 4" fill="none" stroke="currentColor" stroke-width="1" vector-effect="non-scaling-stroke"/></svg><svg class="method-feedback-vertical" viewBox="0 0 20 300" preserveAspectRatio="none" aria-hidden="true" focusable="false"><path class="method-feedback-path" d="M1 250H14V50H1" fill="none" stroke="currentColor" stroke-width="1" stroke-dasharray="3 4" vector-effect="non-scaling-stroke"/><path d="m5 46-4 4 4 4" fill="none" stroke="currentColor" stroke-width="1" vector-effect="non-scaling-stroke"/></svg><p class="method-feedback-label"><span class="sr-only">Verify to Analyze: </span>Iterate if not reproducible</p></div>')
+    parts.append('</div></div>')
+parts.append('</div></section>')
+f = w / 'index.html'
+old = f.read_text()
+new, count = re.subn(r'<section\b[^>]*id="method"[\s\S]*?</section>', ''.join(parts), old, count=1)
+assert count == 1
+f.write_text(new)
+f = w / 'assets/method-workflow.js'
+s = f.read_text().replace('// Semantic HTML stays readable; the decorative signal loops only while visible.', '// Semantic HTML stays readable; strip highlights loop only while visible.')
+s = s.replace('const steps = [...workflow.children];', "const steps = [...workflow.querySelectorAll('.method-node')];").replace('const stepMs = 480;', 'const stepMs = 600;\n  const restMs = 800; // Let the Report endpoint rest before the next pass.').replace('`${steps.length * stepMs}ms`', '`${steps.length * stepMs + restMs}ms`')
+f.write_text(s)
+f = w / 'assets/research-credentials.css'
+s = f.read_text()
+assert s.count('/* Method:') == 1
+s = s[:s.index('/* Method:')] + '''/* Method: three phases share one segmented strip; only the return path has an arrow. */
+#method.method-section{row-gap:1.4rem}
+#method .method-line{color:var(--muted);font:400 13px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+#method .method-workflow{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:0;grid-column:1/-1;min-width:0;padding:0 0 3.5rem;margin:0}
+#method .method-phase{display:flex;flex-direction:column;grid-column:span 3;min-width:0}
+#method .method-phase[data-phase="deliver"]{grid-column:span 2}
+#method .method-phase-title{margin:0 1.1rem .8rem 0;padding:0 0 .55rem;border-bottom:1px solid var(--line);font-size:14px;line-height:1.35;font-weight:700;color:var(--ink)}
+#method .method-phase:last-child .method-phase-title{margin-right:0}
+#method .method-phase-flow{position:relative;flex:1;min-width:0}
+#method .method-strip{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0;height:100%;min-width:0;padding:0;margin:0;list-style:none}
+#method .method-phase[data-phase="deliver"] .method-strip{grid-template-columns:repeat(2,minmax(0,1fr))}
+#method .method-strip>li{min-width:0}
+#method .method-node{position:relative;display:flex;flex-direction:column;gap:.4rem;height:100%;min-height:8rem;padding:.8rem .7rem;border:1px solid var(--black);border-left:0;background:var(--paper);color:var(--ink)}
+#method .method-phase:first-child .method-strip>li:first-child .method-node{border-left:1px solid var(--black)}
+#method .method-node-final{background:var(--black);color:var(--paper)}
+#method .method-step{margin-bottom:.25rem;color:var(--muted);font:400 11px/1.2 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-variant-numeric:tabular-nums}
+#method .method-label{font-size:14px;line-height:1.3;font-weight:700}
+#method .method-detail{color:var(--muted);font-size:12px;line-height:1.4;overflow-wrap:break-word}
+#method .method-node-final .method-step,#method .method-node-final .method-detail{color:var(--paper)}
+#method .method-node::before{content:"";position:absolute;top:0;left:0;right:0;height:2px;background:var(--black);transform:scaleX(0);transform-origin:left center;opacity:0;pointer-events:none}
+#method .method-node-final::before{background:var(--paper)}
+#method .method-workflow[data-flow-state="running"] .method-node:not(.method-node-final){animation:method-segment-flow var(--method-cycle) linear infinite;animation-delay:var(--method-delay)}
+#method .method-workflow[data-flow-state="running"] .method-node::before{animation:method-segment-edge var(--method-cycle) linear infinite;animation-delay:var(--method-delay)}
+/* Each stage receives 600ms in the 5600ms cycle, followed by an 800ms endpoint rest. */
+@keyframes method-segment-flow{0%,8%{background:var(--soft)}12%,100%{background:var(--paper)}}
+@keyframes method-segment-edge{0%{transform:scaleX(0);opacity:1}10.714%{transform:scaleX(1);opacity:1}14%,100%{transform:scaleX(1);opacity:0}}
+#method .method-feedback{color:var(--muted)}
+#method .method-feedback-horizontal{position:absolute;top:calc(100% + 3px);left:0;display:block;width:100%;height:28px;pointer-events:none}
+#method .method-feedback-vertical{display:none}
+#method .method-feedback-label{position:absolute;top:calc(100% + 32px);left:0;right:0;margin:0;text-align:center;font:400 11px/1.4 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+@media (max-width:1100px) and (min-width:981px){
+  #method .method-node{padding:.7rem .45rem}
+  #method .method-label{font-size:13px}
+}
+@media (max-width:980px){
+  #method.method-section{grid-template-columns:1fr;row-gap:.75rem}
+  #method .method-workflow{grid-template-columns:1fr;gap:1.25rem;margin-top:.5rem;padding:0 20px 0 0}
+  #method .method-phase,#method .method-phase[data-phase="deliver"]{grid-column:auto}
+  #method .method-phase-title{margin:0 0 .65rem;padding-bottom:.5rem;font-size:14px}
+  #method .method-strip,#method .method-phase[data-phase="deliver"] .method-strip{grid-template-columns:1fr}
+  #method .method-node{display:grid;grid-template-columns:1.7rem minmax(0,1fr);grid-template-rows:auto auto;gap:.2rem .55rem;align-content:center;min-height:4.25rem;padding:.7rem .8rem;border-left:1px solid var(--black);border-top:0}
+  #method .method-strip>li:first-child .method-node{border-top:1px solid var(--black)}
+  #method .method-step{grid-column:1;grid-row:1/3;align-self:start;margin:.15rem 0 0}
+  #method .method-label,#method .method-detail{grid-column:2}
+  #method .method-detail{font-size:13px}
+  #method .method-phase[data-phase="test"]{margin-bottom:1.65rem}
+  #method .method-feedback-horizontal{display:none}
+  #method .method-feedback-vertical{position:absolute;left:100%;top:0;display:block;width:20px;height:100%;pointer-events:none}
+  #method .method-feedback-label{top:calc(100% + .5rem);font-size:11px}
+}
+@media (prefers-reduced-motion:reduce){
+  #method .method-workflow .method-node{animation:none!important}
+  #method .method-workflow .method-node::before{animation:none!important;opacity:0!important}
+}
+'''
+f.write_text(s)
