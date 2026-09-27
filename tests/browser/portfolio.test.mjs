@@ -230,7 +230,7 @@ test('desktop wheel input glides through real inertial scrolling while reduced m
     await page.evaluate(() => window.scrollTo(0, 0));
     const sample = await page.evaluate(async () => {
       const event = new WheelEvent('wheel', {
-        deltaY: 600,
+        deltaY: 180,
         bubbles: true,
         cancelable: true,
       });
@@ -252,8 +252,8 @@ test('desktop wheel input glides through real inertial scrolling while reduced m
     assert.equal(sample.mode, 'ready');
     assert.ok(sample.afterTwoFrames > sample.immediate);
     assert.ok(sample.later > sample.afterTwoFrames);
-    assert.ok(sample.later < 600);
-    await page.waitForFunction(() => Math.abs(scrollY - 600) < 2);
+    assert.ok(sample.later < 180);
+    await page.waitForFunction(() => Math.abs(scrollY - 180) < 2);
   } finally {
     await page.close();
   }
