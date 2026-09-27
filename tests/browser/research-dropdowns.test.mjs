@@ -77,7 +77,7 @@ for (const width of [320, 390, 768, 1440]) {
       assert.deepEqual(await controls.getByRole('group', { name: 'Filter CVEs by severity' }).getByRole('button').allTextContents(), ['All', 'Critical', 'High', 'Medium']);
       assert.equal(await page.getByRole('menu').count(), 0);
       const trigger = controls.getByRole('button', { name: 'Type: All', exact: true });
-      const sort = controls.getByRole('button', { name: 'Sort: CVSS', exact: true });
+      const sort = controls.getByRole('button', { name: /^Sort:/ });
       assert.equal(await trigger.getAttribute('aria-haspopup'), 'menu');
       assert.equal(await trigger.getAttribute('aria-expanded'), 'false');
       const before = await page.locator('.cve-row-list-v2').boundingBox();
@@ -101,6 +101,9 @@ for (const width of [320, 390, 768, 1440]) {
       const box = await menu.boundingBox();
       assert.ok(box.x >= 0 && box.x + box.width <= width + 1 && box.y >= 0 && box.y + box.height <= 900, JSON.stringify(box));
       if (width <= 760) assert.ok((await menu.getByRole('menuitemradio').first().boundingBox()).height >= 44);
+      if (process.env.UI_SCREENSHOTS) {
+        await page.screenshot({ path: resolve(process.env.UI_SCREENSHOTS, `${width}-filters-open.png`) });
+      }
       // The last category must be reachable inside the scrolling overlay.
       await menu.getByRole('menuitemradio', { name: 'Other', exact: true }).click();
       assert.equal(await page.getByRole('menu').count(), 0);
@@ -142,7 +145,7 @@ test('selecting Type and Sort preserves combined filtering and resets pagination
 test('opening another menu or clicking outside dismisses options without changing selections', async () => {
   await withPage(1440, async page => {
     const type = page.getByRole('button', { name: 'Type: All', exact: true });
-    const sort = page.getByRole('button', { name: 'Sort: CVSS', exact: true });
+    const sort = page.getByRole('button', { name: /^Sort:/ });
     await type.click();
     await sort.click();
     assert.equal(await type.getAttribute('aria-expanded'), 'false');
@@ -176,7 +179,7 @@ test('keyboard menus support arrows, Home/End, type-ahead, selection and Escape 
     assert.equal(await page.getByRole('menu').count(), 0);
     assert.equal(await page.evaluate(() => document.activeElement.getAttribute('aria-expanded')), 'false');
     await assertRows(page, { severity: 'All', vulnerabilityClass: 'SQLi', sort: 'cvss' });
-    const sort = page.getByRole('button', { name: 'Sort: CVSS', exact: true });
+    const sort = page.getByRole('button', { name: /^Sort:/ });
     await sort.focus();
     await page.keyboard.press('ArrowUp');
     assert.equal(await page.evaluate(() => document.activeElement.textContent), 'Date');
@@ -192,7 +195,7 @@ test('keyboard menus support arrows, Home/End, type-ahead, selection and Escape 
 test('Tab exits an open menu without trapping focus or exposing hidden options', async () => {
   await withPage(1440, async page => {
     const type = page.getByRole('button', { name: 'Type: All', exact: true });
-    const sort = page.getByRole('button', { name: 'Sort: CVSS', exact: true });
+    const sort = page.getByRole('button', { name: /^Sort:/ });
     await type.focus();
     await page.keyboard.press('Space');
     await page.keyboard.press('Tab');

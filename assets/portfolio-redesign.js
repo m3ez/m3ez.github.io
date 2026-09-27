@@ -281,6 +281,124 @@ function createButtonGroup(label, values, initial, onChange) {
   return { group, buttons };
 }
 
+// Single-selection menus share an open state but never reset a selected filter.
+function createResearchDropdown(id, label, menuLabel, values, initial, onChange, onOpen) {
+  const root = element('div', 'research-dropdown');
+  const trigger = element('button', 'filter-button research-dropdown-trigger');
+  trigger.type = 'button';
+  trigger.setAttribute('aria-haspopup', 'menu');
+  trigger.setAttribute('aria-expanded', 'false');
+  trigger.setAttribute('aria-controls', id);
+  const caption = element('span', 'research-dropdown-caption', `${label}: ${initial}`);
+  const arrow = element('span', 'research-dropdown-arrow', '▾');
+  arrow.setAttribute('aria-hidden', 'true');
+  trigger.append(caption, arrow);
+  const menu = element('div', 'research-dropdown-menu');
+  menu.id = id;
+  menu.hidden = true;
+  menu.setAttribute('role', 'menu');
+  menu.setAttribute('aria-label', menuLabel);
+
+  const options = values.map(value => {
+    const option = element('button', 'research-dropdown-option', value);
+    option.type = 'button';
+    option.tabIndex = -1;
+    option.setAttribute('role', 'menuitemradio');
+    option.setAttribute('aria-checked', String(value === initial));
+    option.addEventListener('click', () => {
+      caption.textContent = `${label}: ${value}`;
+      options.forEach((item, index) => item.setAttribute('aria-checked', String(values[index] === value)));
+      close(true);
+      onChange(value);
+    });
+    return option;
+  });
+  menu.append(...options);
+  root.append(trigger, menu);
+  const dropdown = { root, close };
+
+  function close(returnFocus = false) {
+    menu.hidden = true;
+    trigger.setAttribute('aria-expanded', 'false');
+    if (returnFocus) trigger.focus({ preventScroll: true });
+  }
+
+  function positionMenu() {
+    if (menu.hidden) return;
+    const rect = trigger.getBoundingClientRect();
+    const viewport = window.visualViewport;
+    const top = viewport?.offsetTop ?? 0;
+    const bottom = top + (viewport?.height ?? window.innerHeight);
+    const headerBottom = document.querySelector('.site-header')?.getBoundingClientRect().bottom ?? top;
+    const below = bottom - rect.bottom - 8;
+    const above = rect.top - Math.max(top, headerBottom) - 8;
+    const upward = below < Math.min(menu.scrollHeight, 288) && above > below;
+    menu.dataset.side = upward ? 'top' : 'bottom';
+    menu.style.maxHeight = `${Math.max(44, Math.min(288, upward ? above : below))}px`;
+  }
+
+  function open(index = 0) {
+    onOpen(dropdown);
+    menu.hidden = false;
+    trigger.setAttribute('aria-expanded', 'true');
+    positionMenu();
+    options[index].focus({ preventScroll: true });
+    options[index].scrollIntoView({ block: 'nearest' });
+  }
+
+  trigger.addEventListener('click', () => menu.hidden ? open() : close());
+  trigger.addEventListener('keydown', event => {
+    if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+      event.preventDefault();
+      open(event.key === 'ArrowUp' ? options.length - 1 : 0);
+    }
+  });
+  menu.addEventListener('keydown', event => {
+    const index = options.indexOf(document.activeElement);
+    let next;
+    if (event.key === 'ArrowDown') next = (index + 1) % options.length;
+    else if (event.key === 'ArrowUp') next = (index + options.length - 1) % options.length;
+    else if (event.key === 'Home') next = 0;
+    else if (event.key === 'End') next = options.length - 1;
+    else if (event.key === 'Tab') {
+      // Let the browser continue from the trigger, skipping the hidden options.
+      close(true);
+      return;
+    } else if (event.key.length === 1 && event.key !== ' ' && !event.ctrlKey && !event.metaKey && !event.altKey) {
+      const key = event.key.toLocaleLowerCase();
+      for (let offset = 1; offset <= options.length; offset++) {
+        const candidate = (index + offset) % options.length;
+        if (values[candidate].toLocaleLowerCase().startsWith(key)) {
+          next = candidate;
+          break;
+        }
+      }
+    }
+    if (next !== undefined) {
+      event.preventDefault();
+      options[next].focus({ preventScroll: true });
+      options[next].scrollIntoView({ block: 'nearest' });
+    }
+  });
+  root.addEventListener('keydown', event => {
+    if (event.key === 'Escape' && !menu.hidden) {
+      event.preventDefault();
+      event.stopPropagation();
+      close(true);
+    }
+  });
+  root.addEventListener('focusout', event => {
+    if (!root.contains(event.relatedTarget)) close();
+  });
+  document.addEventListener('pointerdown', event => {
+    if (!root.contains(event.target)) close();
+  });
+  window.addEventListener('resize', positionMenu);
+  window.addEventListener('scroll', positionMenu, { passive: true });
+  window.visualViewport?.addEventListener('resize', positionMenu);
+  return dropdown;
+}
+
 async function renderResearch() {
   const ledger = document.querySelector('#research .cve-ledger');
   if (!ledger || ledger.querySelector('.research-index-v2')) return;
@@ -357,8 +475,13 @@ async function renderResearch() {
     resetVisibleLimit();
     refresh();
   });
-  const classControls = createButtonGroup(
-    'Filter CVEs by vulnerability class',
+  let activeDropdown;
+  const onOpen = dropdown => {
+    if (activeDropdown !== dropdown) activeDropdown?.close();
+    activeDropdown = dropdown;
+  };
+  const classControls = createResearchDropdown(
+    'wordpress-cve-type-menu', 'Type', 'Filter CVEs by vulnerability class',
     ['All', ...deriveClassOptions(documentData.items)],
     state.vulnerabilityClass,
     (value) => {
@@ -366,21 +489,18 @@ async function renderResearch() {
       resetVisibleLimit();
       refresh();
     },
+    onOpen,
   );
 
-  const sortWrap = element('div', 'research-sort');
-  sortWrap.appendChild(element('span', 'research-sort-label', 'Sort'));
-  const sortControls = createButtonGroup('Sort CVEs', ['CVSS', 'Date'], 'CVSS', (value) => {
+  const sortControls = createResearchDropdown('wordpress-cve-sort-menu', 'Sort', 'Sort CVEs', ['CVSS', 'Date'], 'CVSS', (value) => {
     state.sort = value === 'Date' ? 'date' : 'cvss';
     resetVisibleLimit();
     refresh();
-  });
-  for (const button of sortControls.buttons) {
-    button.dataset.value = button.textContent;
-  }
-  sortWrap.appendChild(sortControls.group);
+  }, onOpen);
+  const dropdowns = element('div', 'research-dropdowns');
+  dropdowns.append(classControls.root, sortControls.root);
 
-  controls.append(severityControls.group, classControls.group, sortWrap);
+  controls.append(severityControls.group, dropdowns);
   section.append(controls, rows, footer);
 
   const other = ledger.querySelector(':scope > section[aria-labelledby="other-cves-title"]');
