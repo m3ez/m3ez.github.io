@@ -19,12 +19,127 @@ const STAGGER_SELECTORS = [
 ];
 
 const PROGRESS_ID = 'm3ez-scroll-progress-v1';
+const DESKTOP_SCROLL_MEDIA = '(pointer: fine) and (hover: hover)';
+
+function initializeInertialScroll(reducedMotion) {
+  const desktopInput = window.matchMedia(DESKTOP_SCROLL_MEDIA);
+  let animationFrame = 0;
+  let currentY = window.scrollY;
+  let targetY = window.scrollY;
+
+  const isEnabled = () => desktopInput.matches && !reducedMotion.matches;
+
+  function maxScroll() {
+    return Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+  }
+
+  function normalizeWheelDelta(event) {
+    let delta = event.deltaY;
+    if (event.deltaMode === WheelEvent.DOM_DELTA_LINE) delta *= 16;
+    if (event.deltaMode === WheelEvent.DOM_DELTA_PAGE) delta *= window.innerHeight;
+    return Math.max(-240, Math.min(240, delta));
+  }
+
+  function canNestedScrollerConsume(target, delta) {
+    let node = target instanceof Element ? target : null;
+    while (node && node !== document.body && node !== document.documentElement) {
+      const style = getComputedStyle(node);
+      const scrollable = /(auto|scroll|overlay)/.test(style.overflowY);
+      if (scrollable && node.scrollHeight > node.clientHeight + 1) {
+        if (delta < 0 && node.scrollTop > 0) return true;
+        if (
+          delta > 0 &&
+          node.scrollTop + node.clientHeight < node.scrollHeight - 1
+        ) {
+          return true;
+        }
+      }
+      node = node.parentElement;
+    }
+    return false;
+  }
+
+  function cancelInertia() {
+    if (animationFrame) cancelAnimationFrame(animationFrame);
+    animationFrame = 0;
+    currentY = window.scrollY;
+    targetY = currentY;
+  }
+
+  function step() {
+    currentY += (targetY - currentY) * 0.18;
+
+    if (Math.abs(targetY - currentY) < 0.5) {
+      currentY = targetY;
+      window.scrollTo({ top: currentY, behavior: 'instant' });
+      animationFrame = 0;
+      return;
+    }
+
+    window.scrollTo({ top: currentY, behavior: 'instant' });
+    animationFrame = requestAnimationFrame(step);
+  }
+
+  function onWheel(event) {
+    if (!isEnabled()) return;
+    if (event.ctrlKey || event.metaKey) return;
+    if (Math.abs(event.deltaX) > Math.abs(event.deltaY)) return;
+
+    const delta = normalizeWheelDelta(event);
+    if (!delta || canNestedScrollerConsume(event.target, delta)) return;
+
+    if (!animationFrame) {
+      currentY = window.scrollY;
+      targetY = currentY;
+    }
+
+    const nextTarget = Math.min(maxScroll(), Math.max(0, targetY + delta));
+    if (nextTarget === targetY && !animationFrame) return;
+
+    targetY = Math.min(maxScroll(), Math.max(0, targetY + delta));
+    event.preventDefault();
+
+    if (!animationFrame) animationFrame = requestAnimationFrame(step);
+  }
+
+  function syncMode() {
+    const enabled = isEnabled();
+    document.documentElement.dataset.m3ezInertialScroll = enabled
+      ? 'ready'
+      : 'native';
+    if (!enabled) cancelInertia();
+  }
+
+  window.addEventListener('wheel', onWheel, { passive: false });
+  window.addEventListener('touchstart', cancelInertia, { passive: true });
+  window.addEventListener('pointerdown', cancelInertia, { passive: true });
+  window.addEventListener('keydown', (event) => {
+    if (
+      [
+        'ArrowDown',
+        'ArrowUp',
+        'PageDown',
+        'PageUp',
+        'Home',
+        'End',
+        ' ',
+      ].includes(event.key)
+    ) {
+      cancelInertia();
+    }
+  });
+
+  desktopInput.addEventListener?.('change', syncMode);
+  reducedMotion.addEventListener?.('change', syncMode);
+  syncMode();
+}
 
 export function initializeScrollMotion() {
   if (document.documentElement.dataset.m3ezScrollMotion === 'ready') return;
   document.documentElement.dataset.m3ezScrollMotion = 'ready';
 
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+  initializeInertialScroll(reducedMotion);
   const registered = new WeakSet();
   const targets = new Set();
 
