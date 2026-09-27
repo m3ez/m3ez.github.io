@@ -1,0 +1,80 @@
+name: Method workflow verification
+on:
+  push:
+    branches: [agent/method-workflow]
+permissions:
+  contents: write
+concurrency:
+  group: method-workflow-verification
+  cancel-in-progress: false
+jobs:
+  verify:
+    if: github.ref == 'refs/heads/agent/method-workflow'
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium > /tmp/method-install.log 2>&1 || { tail -n 60 /tmp/method-install.log; exit 1; }
+      - name: Prove new tests reject the old Method
+        run: |
+          set +e
+          npm test > /tmp/method-source-red.log 2>&1
+          source_status=$?
+          node --test tests/browser/method-workflow.test.mjs > /tmp/method-browser-red.log 2>&1
+          browser_status=$?
+          set -e
+          tail -n 12 /tmp/method-source-red.log
+          tail -n 12 /tmp/method-browser-red.log
+          test "$source_status" -ne 0
+          test "$browser_status" -ne 0
+          grep -q '^# fail 3$' /tmp/method-source-red.log
+          grep -q '^# fail 12$' /tmp/method-browser-red.log
+      - name: Apply approved Method workflow
+        run: python3 .github/prepare-method-workflow.py
+      - name: Source suite
+        run: npm test > /tmp/method-source.log 2>&1 && tail -n 12 /tmp/method-source.log || { cat /tmp/method-source.log; exit 1; }
+      - name: Browser suite
+        env:
+          UI_SCREENSHOTS: /tmp/method-screenshots
+        run: npm run test:browser > /tmp/method-browser.log 2>&1 && tail -n 12 /tmp/method-browser.log || { cat /tmp/method-browser.log; exit 1; }
+      - name: Commit and verify final tree
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF" = 'refs/heads/agent/method-workflow'
+          git diff --check
+          git rm .github/prepare-method-workflow.py .github/workflows/method-workflow-verification.yml
+          git add index.html assets/portfolio-interactions.js assets/portfolio-redesign.js assets/research-credentials.css assets/method-workflow.js tests/method-workflow.test.mjs tests/browser/method-workflow.test.mjs
+          git -c user.name='m3ez portfolio automation' -c user.email='72428471+m3ez@users.noreply.github.com' commit -m 'Present Method as a monotone animated workflow'
+          echo "VERIFIED_COMMIT=$(git rev-parse HEAD)" | tee /tmp/method-final.txt
+          echo "VERIFIED_TREE=$(git rev-parse HEAD^{tree})" | tee -a /tmp/method-final.txt
+          git diff --stat 6cfd39d026b21961d0b080c0a69a1c645ab3a5e9 HEAD | tee -a /tmp/method-final.txt
+          test "$(git diff --name-only 6cfd39d026b21961d0b080c0a69a1c645ab3a5e9 HEAD | wc -l)" -eq 7
+          npm test > /tmp/method-source.log 2>&1 || { cat /tmp/method-source.log; exit 1; }
+          UI_SCREENSHOTS=/tmp/method-screenshots npm run test:browser > /tmp/method-browser.log 2>&1 || { cat /tmp/method-browser.log; exit 1; }
+          tail -n 12 /tmp/method-source.log
+          tail -n 12 /tmp/method-browser.log
+          git diff --check
+          git archive --format=tar HEAD > /tmp/method-reviewed-source.tar
+          git push origin HEAD:refs/heads/agent/method-workflow
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: method-workflow-review
+          path: |
+            /tmp/method-screenshots
+            /tmp/method-source-red.log
+            /tmp/method-browser-red.log
+            /tmp/method-source.log
+            /tmp/method-browser.log
+            /tmp/method-final.txt
+            /tmp/method-reviewed-source.tar
+          if-no-files-found: ignore
