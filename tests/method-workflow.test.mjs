@@ -24,3 +24,11 @@ test('the previous text-only Method writer cannot overwrite the diagram', () => 
   assert.match(redesign, /import \{ initializeMethodWorkflow \} from '\.\/method-workflow\.js';/);
   assert.match(redesign, /initializeMethodWorkflow\(\);/);
 });
+
+
+test('Method arrows use crisp SVG shafts and filled arrowheads in the static fallback', () => {
+  assert.equal((section.match(/class="method-arrow"/g) ?? []).length, 7);
+  assert.equal((section.match(/class="method-arrow-shaft"/g) ?? []).length, 7);
+  assert.equal((section.match(/class="method-arrow-head"/g) ?? []).length, 7);
+  assert.equal((section.match(/vector-effect="non-scaling-stroke"/g) ?? []).length, 7);
+});

@@ -1,62 +1,42 @@
-// The ordered HTML is the content; motion is a once-only decorative enhancement.
+// Semantic HTML stays readable; the decorative signal loops only while visible.
 export function initializeMethodWorkflow() {
   const workflow = document.querySelector('#method .method-workflow');
   if (!workflow || workflow.dataset.methodInitialized) return;
   workflow.dataset.methodInitialized = 'true';
 
   const steps = [...workflow.children];
-  const stepMs = 360;
+  const stepMs = 480;
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-  let observer = null;
-  let timer = 0;
+  let inView = false;
 
-  function complete() {
-    window.clearTimeout(timer);
-    timer = 0;
+  // Unsupported observers retain the fully drawn static diagram.
+  if (steps.length < 2 || typeof IntersectionObserver === 'undefined') {
     workflow.dataset.flowState = 'complete';
-    observer?.disconnect();
-    reducedMotion.removeEventListener?.('change', onMotionChange);
-    document.removeEventListener('visibilitychange', onVisibilityChange);
-    window.removeEventListener('resize', onResize);
-  }
-
-  function onMotionChange() {
-    if (reducedMotion.matches) complete();
-  }
-
-  function onVisibilityChange() {
-    if (document.hidden && workflow.dataset.flowState === 'running') complete();
-  }
-
-  function onResize() {
-    if (workflow.dataset.flowState === 'running') complete();
-  }
-
-  // No JavaScript, unsupported observers, and reduced motion all retain the
-  // completed, readable diagram without hiding any label or description.
-  if (reducedMotion.matches || typeof IntersectionObserver === 'undefined') {
-    complete();
     return;
   }
 
+  workflow.style.setProperty('--method-cycle', `${steps.length * stepMs}ms`);
   steps.forEach((step, index) => {
     step.style.setProperty('--method-delay', `${index * stepMs}ms`);
   });
-  workflow.dataset.flowState = 'waiting';
-  reducedMotion.addEventListener?.('change', onMotionChange);
-  document.addEventListener('visibilitychange', onVisibilityChange);
-  window.addEventListener('resize', onResize, { passive: true });
 
-  observer = new IntersectionObserver(entries => {
+  function sync() {
+    const state = reducedMotion.matches
+      ? 'complete'
+      : inView && !document.hidden ? 'running' : 'waiting';
+    if (workflow.dataset.flowState !== state) workflow.dataset.flowState = state;
+  }
+
+  // Keep these subscriptions: re-entry and live preference changes may resume
+  // the loop. CSS owns the repetition; no interval or completion timer runs.
+  const observer = new IntersectionObserver(entries => {
     for (const entry of entries) {
-      if (workflow.dataset.flowState === 'waiting' && entry.isIntersecting && entry.intersectionRatio >= 0.2) {
-        if (document.hidden) continue;
-        workflow.dataset.flowState = 'running';
-        timer = window.setTimeout(complete, steps.length * stepMs);
-      } else if (workflow.dataset.flowState === 'running' && !entry.isIntersecting) {
-        complete();
-      }
+      inView = entry.isIntersecting && entry.intersectionRatio >= 0.2;
+      sync();
     }
   }, { threshold: [0, 0.2] });
+  reducedMotion.addEventListener?.('change', sync);
+  document.addEventListener('visibilitychange', sync);
   observer.observe(workflow);
+  sync();
 }
