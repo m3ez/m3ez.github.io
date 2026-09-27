@@ -184,9 +184,15 @@ test('hover pauses temporarily and leaving resumes automatic rotation', async ()
 
 test('reduced motion disables autoplay but preserves manual navigation without a rotation button', async () => {
   await withPage(1200, async page => {
+    // Reading .matches alone does not establish that queued change listeners ran.
+    await page.evaluate(() => {
+      window.__carouselMotionChanges = [];
+      matchMedia('(prefers-reduced-motion: reduce)').addEventListener('change', event => {
+        window.__carouselMotionChanges.push(event.matches);
+      });
+    });
     await page.emulateMedia({ reducedMotion: 'reduce' });
-    await page.waitForFunction(() => matchMedia('(prefers-reduced-motion: reduce)').matches);
-    await page.clock.runFor(100);
+    await page.waitForFunction(() => window.__carouselMotionChanges.at(-1) === true);
     const first = await page.locator(currentCard).getAttribute('href');
     await page.clock.fastForward(10000);
     assert.equal(await page.locator(currentCard).getAttribute('href'), first);
@@ -199,8 +205,7 @@ test('reduced motion disables autoplay but preserves manual navigation without a
     await page.clock.fastForward(10000);
     assert.equal(await page.locator(currentCard).getAttribute('href'), manual);
     await page.emulateMedia({ reducedMotion: 'no-preference' });
-    await page.waitForFunction(() => !matchMedia('(prefers-reduced-motion: reduce)').matches);
-    await page.clock.runFor(100);
+    await page.waitForFunction(() => window.__carouselMotionChanges.at(-1) === false);
     await page.clock.fastForward(5000);
     assert.notEqual(await page.locator(currentCard).getAttribute('href'), manual);
   }, { reducedMotion: 'no-preference' });
