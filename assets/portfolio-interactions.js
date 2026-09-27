@@ -475,6 +475,11 @@ export function initializeInteractions() {
         activeId = null;
       }
 
+      const atDocumentEnd =
+        window.scrollY + window.innerHeight >=
+        document.documentElement.scrollHeight - 2;
+      if (atDocumentEnd) activeId = sections.at(-1)?.id ?? activeId;
+
       for (const [id, links] of linksById) {
         for (const link of links) {
           if (id === activeId) link.setAttribute('aria-current', 'location');
