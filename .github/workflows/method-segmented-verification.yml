@@ -1,0 +1,100 @@
+name: Segmented Method verification
+on:
+  push:
+    branches: [agent/method-workflow]
+permissions:
+  contents: write
+concurrency:
+  group: method-segmented-verification
+  cancel-in-progress: false
+jobs:
+  verify:
+    if: github.ref == 'refs/heads/agent/method-workflow'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+      - name: Guard the reviewed baseline
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF" = 'refs/heads/agent/method-workflow'
+          git diff --exit-code a057a07fe9dd1d9f81e9d74884e2f047b1565dfa HEAD -- . ':(exclude).github/method-segmented-revision.py' ':(exclude).github/workflows/method-segmented-verification.yml' ':(exclude)tests/method-workflow.test.mjs' ':(exclude)tests/browser/method-workflow.test.mjs'
+          mkdir -p /tmp/segmented-review
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium > /tmp/browser-install.log 2>&1 || { tail -n 60 /tmp/browser-install.log; exit 1; }
+      - name: RED - reject the ungrouped numberless layout
+        run: |
+          set -euo pipefail
+          if npm test > /tmp/segmented-review/red-source.log 2>&1; then cat /tmp/segmented-review/red-source.log; exit 1; fi
+          tail -n 12 /tmp/segmented-review/red-source.log
+          grep -q '^# fail 6$' /tmp/segmented-review/red-source.log
+          if node --test --test-name-pattern='Method segmented layout' tests/browser/method-workflow.test.mjs > /tmp/segmented-review/red-browser.log 2>&1; then cat /tmp/segmented-review/red-browser.log; exit 1; fi
+          tail -n 12 /tmp/segmented-review/red-browser.log
+          grep -q '^# fail 9$' /tmp/segmented-review/red-browser.log
+      - name: Apply the approved grouped strip
+        run: |
+          python .github/method-segmented-revision.py
+          git diff --check
+          node --check assets/method-workflow.js
+      - name: GREEN - full source and browser suites
+        env:
+          UI_SCREENSHOTS: /tmp/segmented-review/screenshots
+        run: |
+          set -o pipefail
+          npm test | tee /tmp/segmented-review/source.log
+          npm run test:browser | tee /tmp/segmented-review/browser.log
+      - name: Commit and reverify the clean review tree
+        env:
+          UI_SCREENSHOTS: /tmp/segmented-review/screenshots
+        run: |
+          set -euo pipefail
+          git rm .github/method-segmented-revision.py .github/workflows/method-segmented-verification.yml
+          git add index.html assets/method-workflow.js assets/research-credentials.css tests/method-workflow.test.mjs tests/browser/method-workflow.test.mjs
+          test "$(git write-tree)" = 'd6035789afbea4247a0e1e066cd7dfe5804ae3f9'
+          git -c user.name='m3ez portfolio automation' -c user.email='72428471+m3ez@users.noreply.github.com' commit -m 'Group Method into numbered segmented phases with a feedback loop'
+          printf 'VERIFIED_COMMIT=%s\nVERIFIED_TREE=%s\n' "$(git rev-parse HEAD)" "$(git rev-parse HEAD^{tree})" | tee /tmp/segmented-review/final.txt
+          git diff --stat a057a07fe9dd1d9f81e9d74884e2f047b1565dfa HEAD | tee -a /tmp/segmented-review/final.txt
+          npm test | tee /tmp/segmented-review/source.log
+          npm run test:browser | tee /tmp/segmented-review/browser.log
+          git archive --format=tar HEAD > /tmp/segmented-review/reviewed-source.tar
+      - name: Record the actual looping strip
+        run: |
+          set -euo pipefail
+          python -m http.server 8765 --bind 127.0.0.1 > /tmp/segmented-server.log 2>&1 &
+          server_pid=$!
+          trap 'kill "$server_pid"' EXIT
+          node --input-type=module <<'JS'
+          import { chromium } from 'playwright';
+          import { writeFile } from 'node:fs/promises';
+          const browser = await chromium.launch({headless:true});
+          const context = await browser.newContext({viewport:{width:1440,height:600},reducedMotion:'no-preference',recordVideo:{dir:'/tmp/segmented-review/video',size:{width:1440,height:600}}});
+          const page = await context.newPage();
+          await page.goto('http://127.0.0.1:8765', {waitUntil:'networkidle'});
+          await page.locator('#method').evaluate(n=>n.scrollIntoView({behavior:'instant',block:'center'}));
+          await page.waitForFunction(()=>document.querySelector('#method .method-workflow').dataset.flowState==='running');
+          const box = await page.locator('#method').boundingBox();
+          await writeFile('/tmp/segmented-review/video-crop.json',JSON.stringify(box));
+          await page.waitForTimeout(12000);
+          await context.close();
+          await browser.close();
+          JS
+      - name: Push only the verified PR head
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF" = 'refs/heads/agent/method-workflow'
+          test "$(git rev-parse HEAD^{tree})" = 'd6035789afbea4247a0e1e066cd7dfe5804ae3f9'
+          git push origin HEAD:refs/heads/agent/method-workflow
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: method-segmented-review
+          path: /tmp/segmented-review
+          if-no-files-found: error
