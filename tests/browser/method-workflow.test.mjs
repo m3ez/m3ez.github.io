@@ -70,238 +70,213 @@ async function screenshot(page, name) {
   await page.locator('#method').screenshot({ path: resolve(process.env.UI_SCREENSHOTS, name) });
 }
 
-for (const [width, javaScriptEnabled] of [[320, true], [390, true], [768, true], [1024, true], [1440, true], [390, false]]) {
-  test(`Method keeps eight readable nodes in order at ${width}px (JavaScript ${javaScriptEnabled})`, async () => {
+const phases = ['Discover', 'Test', 'Deliver'];
+const numbers = ['01','02','03','04','05','06','07','08'];
+
+async function feedbackGeometry(page, width) {
+  const geometry = await page.locator(selector).evaluate(node => {
+    const feedback = node.querySelector('.method-feedback');
+    const svg = [...feedback.querySelectorAll('svg')].find(s => getComputedStyle(s).display !== 'none');
+    const path = svg.querySelector('.method-feedback-path');
+    const matrix = path.getScreenCTM();
+    const from = path.getPointAtLength(0).matrixTransform(matrix);
+    const to = path.getPointAtLength(path.getTotalLength()).matrixTransform(matrix);
+    const analyze = document.getElementById(feedback.dataset.to).getBoundingClientRect();
+    const verify = document.getElementById(feedback.dataset.from).getBoundingClientRect();
+    const label = feedback.querySelector('p').getBoundingClientRect();
+    const deliver = node.querySelector('[data-phase="deliver"]').getBoundingClientRect();
+    return { from: {x:from.x,y:from.y}, to: {x:to.x,y:to.y}, analyze: analyze.toJSON(), verify: verify.toJSON(), label: label.toJSON(), deliver: deliver.toJSON() };
+  });
+  const {from,to,analyze,verify,label,deliver} = geometry;
+  if (width > 980) {
+    assert.ok(Math.abs(from.x - (verify.x + verify.width / 2)) < 2, JSON.stringify(geometry));
+    assert.ok(Math.abs(to.x - (analyze.x + analyze.width / 2)) < 2, JSON.stringify(geometry));
+    assert.ok(to.x < from.x && to.y >= analyze.y + analyze.height - 1);
+    assert.ok(label.y >= verify.y + verify.height && label.right <= deliver.x + 1);
+  } else {
+    assert.ok(Math.abs(from.y - (verify.y + verify.height / 2)) < 2, JSON.stringify(geometry));
+    assert.ok(Math.abs(to.y - (analyze.y + analyze.height / 2)) < 2, JSON.stringify(geometry));
+    assert.ok(to.y < from.y && to.x >= analyze.x + analyze.width - 1);
+    assert.ok(label.bottom <= deliver.y, 'feedback note must not overlap Deliver');
+  }
+}
+
+for (const [width, javaScriptEnabled] of [[320,true],[390,true],[768,true],[980,true],[981,true],[1024,true],[1440,true],[320,false],[1440,false]]) {
+  test(`Method segmented layout groups phases and fits at ${width}px (JavaScript ${javaScriptEnabled})`, async () => {
     await withPage(width, async page => {
       await showMethod(page);
       const graph = page.locator(selector);
+      assert.deepEqual(await graph.locator('.method-phase-title').allTextContents(), phases);
       assert.deepEqual(await graph.locator('.method-label').allTextContents(), expected);
-      assert.equal(await graph.locator('li').count(), 8);
-      assert.equal(await graph.locator('.method-step').count(), 0, 'remove number markup, not only its visibility');
-      const contents = await graph.locator('.method-node').evaluateAll(nodes => nodes.map(node => ({
-        parts: [...node.children].map(child => child.className),
-        text: node.textContent,
-        columns: getComputedStyle(node).gridTemplateColumns.split(' ').length,
-        display: getComputedStyle(node).display,
-        clipped: node.scrollHeight > node.clientHeight + 1,
-      })));
-      for (const content of contents) {
-        assert.deepEqual(content.parts, ['method-label', 'method-detail']);
-        assert.doesNotMatch(content.text, /\d/);
-        assert.equal(content.clipped, false, 'node text must fit vertically');
-        if (width <= 980) {
-          assert.equal(content.display, 'grid');
-          assert.equal(content.columns, 2, 'mobile must not reserve an empty number column');
-        }
-      }
-      assert.equal(await graph.evaluate(node => getComputedStyle(node).listStyleType), 'none');
-      assert.equal(await graph.locator('.method-connector[aria-hidden="true"]').count(), 7);
-      assert.equal(await graph.locator('svg.method-arrow[focusable="false"]').count(), 7);
-      assert.equal(await graph.locator('.method-arrow-shaft[vector-effect="non-scaling-stroke"]').count(), 7);
-      assert.equal(await graph.locator('.method-arrow-head').count(), 7);
+      assert.deepEqual(await graph.locator('.method-step').allTextContents(), numbers);
+      assert.deepEqual(await graph.locator('.method-strip').evaluateAll(lists => lists.map(list => list.children.length)), [3,3,2]);
+      assert.equal(await graph.locator('.method-connector, .method-arrow, .method-pulse').count(), 0);
       assert.equal(await graph.locator('button, a, [tabindex], [aria-live]').count(), 0);
       const boxes = await graph.locator('.method-node').evaluateAll(nodes => nodes.map(node => {
         const rect = node.getBoundingClientRect();
-        return { x: rect.x, y: rect.y, width: rect.width, height: rect.height, clipped: node.scrollWidth > node.clientWidth + 1 };
+        const textRects = [...node.children].map(child => child.getBoundingClientRect());
+        return {...rect.toJSON(), clipped: node.scrollHeight > node.clientHeight + 1 || node.scrollWidth > node.clientWidth + 1, textFits: textRects.every(r => r.left >= rect.left && r.right <= rect.right + 1 && r.bottom <= rect.bottom + 1)};
       }));
       boxes.forEach(box => {
-        assert.ok(box.x >= 0 && box.x + box.width <= width + 1, JSON.stringify(box));
-        assert.equal(box.clipped, false, JSON.stringify(box));
+        assert.ok(box.x >= 0 && box.right <= width + 1, JSON.stringify(box));
+        assert.equal(box.clipped, false, 'node content must not clip');
+        assert.equal(box.textFits, true, 'titles and numbers fit inside boxes');
       });
-      for (let i = 1; i < boxes.length; i++) {
+      for (let i=1; i<boxes.length; i++) {
         if (width > 980) {
-          assert.ok(Math.abs(boxes[i].y - boxes[0].y) < 1, 'desktop stays left-to-right');
-          assert.ok(boxes[i].x > boxes[i - 1].x + boxes[i - 1].width);
+          assert.ok(Math.abs(boxes[i].y - boxes[0].y) < 1);
+          assert.ok(Math.abs(boxes[i].x - boxes[i-1].right) < 1, 'desktop cells touch even between phases');
+          assert.ok(Math.abs(boxes[i].height - boxes[0].height) < 1);
         } else {
-          assert.ok(boxes[i].y > boxes[i - 1].y + boxes[i - 1].height, 'mobile keeps top-to-bottom order');
+          assert.ok(boxes[i].y >= boxes[i-1].bottom - 1);
+          if (![3,6].includes(i)) assert.ok(Math.abs(boxes[i].y - boxes[i-1].bottom) < 1, 'mobile cells share borders within each phase');
         }
       }
-      const connectorRects = await graph.locator('.method-connector').evaluateAll(nodes => nodes.map(node => {
-        const { x, y, width, height } = node.getBoundingClientRect();
-        return { x, y, width, height };
-      }));
-      connectorRects.forEach((edge, i) => {
-        if (width > 980) {
-          assert.ok(Math.abs(edge.x - (boxes[i].x + boxes[i].width)) < 2);
-          assert.ok(Math.abs(edge.x + edge.width - boxes[i + 1].x) < 2);
-        } else {
-          assert.ok(Math.abs(edge.y - (boxes[i].y + boxes[i].height)) < 2);
-          assert.ok(Math.abs(edge.y + edge.height - boxes[i + 1].y) < 2);
-        }
-      });
+      const endpoint = await graph.locator('.method-node-final').evaluate(node => ({label: node.querySelector('.method-label').textContent, bg: getComputedStyle(node).backgroundColor, fg: getComputedStyle(node).color}));
+      assert.equal(endpoint.label, 'Report');
+      assert.equal(endpoint.bg, 'rgb(0, 0, 0)');
+      assert.equal(endpoint.fg, 'rgb(255, 255, 255)');
+      await feedbackGeometry(page, width);
       assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
-      assert.equal(await graph.evaluate(node => node.getAnimations({ subtree: true }).length), 0, 'reduced-motion/static fallback has no animation');
+      assert.equal(await graph.evaluate(node => node.getAnimations({subtree:true}).length), 0);
       if (javaScriptEnabled) {
         assert.equal(await page.locator('.credential-carousel-rotation').count(), 0);
         assert.equal(await page.locator('.research-dropdown-trigger').count(), 2);
         assert.equal(await page.locator('#contact a[href="https://x.com/Supakiad_Mee"]').count(), 1);
       }
       await screenshot(page, `${width}-method-static-js-${javaScriptEnabled}.png`);
-    }, { javaScriptEnabled });
+    }, {javaScriptEnabled});
   });
 }
 
-test('Method loops through multiple cycles with a moving pulse and no layout shift', async () => {
+test('strip highlights move across eight nodes and loop through a third cycle without layout shift', async () => {
   await withPage(1440, async page => {
     await state(page, 'waiting');
     const graph = page.locator(selector);
-    assert.equal(await graph.evaluate(node => node.getAnimations({ subtree: true }).length), 0);
+    assert.equal(await graph.evaluate(n => n.getAnimations({subtree:true}).length), 0);
     await showMethod(page);
     await state(page, 'running');
     const before = await graph.boundingBox();
-    const travel = await graph.evaluate(node => {
-      const pulses = node.getAnimations({ subtree: true }).filter(animation => animation.effect.target.matches('.method-pulse'));
-      if (pulses.length !== 7) return { count: pulses.length };
-      const first = pulses[0];
-      const timing = first.effect.getTiming();
-      // Sample the rendered pulse in both its first and second iterations.
-      // Replacing infinite with one iteration must break the second sample.
-      first.pause();
-      const samples = [0, timing.duration].map(cycle => {
-        first.currentTime = timing.delay + cycle + 60;
-        const start = first.effect.target.getBoundingClientRect().x;
-        first.currentTime = timing.delay + cycle + 240;
-        const end = first.effect.target.getBoundingClientRect().x;
-        return { start, end, opacity: +getComputedStyle(first.effect.target).opacity };
+    const sample = await graph.evaluate(node => {
+      const animations = node.getAnimations({subtree:true});
+      const highlights = animations.filter(a => a.animationName === 'method-segment-flow');
+      if (highlights.length !== 7) return {count:highlights.length};
+      const timing = highlights[0].effect.getTiming();
+      const edge = animations.find(a => a.animationName === 'method-segment-edge');
+      const edgeTiming = edge.effect.getTiming();
+      edge.pause();
+      const frames = [0,edgeTiming.duration].map(cycle => {
+        edge.currentTime = cycle + edgeTiming.delay + 60;
+        const first = getComputedStyle(edge.effect.target,'::before').transform;
+        edge.currentTime = cycle + edgeTiming.delay + 440;
+        const second = getComputedStyle(edge.effect.target,'::before').transform;
+        return {first,second,opacity:+getComputedStyle(edge.effect.target,'::before').opacity};
       });
-      first.currentTime = 0;
-      first.play();
-      return { count: pulses.length, infinite: timing.iterations === Infinity, duration: timing.duration, samples };
+      edge.currentTime = 0; edge.play();
+      return {count:highlights.length, duration:timing.duration, infinite:animations.every(a => a.effect.getTiming().iterations === Infinity), delays:highlights.map(a => a.effect.getTiming().delay), frames};
     });
-    assert.equal(travel.count, 7);
-    assert.equal(travel.infinite, true, 'flow must repeat, not play once');
-    travel.samples.forEach(sample => {
-      assert.ok(sample.end > sample.start + 1, JSON.stringify(sample));
-      assert.ok(sample.opacity > 0, 'pulse must remain visible in subsequent cycles');
-    });
-    // Use real elapsed browser time to catch the previous JS completion timer.
-    // This also verifies that the third cycle runs without re-entering Method.
-    await page.waitForTimeout(travel.duration * 2 + 350);
+    assert.equal(sample.count, 7, 'the seven white nodes receive the fill tint');
+    assert.equal(sample.infinite, true);
+    assert.deepEqual(sample.delays, [0,600,1200,1800,2400,3000,3600]);
+    sample.frames.forEach(frame => {assert.notEqual(frame.first,frame.second);assert.ok(frame.opacity > 0);});
+    await page.waitForTimeout(sample.duration * 2 + 150);
     assert.equal(await graph.getAttribute('data-flow-state'), 'running');
-    assert.ok(await graph.evaluate(node => node.getAnimations({ subtree: true }).some(animation => animation.effect.target.matches('.method-pulse') && animation.effect.getComputedTiming().currentIteration >= 2)));
+    assert.ok(await graph.evaluate(n => n.getAnimations({subtree:true}).some(a => a.effect.getComputedTiming().currentIteration >= 2)));
     const after = await graph.boundingBox();
-    assert.ok(Math.abs(after.height - before.height) < 1 && Math.abs(after.y - before.y) < 1);
+    assert.ok(Math.abs(after.height-before.height)<1 && Math.abs(after.y-before.y)<1);
     await screenshot(page, '1440-method-loop.png');
-  }, { reducedMotion: 'no-preference' });
+  }, {reducedMotion:'no-preference'});
 });
 
-test('Method stops offscreen and restarts the loop when it re-enters the viewport', async () => {
+test('Report stays black through its active pulse and every restart', async () => {
   await withPage(1440, async page => {
-    const graph = page.locator(selector);
-    await showMethod(page);
-    await state(page, 'running');
-    await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'instant' }));
-    await state(page, 'waiting');
-    assert.equal(await graph.evaluate(node => node.getAnimations({ subtree: true }).length), 0);
-    assert.equal(await graph.locator('.method-pulse').evaluateAll(nodes => nodes.some(node => +getComputedStyle(node).opacity > 0)), false);
-    await showMethod(page);
-    await state(page, 'running');
-    assert.equal(await graph.evaluate(node => node.getAnimations({ subtree: true }).filter(animation => animation.effect.target.matches('.method-pulse')).length), 7);
-  }, { reducedMotion: 'no-preference' });
-});
-
-test('live reduced motion disables the loop and clearing the preference restores visible flow', async () => {
-  await withPage(1440, async page => {
-    const graph = page.locator(selector);
-    await showMethod(page);
-    await state(page, 'running');
-    await page.emulateMedia({ reducedMotion: 'reduce' });
-    await state(page, 'complete');
-    assert.equal(await graph.evaluate(node => node.getAnimations({ subtree: true }).length), 0);
-    await page.emulateMedia({ reducedMotion: 'no-preference' });
-    await state(page, 'running');
-    assert.ok(await graph.evaluate(node => node.getAnimations({ subtree: true }).length > 0));
-  }, { reducedMotion: 'no-preference' });
-});
-
-test('a reduced-motion initial load can start later without duplicating initialization', async () => {
-  await withPage(390, async page => {
-    await showMethod(page);
-    await state(page, 'complete');
-    await page.evaluate(async () => {
-      const { initializeMethodWorkflow } = await import('/assets/method-workflow.js');
-      initializeMethodWorkflow();
-      initializeMethodWorkflow();
+    await showMethod(page); await state(page,'running');
+    const colors = await page.locator('.method-node-final').evaluate(node => {
+      const animations = node.getAnimations({subtree:true});
+      return [0,4400,5500,6000,11200].map(time => {
+        animations.forEach(a => {a.pause(); a.currentTime=time;});
+        return {bg:getComputedStyle(node).backgroundColor,fg:getComputedStyle(node).color};
+      });
     });
-    await page.emulateMedia({ reducedMotion: 'no-preference' });
-    await state(page, 'running');
-    assert.equal(await page.locator(`${selector} .method-node`).count(), 8);
-    assert.equal(await page.locator(`${selector} .method-pulse`).count(), 7);
+    colors.forEach(c => assert.deepEqual(c,{bg:'rgb(0, 0, 0)',fg:'rgb(255, 255, 255)'}));
+  }, {reducedMotion:'no-preference'});
+});
+
+test('Method stops offscreen and resumes its strip on re-entry', async () => {
+  await withPage(1440, async page => {
+    const graph=page.locator(selector);
+    await showMethod(page); await state(page,'running');
+    await page.evaluate(() => window.scrollTo({top:0,behavior:'instant'}));
+    await state(page,'waiting');
+    assert.equal(await graph.evaluate(n => n.getAnimations({subtree:true}).length),0);
+    await showMethod(page); await state(page,'running');
+    assert.equal(await graph.evaluate(n => n.getAnimations({subtree:true}).filter(a => a.animationName === 'method-segment-edge').length),8);
+  }, {reducedMotion:'no-preference'});
+});
+
+test('live reduced motion stops all highlights without clearing the black Report', async () => {
+  await withPage(1440, async page => {
+    await showMethod(page); await state(page,'running');
+    await page.emulateMedia({reducedMotion:'reduce'}); await state(page,'complete');
+    assert.equal(await page.locator(selector).evaluate(n => n.getAnimations({subtree:true}).length),0);
+    assert.equal(await page.locator('.method-node-final').evaluate(n => getComputedStyle(n).backgroundColor),'rgb(0, 0, 0)');
+    await page.emulateMedia({reducedMotion:'no-preference'}); await state(page,'running');
+  }, {reducedMotion:'no-preference'});
+});
+
+test('a static initial load starts later and repeat initialization keeps all groups intact', async () => {
+  await withPage(390, async page => {
+    await showMethod(page); await state(page,'complete');
+    await page.evaluate(async () => {
+      const {initializeMethodWorkflow}=await import('/assets/method-workflow.js');
+      initializeMethodWorkflow(); initializeMethodWorkflow();
+    });
+    await page.emulateMedia({reducedMotion:'no-preference'}); await state(page,'running');
+    assert.equal(await page.locator('.method-node').count(),8);
+    assert.equal(await page.locator('.method-phase').count(),3);
   });
 });
 
-test('resizing keeps vertical arrow alignment and downward pulse movement', async () => {
+test('resize preserves connected mobile cells and aligns the returning feedback path', async () => {
   await withPage(1440, async page => {
-    await showMethod(page);
-    await state(page, 'running');
-    await page.setViewportSize({ width: 390, height: 900 });
-    await showMethod(page);
-    await state(page, 'running');
-    const sample = await page.locator(selector).evaluate(node => {
-      const first = node.getAnimations({ subtree: true }).find(animation => animation.effect.target.matches('.method-pulse'));
-      first.pause();
-      const timing = first.effect.getTiming();
-      first.currentTime = timing.delay + 60;
-      const start = first.effect.target.getBoundingClientRect();
-      first.currentTime = timing.delay + 240;
-      const end = first.effect.target.getBoundingClientRect();
-      first.play();
-      const arrow = node.querySelector('.method-arrow').getBoundingClientRect();
-      const connector = node.querySelector('.method-connector').getBoundingClientRect();
-      return { startY: start.y, endY: end.y, startX: start.x, endX: end.x, arrowHeight: arrow.height, arrowWidth: arrow.width, connectorHeight: connector.height };
-    });
-    assert.ok(sample.endY > sample.startY + 1, JSON.stringify(sample));
-    assert.ok(Math.abs(sample.endX - sample.startX) < 1);
-    assert.ok(sample.arrowHeight > sample.arrowWidth, 'mobile arrow must rotate down');
-    assert.ok(Math.abs(sample.arrowHeight - sample.connectorHeight) < 1);
+    await showMethod(page); await state(page,'running');
+    await page.setViewportSize({width:390,height:900}); await showMethod(page); await state(page,'running');
+    await feedbackGeometry(page,390);
     assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
-    await screenshot(page, '390-method-loop.png');
-  }, { reducedMotion: 'no-preference' });
+    await screenshot(page,'390-method-loop.png');
+  }, {reducedMotion:'no-preference'});
 });
 
-test('visibility lifecycle suspends a hidden document and resumes when visible', async () => {
+test('hidden-document lifecycle stops and restores the visible highlight loop', async () => {
   await withPage(1440, async page => {
-    await showMethod(page);
-    await state(page, 'running');
-    // Deterministically exercise the document lifecycle handler. Headless tabs
-    // do not consistently become hidden when another page is opened.
-    await page.evaluate(() => {
-      Object.defineProperty(document, 'hidden', { configurable: true, get: () => true });
-      document.dispatchEvent(new Event('visibilitychange'));
-    });
-    await state(page, 'waiting');
-    assert.equal(await page.locator(selector).evaluate(node => node.getAnimations({ subtree: true }).length), 0);
-    await page.evaluate(() => {
-      delete document.hidden;
-      document.dispatchEvent(new Event('visibilitychange'));
-    });
-    await state(page, 'running');
-  }, { reducedMotion: 'no-preference' });
+    await showMethod(page); await state(page,'running');
+    // Deterministic handler coverage, not an OS-level background-tab test.
+    await page.evaluate(() => {Object.defineProperty(document,'hidden',{configurable:true,get:()=>true});document.dispatchEvent(new Event('visibilitychange'));});
+    await state(page,'waiting');
+    assert.equal(await page.locator(selector).evaluate(n => n.getAnimations({subtree:true}).length),0);
+    await page.evaluate(() => {delete document.hidden;document.dispatchEvent(new Event('visibilitychange'));});
+    await state(page,'running');
+  }, {reducedMotion:'no-preference'});
 });
 
-test('loop initialization is idempotent while animations are already running', async () => {
+test('running initialization is idempotent and does not add another observer or animation', async () => {
   await withPage(1440, async page => {
-    await showMethod(page);
-    await state(page, 'running');
-    const result = await page.evaluate(async () => {
-      const root = document.querySelector('#method .method-workflow');
-      const before = root.getAnimations({ subtree: true });
-      const { initializeMethodWorkflow } = await import('/assets/method-workflow.js');
-      initializeMethodWorkflow();
-      initializeMethodWorkflow();
-      const after = root.getAnimations({ subtree: true });
-      return { same: before.length === after.length && before.every(animation => after.includes(animation)), state: root.dataset.flowState };
+    await showMethod(page); await state(page,'running');
+    const same=await page.evaluate(async () => {
+      const graph=document.querySelector('#method .method-workflow');
+      const before=graph.getAnimations({subtree:true});
+      const {initializeMethodWorkflow}=await import('/assets/method-workflow.js'); initializeMethodWorkflow();
+      const after=graph.getAnimations({subtree:true});
+      return before.length===after.length && before.every(a=>after.includes(a));
     });
-    assert.equal(result.same, true, 'repeat initialization must not restart or duplicate animations');
-    assert.equal(result.state, 'running');
-  }, { reducedMotion: 'no-preference' });
+    assert.equal(same,true);
+  }, {reducedMotion:'no-preference'});
 });
 
-test('no IntersectionObserver still provides the completed static workflow', async () => {
+test('unsupported IntersectionObserver keeps the grouped static workflow', async () => {
   await withPage(390, async page => {
-    await state(page, 'complete');
-    await showMethod(page);
-    assert.deepEqual(await page.locator(`${selector} .method-label`).allTextContents(), expected);
-    assert.equal(await page.locator(selector).evaluate(node => node.getAnimations({ subtree: true }).length), 0);
-  }, { reducedMotion: 'no-preference', init: () => { delete window.IntersectionObserver; } });
+    await state(page,'complete'); await showMethod(page);
+    assert.deepEqual(await page.locator('.method-label').allTextContents(),expected);
+    assert.equal(await page.locator(selector).evaluate(n => n.getAnimations({subtree:true}).length),0);
+  }, {reducedMotion:'no-preference',init:()=>{delete window.IntersectionObserver;}});
 });
