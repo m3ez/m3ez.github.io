@@ -77,6 +77,24 @@ for (const [width, javaScriptEnabled] of [[320, true], [390, true], [768, true],
       const graph = page.locator(selector);
       assert.deepEqual(await graph.locator('.method-label').allTextContents(), expected);
       assert.equal(await graph.locator('li').count(), 8);
+      assert.equal(await graph.locator('.method-step').count(), 0, 'remove number markup, not only its visibility');
+      const contents = await graph.locator('.method-node').evaluateAll(nodes => nodes.map(node => ({
+        parts: [...node.children].map(child => child.className),
+        text: node.textContent,
+        columns: getComputedStyle(node).gridTemplateColumns.split(' ').length,
+        display: getComputedStyle(node).display,
+        clipped: node.scrollHeight > node.clientHeight + 1,
+      })));
+      for (const content of contents) {
+        assert.deepEqual(content.parts, ['method-label', 'method-detail']);
+        assert.doesNotMatch(content.text, /\d/);
+        assert.equal(content.clipped, false, 'node text must fit vertically');
+        if (width <= 980) {
+          assert.equal(content.display, 'grid');
+          assert.equal(content.columns, 2, 'mobile must not reserve an empty number column');
+        }
+      }
+      assert.equal(await graph.evaluate(node => getComputedStyle(node).listStyleType), 'none');
       assert.equal(await graph.locator('.method-connector[aria-hidden="true"]').count(), 7);
       assert.equal(await graph.locator('svg.method-arrow[focusable="false"]').count(), 7);
       assert.equal(await graph.locator('.method-arrow-shaft[vector-effect="non-scaling-stroke"]').count(), 7);

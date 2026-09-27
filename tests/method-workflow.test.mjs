@@ -32,3 +32,12 @@ test('Method arrows use crisp SVG shafts and filled arrowheads in the static fal
   assert.equal((section.match(/class="method-arrow-head"/g) ?? []).length, 7);
   assert.equal((section.match(/vector-effect="non-scaling-stroke"/g) ?? []).length, 7);
 });
+
+
+test('Method nodes contain only labels and descriptions, without step numbers', () => {
+  const nodes = [...section.matchAll(/<div class="method-node">([\s\S]*?)<\/div>/g)];
+  assert.equal(nodes.length, 8);
+  for (const [, node] of nodes) {
+    assert.match(node, /^<strong class="method-label">[^<]+<\/strong><span class="method-detail">[^<]+<\/span>$/);
+  }
+});
