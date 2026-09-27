@@ -153,6 +153,9 @@ test('scroll motion reveals once, updates progress, staggers cards, and animates
     assert.equal(await progress.count(), 1);
     assert.equal(await progress.getAttribute('aria-hidden'), 'true');
 
+    const credentials = page.locator('#credentials');
+    await credentials.scrollIntoViewIfNeeded();
+    await page.waitForFunction(() => document.querySelector('#credentials')?.classList.contains('is-visible'));
     const delays = await page.locator('.credential-grid-item').evaluateAll(nodes =>
       nodes.slice(0, 2).map(node => getComputedStyle(node).transitionDelay));
     assert.notEqual(delays[0], delays[1]);
