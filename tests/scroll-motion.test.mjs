@@ -72,3 +72,26 @@ test('only CVE rows added by Show more receive a fade-only animation', () => {
   assert.match(css, /@keyframes cve-row-enter\{from\{opacity:\.9\}to\{opacity:1\}\}/);
   assert.doesNotMatch(css, /@keyframes cve-row-enter\{[^}]*transform:/);
 });
+
+
+test('desktop wheel input gets real requestAnimationFrame inertial scrolling', () => {
+  assert.match(motion, /const DESKTOP_SCROLL_MEDIA = '\\(pointer: fine\\) and \\(hover: hover\\)'/);
+  assert.match(motion, /function initializeInertialScroll\(reducedMotion\)/);
+  assert.match(motion, /window\.addEventListener\('wheel', onWheel, \{ passive: false \}\)/);
+  assert.match(motion, /event\.preventDefault\(\)/);
+  assert.match(motion, /requestAnimationFrame\(step\)/);
+  assert.match(motion, /currentY \+= \(targetY - currentY\) \* 0\.18/);
+  assert.match(motion, /window\.scrollTo\(\{ top: currentY, behavior: 'instant' \}\)/);
+  assert.match(motion, /targetY = Math\.min\(maxScroll\(\), Math\.max\(0, targetY \+ delta\)\)/);
+});
+
+test('inertial scrolling preserves native touch, zoom, nested scroll, and reduced-motion behavior', () => {
+  assert.match(motion, /desktopInput\.matches && !reducedMotion\.matches/);
+  assert.match(motion, /if \(event\.ctrlKey \|\| event\.metaKey\) return/);
+  assert.match(motion, /function canNestedScrollerConsume\(target, delta\)/);
+  assert.match(motion, /if \(canNestedScrollerConsume\(event\.target, delta\)\) return/);
+  assert.match(motion, /function cancelInertia\(\)/);
+  assert.match(motion, /touchstart/);
+  assert.match(motion, /keydown/);
+  assert.match(motion, /m3ezInertialScroll/);
+});
