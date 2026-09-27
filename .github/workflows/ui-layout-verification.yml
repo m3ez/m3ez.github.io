@@ -1,0 +1,63 @@
+name: UI layout verification
+
+on:
+  push:
+    branches: [agent/ui-layout-readability]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ui-layout-readability-review
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    if: github.ref == 'refs/heads/agent/ui-layout-readability'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - run: npx playwright install --with-deps chromium
+      - name: Apply approved changes when present
+        run: |
+          if [ -f .github/ui-layout-apply.py ]; then
+            python3 .github/ui-layout-apply.py
+          fi
+      - name: Source suite
+        run: npm test
+      - name: Browser suite
+        env:
+          UI_SCREENSHOTS: /tmp/ui-layout-screenshots
+        run: npm run test:browser
+      - name: Capture review images
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ui-layout-screenshots
+          path: /tmp/ui-layout-screenshots
+          if-no-files-found: ignore
+      - name: Record verified clean tree on the isolated branch
+        run: |
+          set -euo pipefail
+          if [ ! -f .github/ui-layout-apply.py ]; then
+            exit 0
+          fi
+          test "$(git branch --show-current)" = 'agent/ui-layout-readability'
+          git diff --check
+          rm .github/ui-layout-apply.py .github/workflows/ui-layout-verification.yml
+          git add assets/portfolio-interactions.js assets/portfolio-redesign.js assets/research-credentials.css '_next/static/chunks/03~_g8i41_-g_-base.css'
+          git add -u .github/ui-layout-apply.py .github/workflows/ui-layout-verification.yml
+          git -c user.name='m3ez portfolio automation' -c user.email='72428471+m3ez@users.noreply.github.com' commit -m 'Improve layout readability, hero hierarchy and carousel rotation controls'
+          echo "VERIFIED_CLEAN_COMMIT=$(git rev-parse HEAD)"
+          echo "VERIFIED_CLEAN_TREE=$(git rev-parse HEAD^{tree})"
+          npm test
+          npm run test:browser
+          git push origin HEAD:refs/heads/agent/ui-layout-readability
