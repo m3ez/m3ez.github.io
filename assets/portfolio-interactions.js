@@ -440,6 +440,68 @@ export function initializeInteractions() {
   })();
 
   (() => {
+    const ACTIVE_SECTION_IDS = ['research', 'credentials', 'consulting', 'contact'];
+    const nav = document.querySelector('.site-header nav');
+    if (!nav) return;
+
+    const sections = ACTIVE_SECTION_IDS
+      .map((id) => document.getElementById(id))
+      .filter(Boolean);
+    if (!sections.length) return;
+
+    const linksById = new Map(
+      ACTIVE_SECTION_IDS.map((id) => [
+        id,
+        [...nav.querySelectorAll(`a[href="#${id}"]`)],
+      ]),
+    );
+
+    let ticking = false;
+
+    function syncActiveSection() {
+      const markerY = Math.min(window.innerHeight * 0.35, 280);
+      let activeId = null;
+      let closestTop = Number.NEGATIVE_INFINITY;
+
+      for (const section of sections) {
+        const top = section.getBoundingClientRect().top;
+        if (top <= markerY && top > closestTop) {
+          activeId = section.id;
+          closestTop = top;
+        }
+      }
+
+      if (window.scrollY < Math.max(0, sections[0].offsetTop - markerY)) {
+        activeId = null;
+      }
+
+      const atDocumentEnd =
+        window.scrollY + window.innerHeight >=
+        document.documentElement.scrollHeight - 2;
+      if (atDocumentEnd) activeId = sections.at(-1)?.id ?? activeId;
+
+      for (const [id, links] of linksById) {
+        for (const link of links) {
+          if (id === activeId) link.setAttribute('aria-current', 'location');
+          else link.removeAttribute('aria-current');
+        }
+      }
+
+      ticking = false;
+    }
+
+    function scheduleActiveSection() {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(syncActiveSection);
+    }
+
+    window.addEventListener('scroll', scheduleActiveSection, { passive: true });
+    window.addEventListener('resize', scheduleActiveSection);
+    syncActiveSection();
+  })();
+
+  (() => {
     const MARKER = "m3ez-back-to-top-v1";
     const SHOW_AFTER = 200;
     const css = `

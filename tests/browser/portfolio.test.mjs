@@ -283,3 +283,54 @@ test('desktop wheel input glides through real inertial scrolling while reduced m
     await reduced.close();
   }
 });
+
+
+test('active navigation follows scrolling and controls provide tactile press feedback', async () => {
+  const page = await browser.newPage({ viewport: { width: 1200, height: 900 } });
+  try {
+    await page.goto(origin, { waitUntil: 'networkidle' });
+    await ready(page);
+
+    const credentialsLink = page.locator('.site-header nav > a[href="#credentials"]');
+    const consultingLink = page.locator('.site-header nav > a[href="#consulting"]');
+    const contactLink = page.locator('.site-header nav > a[href="#contact"]');
+
+    await page.locator('#credentials').scrollIntoViewIfNeeded();
+    await page.waitForFunction(() =>
+      document.querySelector('.site-header nav > a[href="#credentials"]')?.getAttribute('aria-current') === 'location');
+    assert.equal(await credentialsLink.getAttribute('aria-current'), 'location');
+    assert.equal(await consultingLink.getAttribute('aria-current'), null);
+
+    await page.locator('#contact').scrollIntoViewIfNeeded();
+    await page.waitForFunction(() =>
+      document.querySelector('.site-header nav > a[href="#contact"]')?.getAttribute('aria-current') === 'location');
+    assert.equal(await contactLink.getAttribute('aria-current'), 'location');
+    assert.equal(await credentialsLink.getAttribute('aria-current'), null);
+
+    const button = page.getByRole('button', { name: 'Show more CVEs', exact: true });
+    await button.scrollIntoViewIfNeeded();
+    await button.hover();
+    await page.mouse.down();
+    assert.equal(await button.evaluate(node => getComputedStyle(node).animationName), 'tactile-press');
+    await page.mouse.up();
+  } finally {
+    await page.close();
+  }
+
+  const reduced = await browser.newPage({
+    viewport: { width: 1200, height: 900 },
+    reducedMotion: 'reduce',
+  });
+  try {
+    await reduced.goto(origin, { waitUntil: 'networkidle' });
+    await ready(reduced);
+    const button = reduced.getByRole('button', { name: 'Show more CVEs', exact: true });
+    await button.scrollIntoViewIfNeeded();
+    await button.hover();
+    await reduced.mouse.down();
+    assert.equal(await button.evaluate(node => getComputedStyle(node).animationName), 'none');
+    await reduced.mouse.up();
+  } finally {
+    await reduced.close();
+  }
+});
