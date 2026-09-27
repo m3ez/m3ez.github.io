@@ -137,3 +137,48 @@ test('a failed CVE refresh preserves the exported research and other interaction
     await page.close();
   }
 });
+
+
+test('scroll motion reveals once, updates progress, staggers cards, and animates only newly shown CVEs', async () => {
+  const page = await browser.newPage({ viewport: { width: 1200, height: 900 } });
+  try {
+    await page.goto(origin, { waitUntil: 'networkidle' });
+    await ready(page);
+
+    const contact = page.locator('#contact');
+    assert.ok(await contact.evaluate(node => node.classList.contains('scroll-reveal')));
+    assert.equal(await contact.evaluate(node => node.classList.contains('is-visible')), false);
+
+    const progress = page.locator('#m3ez-scroll-progress-v1');
+    assert.equal(await progress.count(), 1);
+    assert.equal(await progress.getAttribute('aria-hidden'), 'true');
+
+    const delays = await page.locator('.credential-grid-item').evaluateAll(nodes =>
+      nodes.slice(0, 2).map(node => getComputedStyle(node).transitionDelay));
+    assert.notEqual(delays[0], delays[1]);
+
+    await contact.scrollIntoViewIfNeeded();
+    await page.waitForFunction(() => document.querySelector('#contact')?.classList.contains('is-visible'));
+    const ratio = await progress.evaluate(node => Number(node.style.transform.match(/scaleX\(([^)]+)\)/)?.[1] || 0));
+    assert.ok(ratio > 0);
+
+    await page.evaluate(() => window.scrollTo(0, 0));
+    await page.waitForFunction(() => scrollY === 0);
+    assert.equal(await contact.evaluate(node => node.classList.contains('is-visible')), true);
+
+    await page.getByRole('button', { name: 'Show more CVEs', exact: true }).click();
+    assert.equal(await page.locator('.cve-row-enter').count(), 10);
+  } finally {
+    await page.close();
+  }
+
+  const reduced = await browser.newPage({ viewport: { width: 1200, height: 900 }, reducedMotion: 'reduce' });
+  try {
+    await reduced.goto(origin, { waitUntil: 'networkidle' });
+    await ready(reduced);
+    assert.equal(await reduced.locator('#contact').evaluate(node => node.classList.contains('is-visible')), true);
+    assert.equal(await reduced.evaluate(() => getComputedStyle(document.documentElement).scrollBehavior), 'auto');
+  } finally {
+    await reduced.close();
+  }
+});
