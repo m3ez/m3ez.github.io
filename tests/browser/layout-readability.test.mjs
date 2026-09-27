@@ -196,6 +196,8 @@ test('reduced-motion changes stop autoplay without restarting it when the prefer
     const first = await page.locator(currentCard).getAttribute('href');
     await page.clock.fastForward(10000);
     assert.equal(await page.locator(currentCard).getAttribute('href'), first);
+    // Desktop arrows appear on hover or focus; exercise the real pointer path.
+    await page.locator(carousel).hover();
     await page.getByRole('button', { name: 'Next credential', exact: true }).click();
     const manual = await page.locator(currentCard).getAttribute('href');
     assert.notEqual(manual, first);
