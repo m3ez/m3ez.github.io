@@ -1,0 +1,30 @@
+name: Contact X link verification
+on:
+  push:
+    branches: [agent/contact-x-link]
+permissions:
+  contents: read
+concurrency:
+  group: contact-x-verification
+  cancel-in-progress: false
+jobs:
+  verify:
+    if: github.ref == 'refs/heads/agent/contact-x-link'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium > /tmp/browser-install.log 2>&1 || { tail -n 50 /tmp/browser-install.log; exit 1; }
+      - name: Existing source suite
+        run: npm test > /tmp/contact-source.log 2>&1 && tail -n 12 /tmp/contact-source.log || { cat /tmp/contact-source.log; exit 1; }
+      - name: Contact regression tests
+        run: node --test tests/browser/contact-links.test.mjs
