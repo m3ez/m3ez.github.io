@@ -106,13 +106,30 @@ test('CVE controls, carousel, mobile navigation and back-to-top remain usable', 
     const severities = await page.locator('.cve-row-v2 .severity-chip').allTextContents();
     assert.ok(severities.length > 0 && severities.every(value => value === 'CRITICAL'));
     const current = page.locator('.credential-carousel-card[data-position="current"]');
-    const verify = current.locator('.credential-carousel-verify');
-    assert.equal(await verify.evaluate(node => node.closest('a')?.getAttribute('href')), await current.getAttribute('href'));
-    const first = await current.getAttribute('href');
+    let verify = current.locator('.credential-carousel-verify');
+    assert.equal(await verify.evaluate(node => node.tagName), 'A');
+    assert.equal(await verify.getAttribute('target'), '_blank');
+    assert.ok((await verify.getAttribute('href'))?.length > 0);
+
+    const firstTitle = await current.locator('.credential-carousel-title').textContent();
     await page.getByRole('button', { name: 'Next credential', exact: true }).click();
-    assert.notEqual(await current.getAttribute('href'), first);
+    assert.notEqual(await current.locator('.credential-carousel-title').textContent(), firstTitle);
     await page.getByRole('button', { name: 'Previous credential', exact: true }).click();
-    assert.equal(await current.getAttribute('href'), first);
+    assert.equal(await current.locator('.credential-carousel-title').textContent(), firstTitle);
+
+    await page.getByRole('button', { name: 'Show Certified Ethical Hacker (Practical) credential', exact: true }).click();
+    assert.equal(await current.locator('.credential-carousel-title').textContent(), 'Certified Ethical Hacker (Practical)');
+    assert.equal(await current.locator('.credential-carousel-company').textContent(), 'EC-Council');
+    assert.ok(await current.locator('.credential-carousel-company').evaluate(node => node.getBoundingClientRect().width > 0));
+
+    verify = current.locator('.credential-carousel-verify');
+    await verify.evaluate((node, href) => { node.href = href; }, `${origin}/?verify-click-test=1`);
+    const popupPromise = page.waitForEvent('popup');
+    await verify.click();
+    const popup = await popupPromise;
+    await popup.waitForLoadState('domcontentloaded');
+    assert.match(popup.url(), /verify-click-test=1/);
+    await popup.close();
     await page.getByRole('button', { name: 'Open navigation menu' }).click();
     await page.locator('#mobile-primary-navigation').getByRole('link', { name: 'Contact', exact: true }).click();
     await page.waitForFunction(() => location.hash === '#contact' && scrollY > 200);
