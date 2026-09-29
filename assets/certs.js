@@ -100,6 +100,15 @@ export const certs = [
     verificationUrl: 'https://www.credly.com/badges/5dc57b75-6252-42c2-a40b-6e84aa83c0e2/public_url',
   },
   {
+    name: 'Certified Ethical Hacker (Practical)',
+    issuer: 'EC-Council',
+    year: 2022,
+    category: 'Offensive',
+    flagship: false,
+    description: 'Hands-on ethical hacking across networks, systems, and web applications',
+    verificationUrl: 'https://aspen.eccouncil.org/VerifyBadge?&type=certification&a=93Su70yxeQhkpvw/+udaTfqctW36VqRFyDcp9TaqyL4=',
+  },
+  {
     name: 'PenTest+',
     issuer: 'CompTIA',
     year: 2022,
@@ -135,6 +144,7 @@ const MONOGRAMS = new Map([
   ['TCM Security', 'TCM'],
   ['Red Hat', 'RH'],
   ['Cisco', 'Cisco'],
+  ['EC-Council', 'EC-Council'],
   ['CompTIA', 'CompTIA'],
 ]);
 
