@@ -1,0 +1,84 @@
+name: Verify floating theme switch
+
+on:
+  push:
+    branches: [agent/floating-theme-toggle]
+    paths: [.github/workflows/verify-floating-theme.yml]
+
+permissions:
+  contents: write
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      EVIDENCE_DIR: ${{ runner.temp }}/theme-verification
+      EXPECTED_TREE: e4ae7a7b7977b4e781f8f80e6b4d6e90ead31cef
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/floating-theme-toggle
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Prepare the exact reviewed tree without this temporary workflow
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$EVIDENCE_DIR"
+          test "$(git rev-parse origin/gh-pages)" = e38ca73a5c2400f46122caa22eb606a6665d84aa
+          node automation/inject-redesign-assets.mjs
+          git add -- index.html
+          git rm -- .github/workflows/verify-floating-theme.yml
+          git diff --cached --check
+          test "$(git write-tree)" = "$EXPECTED_TREE"
+          printf '%s\n' "$EXPECTED_TREE" > "$EVIDENCE_DIR/tested-tree.txt"
+          git diff --cached e38ca73a5c2400f46122caa22eb606a6665d84aa --stat | tee "$EVIDENCE_DIR/diff-stat.txt"
+          git diff --cached e38ca73a5c2400f46122caa22eb606a6665d84aa > "$EVIDENCE_DIR/change.patch"
+          git archive --format=tar "$EXPECTED_TREE" > "$EVIDENCE_DIR/reviewed-source.tar"
+      - name: Install the unchanged pinned test dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm ci 2>&1 | tee "$EVIDENCE_DIR/npm-ci.log"
+          npx playwright install --with-deps chromium 2>&1 | tee "$EVIDENCE_DIR/browser-install.log"
+      - name: Run all source and unit tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm test 2>&1 | tee "$EVIDENCE_DIR/source-final.log"
+      - name: Run the complete Chromium browser suite over HTTP
+        shell: bash
+        env:
+          UI_SCREENSHOTS: ${{ runner.temp }}/theme-verification/screenshots
+          THEME_SCREENSHOT_DIR: ${{ runner.temp }}/theme-verification/theme-screenshots
+        run: |
+          set -euo pipefail
+          npm run test:browser 2>&1 | tee "$EVIDENCE_DIR/browser-final.log"
+      - name: Publish only the verified homepage wiring on the feature branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git write-tree)" = "$EXPECTED_TREE"
+          git diff --exit-code
+          # Restore the workflow only for this intermediate push. The connector
+          # removes it after the successful run, yielding exactly EXPECTED_TREE.
+          git restore --source=HEAD --staged --worktree .github/workflows/verify-floating-theme.yml
+          git config user.name 'Supakiad S. (m3ez)'
+          git config user.email '72428471+m3ez@users.noreply.github.com'
+          git commit -m 'Wire the tested floating theme switch into the homepage'
+          git push origin HEAD:refs/heads/agent/floating-theme-toggle
+          git rev-parse HEAD > "$EVIDENCE_DIR/verified-branch-head.txt"
+      - name: Retain verification logs, exact source, and screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: floating-theme-verification
+          path: |
+            ${{ runner.temp }}/theme-verification
+            test-results
+          if-no-files-found: error
+          retention-days: 14
