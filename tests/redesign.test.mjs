@@ -10,8 +10,8 @@ import {
   normalizeWordfenceDocument,
 } from '../assets/research-data.js';
 
-test('credentials source contains 13 certifications with flagships first', () => {
-  assert.equal(certs.length, 13);
+test('credentials source contains 14 certifications with flagships first', () => {
+  assert.equal(certs.length, 14);
   assert.deepEqual(CATEGORIES, ['All', 'Offensive', 'Web', 'Identity', 'Mobile', 'Systems', 'Foundational']);
   assert.deepEqual(certs.filter((cert) => cert.flagship).map((cert) => cert.name), ['OSEP', 'OSCP+', 'OSWE', 'eWPTX', 'CRTP']);
   assert.ok(certs.slice(0, 5).every((cert) => cert.flagship));
