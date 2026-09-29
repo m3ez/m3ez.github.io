@@ -17,12 +17,31 @@ jobs:
         with:
           ref: ${{ github.sha }}
           fetch-depth: 0
-      - name: Guard the current production baseline
+      - name: Guard production baseline and recover the previously verified edit scripts
         run: |
           set -euo pipefail
           test "$GITHUB_REF" = 'refs/heads/agent/remove-hero-profiles-label'
           git diff --exit-code eca9fa6137713cdd00241d1011e642a5e9023222 HEAD -- . ':(exclude).github/workflows/hero-profiles-label-verification.yml'
           mkdir -p /tmp/hero-profiles-label-review
+          python <<'PY'
+          from pathlib import Path
+          import subprocess
+          original = subprocess.check_output(['git', 'show', '322f650ffe34bc4a16d83ef7bdc13c4d6f6a7cb5:.github/workflows/hero-profiles-label-verification.yml'], text=True)
+          for title, filename in [
+              ('Add regression assertions for the requested heading removal', 'hero-tests.sh'),
+              ('Remove only the visible heading and its unused style', 'hero-edit.sh'),
+          ]:
+              marker = '      - name: ' + title + '\n        run: |\n'
+              assert original.count(marker) == 1
+              lines = original.split(marker, 1)[1].splitlines()
+              script = []
+              for line in lines:
+                  if line and not line.startswith('          '):
+                      break
+                  script.append(line[10:] if line else '')
+              assert script and script[0] == "python <<'PY'"
+              Path('/tmp', filename).write_text('\n'.join(script) + '\n')
+          PY
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
         with:
           node-version: 22
@@ -30,57 +49,10 @@ jobs:
       - run: npm ci --ignore-scripts
       - name: Install Chromium
         run: npx playwright install --with-deps chromium > /tmp/browser-install.log 2>&1 || { tail -n 60 /tmp/browser-install.log; exit 1; }
-      - name: Verify the baseline suites
+      - name: Prove the revised assertions reject the existing heading
         run: |
           set -euo pipefail
-          npm test | tee /tmp/hero-profiles-label-review/source-baseline.log
-          npm run test:browser | tee /tmp/hero-profiles-label-review/browser-baseline.log
-      - name: Add regression assertions for the requested heading removal
-        run: |
-          python <<'PY'
-          from pathlib import Path
-          p = Path('tests/redesign.test.mjs')
-          source = p.read_text()
-          source += """
-
-          test('hero profile links render without the extra heading or its unused styles', () => {
-            const source = readFileSync(new URL('../assets/portfolio-redesign.js', import.meta.url), 'utf8');
-            const css = readFileSync(new URL('../assets/research-credentials.css', import.meta.url), 'utf8');
-            assert.doesNotMatch(source, /hero-profiles-label|Profiles & verification/, 'remove the heading rather than hiding it');
-            assert.doesNotMatch(css, /\\.hero-profiles-label/, 'remove only the unused heading rule');
-          });
-          """
-          p.write_text(source)
-          p = Path('tests/browser/layout-readability.test.mjs')
-          source = p.read_text()
-          old = "for (const width of [390, 1440]) {\n  test(`hero prioritizes Research and Contact without dropping profile links at ${width}px`, async () => {"
-          new = "for (const width of [320, 390, 768, 1440]) {\n  test(`hero prioritizes Research and Contact without dropping profile links at ${width}px`, async () => {"
-          assert source.count(old) == 1
-          source = source.replace(old, new)
-          old = "      assert.equal(await page.locator('#top .hero-profiles-label').textContent(), 'Profiles & verification');"
-          new = """      assert.equal(await page.locator('#top .hero-profiles-label').count(), 0, 'the removed heading must not leave a hidden or empty element');
-                assert.doesNotMatch(await page.locator('#top').innerText(), /Profiles\\s*&\\s*verification/i);
-                assert.deepEqual(await page.locator('#top .hero-profiles').evaluate(node => [...node.children].map(child => child.className)), ['proof-links']);
-                const profileLinks = page.locator('#top .hero-profiles .proof-links a');
-                assert.deepEqual(await profileLinks.evaluateAll(nodes => nodes.map(node => [node.textContent, node.getAttribute('href')])), [
-                  ['YouTube', 'https://www.youtube.com/@SupakiadS'],
-                  ['Medium', 'https://m3ez.medium.com/'],
-                  ['OffSec Credential', 'https://credentials.offsec.com/profile/supakiadsatuwan533944/wallet'],
-                  ['Accredible Credential', 'https://www.credential.net/profile/supakiadsatuwan533944/wallet'],
-                  ['Credly Badges', 'https://www.credly.com/users/supakiad-satuwan/badges/credly'],
-                  ['Wordfence Researcher', 'https://www.wordfence.com/threat-intel/vulnerabilities/researchers/supakiad-s'],
-                  ['Patchstack Researcher', 'https://patchstack.com/database/researchers/d7a606d8-9d89-4bcf-a973-f8ebe721b82f'],
-                ]);
-                assert.ok(await profileLinks.evaluateAll(nodes => nodes.every(node => node.target === '_blank' && node.relList.contains('noopener') && node.relList.contains('noreferrer'))));
-                for (const link of await profileLinks.all()) assert.ok(await link.isVisible());"""
-          assert source.count(old) == 1
-          p.write_text(source.replace(old, new))
-          PY
-          node --check tests/redesign.test.mjs
-          node --check tests/browser/layout-readability.test.mjs
-      - name: Prove the revised assertions reject the heading
-        run: |
-          set -euo pipefail
+          bash -euo pipefail /tmp/hero-tests.sh
           if npm test > /tmp/hero-profiles-label-review/source-red.log 2>&1; then
             cat /tmp/hero-profiles-label-review/source-red.log; exit 1
           fi
@@ -91,24 +63,10 @@ jobs:
           fi
           grep -q '^# fail 4$' /tmp/hero-profiles-label-review/browser-red.log
           grep -q 'the removed heading must not leave a hidden or empty element' /tmp/hero-profiles-label-review/browser-red.log
-      - name: Remove only the visible heading and its unused style
+      - name: Apply exactly the previously verified product change
         run: |
-          python <<'PY'
-          from pathlib import Path
-          import re
-          p = Path('assets/portfolio-redesign.js')
-          source = p.read_text()
-          old = "    const label = element('p', 'hero-profiles-label', 'Profiles & verification');\n"
-          assert source.count(old) == 1
-          source = source.replace(old, '')
-          old = '    profiles.append(label, list);'
-          assert source.count(old) == 1
-          p.write_text(source.replace(old, '    profiles.append(list);'))
-          p = Path('assets/research-credentials.css')
-          source, count = re.subn(r'^\.hero-profiles-label\{[^\n]*\}\n', '', p.read_text(), flags=re.M)
-          assert count == 1
-          p.write_text(source)
-          PY
+          set -euo pipefail
+          bash -euo pipefail /tmp/hero-edit.sh
           git diff --check
           node --check assets/portfolio-redesign.js
       - name: Full source and browser validation
@@ -118,24 +76,38 @@ jobs:
           set -euo pipefail
           npm test | tee /tmp/hero-profiles-label-review/source-green.log
           npm run test:browser | tee /tmp/hero-profiles-label-review/browser-green.log
-      - name: Commit the clean change and verify it again
+      - name: Commit the exact tested tree and verify again
         env:
           UI_SCREENSHOTS: /tmp/hero-profiles-label-review/screenshots
         run: |
           set -euo pipefail
           git rm .github/workflows/hero-profiles-label-verification.yml
           git add assets/portfolio-redesign.js assets/research-credentials.css tests/redesign.test.mjs tests/browser/layout-readability.test.mjs
-          python <<'PY'
-          import subprocess
-          paths = set(subprocess.check_output(['git', 'diff', '--cached', '--name-only', 'eca9fa6137713cdd00241d1011e642a5e9023222'], text=True).splitlines())
-          assert paths == {'assets/portfolio-redesign.js', 'assets/research-credentials.css', 'tests/redesign.test.mjs', 'tests/browser/layout-readability.test.mjs'}, paths
-          PY
+          test "$(git write-tree)" = 'a30f90ba0d5795e58adf0f643042985aa4af9255'
           git diff --cached --check
           git -c user.name='m3ez portfolio automation' -c user.email='72428471+m3ez@users.noreply.github.com' commit -m 'Remove the Profiles & verification heading from the hero'
           printf 'VERIFIED_COMMIT=%s\nVERIFIED_TREE=%s\n' "$(git rev-parse HEAD)" "$(git rev-parse HEAD^{tree})" | tee /tmp/hero-profiles-label-review/final.txt
           npm test | tee /tmp/hero-profiles-label-review/source-final.log
           npm run test:browser | tee /tmp/hero-profiles-label-review/browser-final.log
+      - name: Preserve only the known generated screenshots and publish the review branch
+        run: |
+          set -euo pipefail
+          git status --porcelain | tee /tmp/hero-profiles-label-review/status-before-artifact-move.txt
+          python <<'PY'
+          from pathlib import Path
+          import shutil, subprocess
+          generated = Path('test-results')
+          assert not subprocess.check_output(['git', 'ls-files', '--', 'test-results'], text=True).strip(), 'never move tracked files'
+          assert generated.is_dir() and not generated.is_symlink()
+          expected = {'ceh-' + str(width) + '.png' for width in [320,375,640,768,881,1024,1280,1440]}
+          assert {p.name for p in generated.iterdir()} == expected, 'unexpected generated files need review'
+          for path in generated.iterdir():
+              assert path.is_file() and not path.is_symlink()
+              assert path.read_bytes().startswith(b'\x89PNG\r\n\x1a\n')
+          shutil.move(str(generated), '/tmp/hero-profiles-label-review/carousel-screenshots')
+          PY
           test -z "$(git status --porcelain)"
+          test "$(git rev-parse HEAD^{tree})" = 'a30f90ba0d5795e58adf0f643042985aa4af9255'
           git diff eca9fa6137713cdd00241d1011e642a5e9023222 HEAD > /tmp/hero-profiles-label-review/change.patch
           git archive --format=tar HEAD > /tmp/hero-profiles-label-review/reviewed-source.tar
           git push origin HEAD:refs/heads/agent/remove-hero-profiles-label
