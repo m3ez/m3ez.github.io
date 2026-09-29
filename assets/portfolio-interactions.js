@@ -530,9 +530,10 @@ export function initializeInteractions() {
     const MARKER = "m3ez-back-to-top-v1";
     const SHOW_AFTER = 200;
     const css = `
-#${MARKER}{position:fixed;right:1rem;bottom:1rem;z-index:30;width:44px;height:44px;padding:0;border:1px solid var(--black);border-radius:0;background:var(--paper);color:var(--ink);display:grid;place-items:center;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:16px;line-height:1;cursor:pointer;opacity:0;visibility:hidden;pointer-events:none;transition:opacity 120ms ease,background-color 120ms ease,color 120ms ease}
+#${MARKER}{position:fixed;right:1rem;bottom:1rem;z-index:30;width:44px;height:44px;padding:0;border:0;border-radius:0;background:transparent;box-shadow:none;color:var(--black);display:grid;place-items:center;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:16px;line-height:1;cursor:pointer;opacity:0;visibility:hidden;pointer-events:none;transition:opacity 120ms ease}
 #${MARKER}.is-visible{opacity:1;visibility:visible;pointer-events:auto}
-#${MARKER}:hover,#${MARKER}:focus-visible{background:var(--black);color:var(--paper)}
+#${MARKER}.is-visible:hover{opacity:.65}
+#${MARKER}:focus-visible{outline:2px solid var(--black);outline-offset:3px}
 @media (max-width:640px){#${MARKER}{right:.75rem;bottom:.75rem}}
 @media (prefers-reduced-motion:reduce){#${MARKER}{transition:none}}
 `;

@@ -268,3 +268,101 @@ test('no-JavaScript fallback keeps the original light page without a dead theme 
     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false);
   } finally { await page.close(); }
 });
+
+for (const width of [390, 1440]) {
+  for (const theme of ['light', 'dark']) {
+    test(`icon-only back-to-top matches the theme toggle and remains usable in ${theme} at ${width}px`, async () => {
+      const page = await browser.newPage({ viewport: { width, height: 900 }, reducedMotion: 'reduce' });
+      const errors = [];
+      page.on('pageerror', error => errors.push(error.message));
+      try {
+        await page.addInitScript(value => localStorage.setItem('m3ez-theme', value), theme);
+        await load(page);
+        const button = page.locator('#m3ez-back-to-top-v1');
+        const ink = theme === 'light' ? 'rgb(0, 0, 0)' : 'rgb(255, 255, 255)';
+        async function appearance() {
+          return button.evaluate(node => {
+            const style = getComputedStyle(node);
+            return {
+              background: style.backgroundColor, image: style.backgroundImage,
+              borders: ['Top', 'Right', 'Bottom', 'Left'].map(side => style[`border${side}Width`]),
+              shadow: style.boxShadow, color: style.color, opacity: style.opacity,
+              outline: style.outlineStyle === 'none' ? '0px' : style.outlineWidth,
+              focusVisible: node.matches(':focus-visible'),
+            };
+          });
+        }
+        function assertIconOnly(style) {
+          assert.equal(style.background, 'rgba(0, 0, 0, 0)', 'back-to-top stays transparent');
+          assert.equal(style.image, 'none');
+          assert.deepEqual(style.borders, ['0px', '0px', '0px', '0px']);
+          assert.equal(style.shadow, 'none');
+          assert.equal(style.color, ink);
+        }
+        async function show() {
+          await page.evaluate(() => window.scrollTo({ top: 600, behavior: 'instant' }));
+          await button.waitFor({ state: 'visible' });
+          await page.waitForFunction(() => document.querySelector('#m3ez-back-to-top-v1').getAttribute('aria-hidden') === 'false');
+        }
+        async function assertHidden() {
+          await page.waitForFunction(() => document.querySelector('#m3ez-back-to-top-v1').getAttribute('aria-hidden') === 'true');
+          assert.equal(await button.isVisible(), false);
+          assert.equal(await button.getAttribute('tabindex'), '-1');
+          assert.equal(await button.evaluate(node => getComputedStyle(node).pointerEvents), 'none');
+        }
+        await assertHidden();
+        await page.evaluate(() => window.scrollTo({ top: 200, behavior: 'instant' }));
+        await assertHidden();
+        await show();
+        assert.equal(await button.getAttribute('tabindex'), '0');
+        assert.equal(await button.getAttribute('aria-label'), 'Back to top');
+        assert.equal(await button.textContent(), '↑');
+        const resting = await appearance();
+        assertIconOnly(resting);
+        assert.equal(resting.opacity, '1');
+        assert.equal(resting.outline, '0px');
+        const box = await button.boundingBox();
+        const themeBox = await page.locator(toggle).boundingBox();
+        assert.equal(box.width, 44); assert.equal(box.height, 44);
+        assert.equal(box.y, themeBox.y);
+        assert.equal(width - box.x - box.width, themeBox.x);
+        await screenshot(page, `${width}-${theme}-both-icon-only.png`);
+
+        await button.hover();
+        const hovered = await appearance();
+        assertIconOnly(hovered);
+        assert.equal(hovered.opacity, '0.65');
+        assert.equal(hovered.outline, '0px');
+        await page.mouse.down();
+        assertIconOnly(await appearance());
+        assert.equal((await appearance()).focusVisible, false);
+        await page.mouse.up();
+        await page.waitForFunction(() => scrollY === 0);
+        await assertHidden();
+
+        // The full 44px target remains clickable outside the arrow glyph.
+        await show();
+        await button.click({ position: { x: 3, y: 3 } });
+        await page.waitForFunction(() => scrollY === 0);
+        await assertHidden();
+        await page.mouse.move(0, 0);
+
+        for (const key of ['Enter', 'Space']) {
+          await show();
+          // Establish keyboard modality, then focus this fixed control.
+          await page.keyboard.press('Tab');
+          await button.focus();
+          const focused = await appearance();
+          assertIconOnly(focused);
+          assert.equal(focused.focusVisible, true);
+          assert.equal(focused.outline, '2px');
+          assert.equal(focused.opacity, '1');
+          await page.keyboard.press(key);
+          await page.waitForFunction(() => scrollY === 0);
+          await assertHidden();
+        }
+        assert.deepEqual(errors, []);
+      } finally { await page.close(); }
+    });
+  }
+}
