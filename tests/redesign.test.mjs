@@ -180,3 +180,27 @@ test('export styles cannot reintroduce generated badges or carousel grid overrid
     assert.doesNotMatch(css, /\.credential-carousel-(?:card|kicker|title|issuer|issued|stage)[\s:{.\[]/, path);
   }
 });
+
+
+test('hero profile links render without the extra heading or its unused styles', () => {
+  const source = readFileSync(new URL('../assets/portfolio-redesign.js', import.meta.url), 'utf8');
+  const css = readFileSync(new URL('../assets/research-credentials.css', import.meta.url), 'utf8');
+  assert.doesNotMatch(source, /hero-profiles-label|Profiles & verification/, 'remove the heading rather than hiding it');
+  assert.doesNotMatch(css, /\.hero-profiles-label/, 'remove only the unused heading rule');
+});
+
+
+test('hero trust statement uses the approved shorter copy in static HTML', () => {
+  const html = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
+  const statements = [...html.matchAll(/<p class="trust-statement">([^<]*)<\/p>/g)];
+  assert.equal(statements.length, 1);
+  assert.equal(statements[0][1], 'I find broken trust boundaries.', 'hero copy must end after trust boundaries');
+});
+
+
+test('hero introduction uses the approved shorter copy in static HTML', () => {
+  const html = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
+  const introductions = [...html.matchAll(/<p class="hero-copy">([^<]*)<\/p>/g)];
+  assert.equal(introductions.length, 1);
+  assert.equal(introductions[0][1], 'Independent security researcher and authorized assessments.', 'hero introduction must match the requested wording');
+});
