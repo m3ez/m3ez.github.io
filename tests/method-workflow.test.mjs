@@ -88,13 +88,16 @@ test('Method ends with one shared-theme divider without adding a card frame', ()
 });
 
 
-test('Research has responsive outer spacing after Method without changing its internal padding', () => {
-  const rules = [...methodCss.matchAll(/#method \+ #research\{([^}]*)\}/g)].map(match => match[1]);
-  assert.match(rules[0], /(?:^|;)margin-top:2rem(?:;|$)/,
-    'Research needs a 2rem gap below the Method divider on desktop');
-  assert.match(rules[0], /padding-top:clamp\(1\.5rem,3vw,2rem\)/,
+test('responsive whitespace belongs above the Method divider, not before Research', () => {
+  const methodRules = [...methodCss.matchAll(/#method\.method-section\{([^}]*)\}/g)].map(match => match[1]);
+  assert.match(methodRules[0], /padding:clamp\(1\.5rem,3vw,2rem\) 0 3rem(?:;|$)/,
+    'The extra 2rem belongs inside Method above the divider, on top of its existing 1rem padding');
+  assert.match(methodRules[1], /padding:1\.25rem 0 2\.5rem(?:;|$)/,
+    'Mobile keeps its existing 1rem padding plus 1.5rem before the divider');
+  const researchRules = [...methodCss.matchAll(/#method \+ #research\{([^}]*)\}/g)].map(match => match[1]);
+  assert.equal(researchRules.length, 1, 'No mobile margin override may put the gap back below the divider');
+  assert.match(researchRules[0], /(?:^|;)margin-top:0(?:;|$)/,
+    'Research starts immediately after the Method divider');
+  assert.match(researchRules[0], /padding-top:clamp\(1\.5rem,3vw,2rem\)/,
     'Research keeps its existing internal top padding');
-  const mobile = methodCss.slice(methodCss.indexOf('@media (max-width:980px)'));
-  assert.match(mobile, /#method \+ #research\{margin-top:1\.5rem\}/,
-    'The outer gap is 1.5rem on mobile and tablet');
 });

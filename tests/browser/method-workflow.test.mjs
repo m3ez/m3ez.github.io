@@ -82,6 +82,7 @@ async function assertMethodPlacement(page, width) {
       borders: ['Top', 'Right', 'Bottom', 'Left'].map(side => style[`border${side}Width`]),
       dividerStyle: style.borderBottomStyle, dividerColor: style.borderBottomColor,
       researchBorderTop: getComputedStyle(document.getElementById('research')).borderTopWidth,
+      methodPaddingBottom: parseFloat(style.paddingBottom),
       researchMarginTop: parseFloat(getComputedStyle(document.getElementById('research')).marginTop),
       researchPaddingTop: parseFloat(getComputedStyle(document.getElementById('research')).paddingTop),
       rootFontSize: parseFloat(getComputedStyle(document.documentElement).fontSize),
@@ -106,17 +107,21 @@ async function assertMethodPlacement(page, width) {
   assert.ok(Math.abs(layout.heading.x - layout.heroTitle.x) < 1);
   assert.ok(Math.abs(layout.workflow.x - layout.heroTitle.x) < 1);
   assert.ok(layout.method.y >= layout.hero.bottom - 1);
-  const expectedGap = (width <= 980 ? 1.5 : 2) * layout.rootFontSize;
-  assert.ok(Math.abs(layout.researchMarginTop - expectedGap) < 0.1,
-    'Research needs responsive outer spacing below the Method divider');
-  assert.ok(Math.abs(layout.research.y - layout.method.bottom - expectedGap) < 1,
-    `The gap must precede the Research panel, not just its title: ${JSON.stringify(layout)}`);
+  const extraSpace = (width <= 980 ? 1.5 : 2) * layout.rootFontSize;
+  const expectedBottomPadding = layout.rootFontSize + extraSpace;
+  assert.ok(Math.abs(layout.methodPaddingBottom - expectedBottomPadding) < 0.1,
+    'Whitespace must be above the Method divider, not below it');
+  assert.ok(Math.abs(layout.method.bottom - 1 - layout.workflow.bottom - expectedBottomPadding) < 1,
+    `The extra space must be inside Method before its bottom line: ${JSON.stringify(layout)}`);
+  assert.equal(layout.researchMarginTop, 0, 'Research must not add a gap after the divider');
+  assert.ok(Math.abs(layout.research.y - layout.method.bottom) < 1,
+    `Research starts immediately after the divider: ${JSON.stringify(layout)}`);
   const expectedPadding = Math.min(2 * layout.rootFontSize, Math.max(1.5 * layout.rootFontSize, width * 0.03));
   assert.ok(Math.abs(layout.researchPaddingTop - expectedPadding) < 0.1,
     'Research internal padding remains unchanged');
   assert.ok(layout.researchHeading.y - layout.research.y <= 40,
     'Research keeps its compact internal heading spacing');
-  assert.ok(layout.method.height <= (width <= 980 ? 650 : 340),
+  assert.ok(layout.method.height - extraSpace <= (width <= 980 ? 650 : 340),
     `Method should not become a second hero: ${JSON.stringify(layout)}`);
 
   if (width <= 980) {
