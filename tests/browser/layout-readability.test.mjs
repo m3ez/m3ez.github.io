@@ -1,3 +1,4 @@
+import { certs } from '../../assets/certs.js';
 import { after, before, test } from 'node:test';
 import assert from 'node:assert/strict';
 import { createServer } from 'node:http';
@@ -109,7 +110,7 @@ for (const width of [390, 1440]) {
       assert.deepEqual(await actions.evaluateAll(nodes => nodes.map(node => node.getAttribute('href'))), ['#research', '#contact']);
       assert.equal(await page.locator('#top .hero-profiles .proof-links a').count(), 7);
       assert.equal(await page.locator('#top .hero-profiles-label').textContent(), 'Profiles & verification');
-      assert.equal(await page.locator('.credential-grid-item').count(), 13);
+      assert.equal(await page.locator('.credential-grid-item').count(), certs.length);
       assert.ok(await page.locator(carousel).isVisible());
       assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
       if (process.env.UI_SCREENSHOTS) {
@@ -140,11 +141,11 @@ test('carousel omits Pause/Play and retains a centered three-part navigation at 
       assert.equal(parts.columns, 3);
       assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
       await root.hover();
-      const first = await page.locator(currentCard).getAttribute('href');
+      const first = await page.locator(currentCard).locator('.credential-carousel-verify').getAttribute('href');
       await root.getByRole('button', { name: 'Next credential', exact: true }).click();
-      assert.notEqual(await page.locator(currentCard).getAttribute('href'), first);
+      assert.notEqual(await page.locator(currentCard).locator('.credential-carousel-verify').getAttribute('href'), first);
       await root.getByRole('button', { name: 'Previous credential', exact: true }).click();
-      assert.equal(await page.locator(currentCard).getAttribute('href'), first);
+      assert.equal(await page.locator(currentCard).locator('.credential-carousel-verify').getAttribute('href'), first);
       await root.locator('.credential-carousel-dot').nth(2).click();
       assert.equal(await page.locator(currentCard).getAttribute('data-index'), '2');
     });
@@ -155,30 +156,30 @@ test('keyboard focus pauses rotation and leaving the carousel resumes without a 
   await withPage(1200, async page => {
     await page.locator('#top .proof-links a').last().focus();
     await page.keyboard.press('Tab');
-    assert.ok(await page.evaluate(() => document.activeElement.matches('.credential-carousel-card')));
-    const first = await page.locator(currentCard).getAttribute('href');
+    assert.ok(await page.evaluate(() => document.activeElement.matches('.credential-carousel-card[data-position="current"] .credential-carousel-verify')));
+    const first = await page.locator(currentCard).locator('.credential-carousel-verify').getAttribute('href');
     await page.clock.fastForward(10000);
-    assert.equal(await page.locator(currentCard).getAttribute('href'), first);
+    assert.equal(await page.locator(currentCard).locator('.credential-carousel-verify').getAttribute('href'), first);
     // Moving the pointer away must not resume while keyboard focus remains inside.
     await page.locator(carousel).hover();
     await page.mouse.move(0, 0);
     await page.clock.fastForward(10000);
-    assert.equal(await page.locator(currentCard).getAttribute('href'), first);
+    assert.equal(await page.locator(currentCard).locator('.credential-carousel-verify').getAttribute('href'), first);
     await page.locator('.wordmark').focus();
     await page.clock.fastForward(5000);
-    assert.notEqual(await page.locator(currentCard).getAttribute('href'), first);
+    assert.notEqual(await page.locator(currentCard).locator('.credential-carousel-verify').getAttribute('href'), first);
   }, { reducedMotion: 'no-preference' });
 });
 
 test('hover pauses temporarily and leaving resumes automatic rotation', async () => {
   await withPage(1200, async page => {
     await page.locator(carousel).hover();
-    const first = await page.locator(currentCard).getAttribute('href');
+    const first = await page.locator(currentCard).locator('.credential-carousel-verify').getAttribute('href');
     await page.clock.fastForward(10000);
-    assert.equal(await page.locator(currentCard).getAttribute('href'), first);
+    assert.equal(await page.locator(currentCard).locator('.credential-carousel-verify').getAttribute('href'), first);
     await page.mouse.move(0, 0);
     await page.clock.fastForward(5000);
-    assert.notEqual(await page.locator(currentCard).getAttribute('href'), first);
+    assert.notEqual(await page.locator(currentCard).locator('.credential-carousel-verify').getAttribute('href'), first);
   }, { reducedMotion: 'no-preference' });
 });
 
@@ -193,21 +194,21 @@ test('reduced motion disables autoplay but preserves manual navigation without a
     });
     await page.emulateMedia({ reducedMotion: 'reduce' });
     await page.waitForFunction(() => window.__carouselMotionChanges.at(-1) === true);
-    const first = await page.locator(currentCard).getAttribute('href');
+    const first = await page.locator(currentCard).locator('.credential-carousel-verify').getAttribute('href');
     await page.clock.fastForward(10000);
-    assert.equal(await page.locator(currentCard).getAttribute('href'), first);
+    assert.equal(await page.locator(currentCard).locator('.credential-carousel-verify').getAttribute('href'), first);
     await page.locator(carousel).hover();
     await page.getByRole('button', { name: 'Next credential', exact: true }).click();
-    const manual = await page.locator(currentCard).getAttribute('href');
+    const manual = await page.locator(currentCard).locator('.credential-carousel-verify').getAttribute('href');
     assert.notEqual(manual, first);
     await page.locator('.wordmark').focus();
     await page.mouse.move(0, 0);
     await page.clock.fastForward(10000);
-    assert.equal(await page.locator(currentCard).getAttribute('href'), manual);
+    assert.equal(await page.locator(currentCard).locator('.credential-carousel-verify').getAttribute('href'), manual);
     await page.emulateMedia({ reducedMotion: 'no-preference' });
     await page.waitForFunction(() => window.__carouselMotionChanges.at(-1) === false);
     await page.clock.fastForward(5000);
-    assert.notEqual(await page.locator(currentCard).getAttribute('href'), manual);
+    assert.notEqual(await page.locator(currentCard).locator('.credential-carousel-verify').getAttribute('href'), manual);
   }, { reducedMotion: 'no-preference' });
 });
 
@@ -217,12 +218,12 @@ test('mobile credential swipe keeps its navigation behavior', async () => {
     await stage.scrollIntoViewIfNeeded();
     const box = await stage.boundingBox();
     assert.ok(box);
-    const first = await page.locator(currentCard).getAttribute('href');
+    const first = await page.locator(currentCard).locator('.credential-carousel-verify').getAttribute('href');
     await page.mouse.move(box.x + box.width * 0.7, box.y + box.height / 2);
     await page.mouse.down();
     await page.mouse.move(box.x + box.width * 0.25, box.y + box.height / 2, { steps: 8 });
     await page.mouse.up();
-    assert.notEqual(await page.locator(currentCard).getAttribute('href'), first);
+    assert.notEqual(await page.locator(currentCard).locator('.credential-carousel-verify').getAttribute('href'), first);
     assert.equal(await page.locator('.credential-carousel-card').count(), await page.locator('.credential-carousel-dot').count());
   });
 });

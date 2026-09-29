@@ -89,14 +89,25 @@ test('redesign preserves hero carousel and removes only the legacy static creden
 });
 
 
-test('carousel keeps a clean header and visible verify affordance', () => {
+test('carousel renders one explicit header, description, grouped metadata and native link', () => {
   const source = readFileSync(new URL('../assets/portfolio-interactions.js', import.meta.url), 'utf8');
-  assert.doesNotMatch(source, /credential-carousel-company/);
-  assert.doesNotMatch(source, /credential-carousel-head/);
-  assert.doesNotMatch(source, /issuerMonogram\(item\.issuer\)/);
+  assert.match(source, /company\.textContent = issuerMonogram\(item\.issuer\)/);
+  assert.match(source, /head\.append\(kicker, company\)/);
   assert.match(source, /kicker\.textContent = item\.category \|\| "Certification"/);
-  assert.match(source, /card\.append\(kicker, title, issuer, issued, verify\)/);
-  assert.match(source, /text-decoration:underline/);
+  assert.match(source, /description: cert\.description/);
+  assert.match(source, /description\.textContent = item\.description/);
+  assert.match(source, /metadata\.append\(issuer, document\.createTextNode\("·"\), issued\)/);
+  assert.match(source, /card\.append\(head, title, description, footer\)/);
+  assert.match(source, /const verify = document\.createElement\("a"\)/);
+  assert.match(source, /verify\.href = item\.href/);
+  assert.match(source, /verify\.target = "_blank"/);
+});
+
+test('export styles cannot reintroduce URL-dependent pseudo badges or card grid overrides', () => {
+  for (const path of ['../_next/static/chunks/03~_g8i41_-g_.css', '../_next/static/chunks/03~_g8i41_-g_-base.css', '../assets/research-credentials.css']) {
+    const css = readFileSync(new URL(path, import.meta.url), 'utf8');
+    assert.doesNotMatch(css, /\.credential-carousel-(?:card|kicker|title|issuer|issued|stage)[\s:{.\[]/, path);
+  }
 });
 
 test('long credential titles get a compact hero treatment', () => {
@@ -115,7 +126,7 @@ test('EC-Council verification URL safely encodes its badge token', () => {
 
 test('hero credential carousel uses the same cert source as the credential grid', () => {
   const source = readFileSync(new URL('../assets/portfolio-interactions.js', import.meta.url), 'utf8');
-  assert.match(source, /import \{ certs \} from '\.\/certs\.js';/);
+  assert.match(source, /import \{ certs, issuerMonogram \} from '\.\/certs\.js';/);
   assert.match(source, /const items = certs\.map\(\(cert\) => \(\{/);
   assert.match(source, /title: cert\.name/);
   assert.match(source, /href: cert\.verificationUrl/);

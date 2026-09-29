@@ -25,5 +25,5 @@ test('phone layout wraps hero proof links naturally while keeping one credential
   assert.doesNotMatch(css, /@media \(max-width:560px\)\{[\s\S]*?\.proof-links\{[^}]*grid-template-columns:1fr/);
   assert.doesNotMatch(css, /@media \(max-width:560px\)\{[\s\S]*?\.proof-links a\{[^}]*min-height:/);
   assert.match(css, /@media \(max-width:560px\)\{[\s\S]*?\.primary-action\{[^}]*width:100%[^}]*justify-content:center/);
-  assert.match(css, /@media \(max-width:560px\)\{[\s\S]*?#m3ez-credential-carousel-v1 \.credential-carousel-stage\{[^}]*height:/);
+  assert.doesNotMatch(css, /#m3ez-credential-carousel-v1 \.credential-carousel-(?:stage|card)\{/);
 });
