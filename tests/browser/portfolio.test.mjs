@@ -106,6 +106,8 @@ test('CVE controls, carousel, mobile navigation and back-to-top remain usable', 
     const severities = await page.locator('.cve-row-v2 .severity-chip').allTextContents();
     assert.ok(severities.length > 0 && severities.every(value => value === 'CRITICAL'));
     const current = page.locator('.credential-carousel-card[data-position="current"]');
+    const verify = current.locator('.credential-carousel-verify');
+    assert.equal(await verify.evaluate(node => node.closest('a')?.getAttribute('href')), await current.getAttribute('href'));
     const first = await current.getAttribute('href');
     await page.getByRole('button', { name: 'Next credential', exact: true }).click();
     assert.notEqual(await current.getAttribute('href'), first);

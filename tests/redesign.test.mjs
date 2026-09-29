@@ -89,11 +89,13 @@ test('redesign preserves hero carousel and removes only the legacy static creden
 });
 
 
-test('carousel renders issuer chip and visible verify affordance', () => {
+test('carousel keeps a clean header and visible verify affordance', () => {
   const source = readFileSync(new URL('../assets/portfolio-interactions.js', import.meta.url), 'utf8');
-  assert.match(source, /issuerMonogram\(item\.issuer\)/);
-  assert.match(source, /credential-carousel-company/);
-  assert.match(source, /credential-carousel-head/);
+  assert.doesNotMatch(source, /credential-carousel-company/);
+  assert.doesNotMatch(source, /credential-carousel-head/);
+  assert.doesNotMatch(source, /issuerMonogram\(item\.issuer\)/);
+  assert.match(source, /kicker\.textContent = item\.category \|\| "Certification"/);
+  assert.match(source, /card\.append\(kicker, title, issuer, issued, verify\)/);
   assert.match(source, /text-decoration:underline/);
 });
 
