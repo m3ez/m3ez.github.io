@@ -1,0 +1,37 @@
+name: Carousel regression
+on:
+  push:
+    branches: [agent/fix-carousel-rendering]
+permissions:
+  contents: read
+jobs:
+  browser:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: Source tests
+        run: npm test
+      - name: Rendered carousel regression
+        if: ${{ !cancelled() }}
+        run: node --test tests/browser/carousel-regression.test.mjs
+      - name: Full browser suite
+        if: ${{ !cancelled() }}
+        run: npm run test:browser
+      - name: Export verification source
+        if: ${{ always() }}
+        run: |
+          mkdir -p test-results
+          tar -czf test-results/verification-source.tar.gz assets _next/static/chunks/*.css index.html package.json package-lock.json tests data
+      - uses: actions/upload-artifact@v4
+        if: ${{ always() }}
+        with:
+          name: carousel-verification
+          path: test-results/
+          retention-days: 3
