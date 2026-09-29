@@ -58,7 +58,7 @@ jobs:
           cat "$EVIDENCE_DIR/browser-red.log"
           test "$red_status" -eq 1
           grep -q '^# fail 4$' "$EVIDENCE_DIR/browser-red.log"
-          test "$(grep -c "error: 'back-to-top stays transparent'" "$EVIDENCE_DIR/browser-red.log")" -eq 4
+          test "$(grep -c 'back-to-top stays transparent' "$EVIDENCE_DIR/browser-red.log")" -eq 4
       - name: Run the complete source and unit suite
         shell: bash
         run: |
