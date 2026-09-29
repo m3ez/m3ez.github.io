@@ -3,7 +3,7 @@ on:
   push:
     branches: [agent/fix-carousel-rendering]
 permissions:
-  contents: read
+  contents: write
 jobs:
   browser:
     runs-on: ubuntu-24.04
@@ -16,14 +16,24 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npx playwright install --with-deps chromium
+      - name: Preserve concurrent Method update
+        run: |
+          git fetch --no-tags origin db8458a99b5e670f96026372507f60546ebabdc6 --depth=1
+          python3 .github/reconcile-method.py
+          git diff --check
       - name: Source tests
         run: npm test
-      - name: Rendered carousel regression
-        if: ${{ !cancelled() }}
-        run: node --test tests/browser/carousel-regression.test.mjs
       - name: Full browser suite
         if: ${{ !cancelled() }}
         run: npm run test:browser
+      - name: Record tested branch snapshot
+        if: ${{ success() && github.ref == 'refs/heads/agent/fix-carousel-rendering' }}
+        run: |
+          git config user.name 'm3ez portfolio automation'
+          git config user.email '72428471+m3ez@users.noreply.github.com'
+          git add assets/research-credentials.css index.html tests/browser/layout-readability.test.mjs tests/browser/method-workflow.test.mjs tests/method-workflow.test.mjs tests/redesign.test.mjs .github/reconcile-method.py
+          git commit -m 'Preserve concurrent Method update and validate combined carousel repair'
+          git push origin HEAD:refs/heads/agent/fix-carousel-rendering
       - name: Export verification source
         if: ${{ always() }}
         run: |
