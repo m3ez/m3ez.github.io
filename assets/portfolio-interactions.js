@@ -1,7 +1,7 @@
 import { certs } from './certs.js';
 
 // Interaction code moved from the exported Next.js chunk.
-// Mount the carousel before the redesign replaces its credential source list.
+// The hero carousel and credential grid share assets/certs.js as their source of truth.
 export function initializeInteractions() {
   (() => {
     const MARKER = "m3ez-credential-carousel-v1";
