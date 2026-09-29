@@ -5,11 +5,26 @@ on:
     branches:
       - gh-pages
 
+  pull_request:
+    branches:
+      - gh-pages
+    paths:
+      - .github/workflows/mirror-gitlab.yml
+      - automation/mirror-gitlab-pages.sh
+      - tests/gitlab-mirror.test.mjs
+
+  # GITHUB_TOKEN-created commits do not trigger another push workflow.
   workflow_run:
     workflows:
       - "Update Wordfence CVE ledger"
+    branches:
+      - gh-pages
     types:
       - completed
+
+  # Catch up after a missed event or a temporary GitLab/network failure.
+  schedule:
+    - cron: "23 * * * *"
 
   workflow_dispatch:
 
@@ -18,7 +33,7 @@ permissions:
 
 concurrency:
   group: mirror-gitlab-pages
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   mirror:
@@ -30,36 +45,43 @@ jobs:
     timeout-minutes: 10
 
     steps:
-      - name: Checkout gh-pages
-        uses: actions/checkout@v4
+      - name: Checkout latest gh-pages
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
-          ref: gh-pages
+          ref: ${{ github.event_name == 'pull_request' && github.ref || 'gh-pages' }}
           fetch-depth: 1
+          persist-credentials: false
 
-      - name: Push snapshot to GitLab
+      - name: Run source and mirror regression tests
+        run: npm test
+
+      - name: Sync committed snapshot to GitLab
+        id: sync
+        if: github.event_name != 'pull_request'
         env:
           GITLAB_TOKEN: ${{ secrets.GITLAB_TOKEN }}
+          GIT_TERMINAL_PROMPT: "0"
         run: |
           set -euo pipefail
-
           if [ -z "${GITLAB_TOKEN:-}" ]; then
             echo "::error::GITLAB_TOKEN is not configured"
             exit 1
           fi
 
-          mirror_dir="$(mktemp -d)"
-          trap 'rm -rf "$mirror_dir"' EXIT
+          askpass="$(mktemp "$RUNNER_TEMP/gitlab-askpass.XXXXXX")"
+          trap 'rm -f "$askpass"' EXIT
+          cat > "$askpass" <<'SH'
+          #!/usr/bin/env sh
+          case "$1" in
+            *Username*) printf '%s\n' 'oauth2' ;;
+            *Password*) printf '%s\n' "$GITLAB_TOKEN" ;;
+            *) exit 1 ;;
+          esac
+          SH
+          chmod 700 "$askpass"
+          export GIT_ASKPASS="$askpass"
 
-          rsync -a --exclude='.git/' ./ "$mirror_dir/"
-          cd "$mirror_dir"
-
-          git init --object-format=sha256 -b main
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -A
-          git commit -m "Mirror GitHub Pages ${GITHUB_SHA}"
-
-          git remote add gitlab \
-            "https://m3ez:${GITLAB_TOKEN}@gitlab.com/m3ez/m3ez.gitlab.io.git"
-
-          git push --force gitlab main
+          bash automation/mirror-gitlab-pages.sh \
+            "$GITHUB_WORKSPACE" \
+            "https://gitlab.com/m3ez/m3ez.gitlab.io.git" \
+            main
