@@ -25,7 +25,7 @@ jobs:
           set -euo pipefail
           mkdir -p /tmp/pr32-integrated-review
           test "$GITHUB_REF" = 'refs/heads/agent/method-text-only'
-          test "$(git rev-parse HEAD^)" = "$REVIEW_HEAD"
+          test "$(git rev-parse HEAD^)" = '1407b36d47a8d3b2cde6cb514b03fdc906a55166'
           git diff --exit-code "$REVIEW_HEAD" HEAD -- . ':(exclude).github/workflows/pr32-integration-verification.yml'
           git fetch origin gh-pages
           test "$(git rev-parse origin/gh-pages)" = "$PRODUCTION_HEAD"
@@ -45,6 +45,59 @@ jobs:
         with:
           node-version: 22
           cache: npm
+      - name: Reproduce stale source assertions on production alone
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/pr32-production-source
+          git archive "$PRODUCTION_HEAD" | tar -x -C /tmp/pr32-production-source
+          if (cd /tmp/pr32-production-source && npm test) > /tmp/pr32-integrated-review/production-source-red.log 2>&1; then
+            cat /tmp/pr32-integrated-review/production-source-red.log
+            exit 1
+          fi
+          grep -q '^# fail 2$' /tmp/pr32-integrated-review/production-source-red.log
+          grep -q '^not ok .*carousel keeps a clean header and visible verify affordance' /tmp/pr32-integrated-review/production-source-red.log
+          grep -q '^not ok .*hero credential carousel uses the same cert source as the credential grid' /tmp/pr32-integrated-review/production-source-red.log
+      - name: Align the two stale assertions with the current carousel
+        run: |
+          python <<'PY'
+          from pathlib import Path
+          path = Path('tests/redesign.test.mjs')
+          text = path.read_text()
+          old = r'''test('carousel keeps a clean header and visible verify affordance', () => {
+            const source = readFileSync(new URL('../assets/portfolio-interactions.js', import.meta.url), 'utf8');
+            assert.doesNotMatch(source, /credential-carousel-company/);
+            assert.doesNotMatch(source, /credential-carousel-head/);
+            assert.doesNotMatch(source, /issuerMonogram\(item\.issuer\)/);
+            assert.match(source, /kicker\.textContent = item\.category \|\| "Certification"/);
+            assert.match(source, /card\.append\(kicker, title, issuer, issued, verify\)/);
+            assert.match(source, /text-decoration:underline/);
+          });'''
+          new = r'''test('carousel preserves its issuer header and real external verification link', () => {
+            const source = readFileSync(new URL('../assets/portfolio-interactions.js', import.meta.url), 'utf8');
+            assert.match(source, /company\.className = "credential-carousel-company"/);
+            assert.match(source, /head\.className = "credential-carousel-head"/);
+            assert.match(source, /company\.textContent = issuerMonogram\(item\.issuer\)/);
+            assert.match(source, /head\.append\(kicker, company\)/);
+            assert.match(source, /kicker\.textContent = item\.category \|\| "Certification"/);
+            assert.match(source, /card\.append\(head, title, issuer, issued, verify\)/);
+            assert.match(source, /const verify = document\.createElement\("a"\)/);
+            assert.match(source, /verify\.href = item\.href/);
+            assert.match(source, /verify\.target = "_blank"/);
+            assert.match(source, /verify\.rel = "noopener noreferrer"/);
+            assert.match(source, /text-decoration:underline/);
+          });'''
+          assert text.count(old) == 1, 'The reviewed header test must match exactly'
+          text = text.replace(old, new)
+          old_import = r'''  assert.match(source, /import \{ certs \} from '\.\/certs\.js';/);'''
+          new_import = r'''  const names = source.match(/^import\s+\{\s*([^}]+)\}\s+from\s+['"]\.\/certs\.js['"]/m)?.[1]
+              .split(',').map(name => name.trim()) ?? [];
+            assert.ok(names.includes('certs'), 'carousel must import the shared certification list');
+            assert.ok(names.includes('issuerMonogram'), 'carousel must import the shared issuer formatter');'''
+          assert text.count(old_import) == 1
+          path.write_text(text.replace(old_import, new_import))
+          PY
+          git add tests/redesign.test.mjs
+          git diff --cached --check
       - run: npm ci --ignore-scripts
       - name: Install Chromium
         run: npx playwright install --with-deps chromium > /tmp/pr32-browser-install.log 2>&1 || { tail -n 60 /tmp/pr32-browser-install.log; exit 1; }
@@ -56,12 +109,19 @@ jobs:
       - name: Commit integration and verify exact final tree
         run: |
           set -euo pipefail
-          git commit -m 'Integrate current CEH and carousel fixes before merging Method timeline'
+          git commit -m 'Integrate current carousel fixes and align stale source assertions before Method merge'
           printf 'VERIFIED_COMMIT=%s\nVERIFIED_TREE=%s\nPRODUCTION_HEAD=%s\n' "$(git rev-parse HEAD)" "$(git rev-parse HEAD^{tree})" "$PRODUCTION_HEAD" | tee /tmp/pr32-integrated-review/final.txt
           npm test | tee /tmp/pr32-integrated-review/source-final.log
           npm run test:browser | tee /tmp/pr32-integrated-review/browser-final.log
           test -z "$(git status --porcelain)"
           git diff --check "$PRODUCTION_HEAD" HEAD
+          git diff --exit-code "$REVIEW_HEAD" -- index.html assets/research-credentials.css tests/method-workflow.test.mjs tests/browser/method-workflow.test.mjs assets/method-workflow.js
+          git diff --exit-code "$PRODUCTION_HEAD" -- assets/certs.js assets/portfolio-interactions.js tests/browser/portfolio.test.mjs
+          python <<'PY'
+          import os, subprocess
+          changed = set(subprocess.check_output(['git','diff','--name-only',os.environ['PRODUCTION_HEAD'],'HEAD'], text=True).splitlines())
+          assert changed == {'index.html','assets/research-credentials.css','tests/method-workflow.test.mjs','tests/browser/method-workflow.test.mjs','tests/redesign.test.mjs'}, changed
+          PY
           git archive --format=tar HEAD > /tmp/pr32-integrated-review/reviewed-source.tar
           git diff --stat "$PRODUCTION_HEAD" HEAD > /tmp/pr32-integrated-review/scope.txt
           git fetch origin gh-pages agent/method-text-only
