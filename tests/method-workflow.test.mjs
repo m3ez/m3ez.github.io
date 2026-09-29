@@ -78,3 +78,11 @@ test('Method appears once directly after the hero and before Research in static 
   assert.equal(html.indexOf('</section>', hero) + '</section>'.length, start,
     'Method follows the hero without depending on a JavaScript reorder');
 });
+
+
+test('Method ends with one shared-theme divider without adding a card frame', () => {
+  assert.match(methodCss, /#method\.method-section\{[^}]*border:0;[^}]*border-bottom:1px solid var\(--line\)/,
+    'Method needs a single bottom divider in the shared line color');
+  assert.match(methodCss, /#method \+ #research\{[^}]*border-top:0/,
+    'Research must not duplicate the Method divider on mobile');
+});

@@ -80,12 +80,21 @@ async function assertMethodPlacement(page, width) {
       heroTitle: box('#hero-title'), heading: box('#method-title'),
       researchHeading: box('#research-title'), workflow: box('#method .method-workflow'),
       borders: ['Top', 'Right', 'Bottom', 'Left'].map(side => style[`border${side}Width`]),
+      dividerStyle: style.borderBottomStyle, dividerColor: style.borderBottomColor,
+      researchBorderTop: getComputedStyle(document.getElementById('research')).borderTopWidth,
+      feedback: box('#method .method-feedback-label'),
       padding: [style.paddingLeft, style.paddingRight],
     };
   });
   assert.deepEqual([layout.previous, layout.next], ['top', 'research'],
     'Method must sit directly between hero and Research');
-  assert.deepEqual(layout.borders, ['0px', '0px', '0px', '0px']);
+  assert.deepEqual(layout.borders, ['0px', '0px', '1px', '0px'],
+    'Method has one bottom divider, not an outer card frame');
+  assert.equal(layout.dividerStyle, 'solid');
+  assert.equal(layout.dividerColor, (await sitePalette(page)).line);
+  assert.equal(layout.researchBorderTop, '0px', 'Research must not double the divider');
+  assert.ok(layout.feedback.bottom < layout.method.bottom - 1,
+    'the divider must remain below the feedback path and caption');
   assert.deepEqual(layout.padding, ['0px', '0px'], 'no card-like horizontal inset');
   for (const neighbour of [layout.hero, layout.research]) {
     assert.ok(Math.abs(layout.method.x - neighbour.x) < 1);
