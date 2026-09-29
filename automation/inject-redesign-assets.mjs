@@ -3,6 +3,8 @@ import { readFile, writeFile } from 'node:fs/promises';
 const path = process.argv[2] ?? 'index.html';
 const stylesheet = '<link rel="stylesheet" href="/assets/research-credentials.css"/>';
 const script = '<script type="module" src="/assets/portfolio-redesign.js"></script>';
+const themeScript = '<script src="/assets/portfolio-theme.js"></script>';
+const themeStylesheet = '<link rel="stylesheet" href="/assets/portfolio-theme.css"/>';
 
 let html = await readFile(path, 'utf8');
 // The exported homepage is enhanced by our modules. Hydrating the same DOM with
@@ -19,5 +21,17 @@ if (!html.includes('/assets/research-credentials.css')) {
 if (!html.includes('/assets/portfolio-redesign.js')) {
   if (!html.includes('</head>')) throw new Error('index.html has no </head>');
   html = html.replace('</head>', `${script}</head>`);
+}
+// Restore theme support when a fresh static export is enhanced. The small
+// classic script runs before styles, independently of the module bootstrap.
+if (!html.includes('/assets/portfolio-theme.js')) {
+  if (!html.includes('</head>')) throw new Error('index.html has no </head>');
+  const firstStyle = html.indexOf('<link rel="stylesheet"');
+  const position = firstStyle >= 0 ? firstStyle : html.indexOf('</head>');
+  html = html.slice(0, position) + themeScript + html.slice(position);
+}
+if (!html.includes('/assets/portfolio-theme.css')) {
+  if (!html.includes('</head>')) throw new Error('index.html has no </head>');
+  html = html.replace('</head>', `${themeStylesheet}</head>`);
 }
 await writeFile(path, html, 'utf8');
