@@ -79,6 +79,50 @@ async function screenshot(page, name) {
   }
 }
 
+// Resolve shared tokens outside Method so a section-local palette cannot pass.
+async function sitePalette(page) {
+  return page.evaluate(() => {
+    const probe = document.createElement('span');
+    document.body.appendChild(probe);
+    try {
+      return Object.fromEntries(['paper', 'ink', 'muted', 'line', 'black'].map(token => {
+        probe.style.color = `var(--${token})`;
+        return [token, getComputedStyle(probe).color];
+      }));
+    } finally {
+      probe.remove();
+    }
+  });
+}
+
+async function assertMethodPalette(page) {
+  const palette = await sitePalette(page);
+  const actual = await page.locator('#method').evaluate(section => {
+    const color = (selector, property = 'color', pseudo = null) =>
+      getComputedStyle(section.querySelector(selector), pseudo)[property];
+    return {
+      background: getComputedStyle(section).backgroundColor,
+      text: getComputedStyle(section).color,
+      label: color('.method-label'),
+      detail: color('.method-detail'),
+      number: color('.method-step'),
+      phase: color('.method-phase-title'),
+      divider: color('.method-phase-title', 'borderBottomColor'),
+      rail: color('.method-track', 'backgroundColor', '::before'),
+      marker: color('.method-marker', 'backgroundColor'),
+      markerBorder: color('.method-marker', 'borderTopColor'),
+      endpoint: color('.method-node-final .method-marker', 'backgroundColor'),
+      feedback: color('.method-feedback'),
+    };
+  });
+  assert.deepEqual(actual, {
+    background: palette.paper, text: palette.ink, label: palette.ink,
+    detail: palette.muted, number: palette.muted, phase: palette.ink,
+    divider: palette.line, rail: palette.line, marker: palette.paper,
+    markerBorder: palette.muted, endpoint: palette.ink, feedback: palette.muted,
+  });
+}
+
 const phases = ['Discover', 'Test', 'Deliver'];
 async function feedbackGeometry(page, width) {
   const geometry = await page.locator(selector).evaluate(node => {
@@ -156,9 +200,9 @@ for (const [width, javaScriptEnabled] of [[320,true],[390,true],[768,true],[980,
         else assert.ok(Math.abs(line.startY+line.height-(next.y+next.height/2))<1.5, 'vertical rail reaches next marker');
       }
       assert.equal(endpoints[7].visible,false,'rail stops at Report');
-      assert.equal(await page.locator('#method').evaluate(n=>getComputedStyle(n).backgroundColor),'rgb(20, 20, 20)');
+      await assertMethodPalette(page);
       assert.equal(await graph.locator('.method-node-final').evaluate(n=>getComputedStyle(n).backgroundColor),'rgba(0, 0, 0, 0)');
-      assert.equal(await graph.locator('.method-node-final .method-marker').evaluate(n=>getComputedStyle(n).backgroundColor),'rgb(245, 245, 245)');
+      assert.equal(await graph.locator('.method-node-final .method-marker').evaluate(n=>getComputedStyle(n).backgroundColor),(await sitePalette(page)).ink);
       await feedbackGeometry(page,width);
       await graph.locator('.method-node-final').scrollIntoViewIfNeeded();
       assert.ok(await graph.locator('.method-node-final .method-detail').evaluate(node=>{
@@ -220,7 +264,8 @@ test('Option 1 Report stays text-only rather than inverting a card during playba
         return {bg:getComputedStyle(node).backgroundColor,marker:getComputedStyle(node.querySelector('.method-marker')).backgroundColor};
       });
     });
-    colors.forEach(c=>assert.deepEqual(c,{bg:'rgba(0, 0, 0, 0)',marker:'rgb(245, 245, 245)'}));
+    const palette = await sitePalette(page);
+    colors.forEach(c=>assert.deepEqual(c,{bg:'rgba(0, 0, 0, 0)',marker:palette.ink}));
   },{reducedMotion:'no-preference'});
 });
 
@@ -241,7 +286,7 @@ test('live reduced motion stops all highlights without hiding the Report endpoin
     await showMethod(page); await state(page,'running');
     await page.emulateMedia({reducedMotion:'reduce'}); await state(page,'complete');
     assert.equal(await page.locator(selector).evaluate(n => n.getAnimations({subtree:true}).length),0);
-    assert.equal(await page.locator('.method-node-final .method-marker').evaluate(n => getComputedStyle(n).backgroundColor),'rgb(245, 245, 245)');
+    assert.equal(await page.locator('.method-node-final .method-marker').evaluate(n => getComputedStyle(n).backgroundColor),(await sitePalette(page)).ink);
     await page.emulateMedia({reducedMotion:'no-preference'}); await state(page,'running');
   }, {reducedMotion:'no-preference'});
 });
@@ -310,4 +355,33 @@ test('unsupported IntersectionObserver keeps the grouped static workflow', async
     assert.deepEqual(await page.locator('.method-label').allTextContents(),expected);
     assert.equal(await page.locator(selector).evaluate(n => n.getAnimations({subtree:true}).length),0);
   }, {reducedMotion:'no-preference',init:()=>{delete window.IntersectionObserver;}});
+});
+
+
+test('Method labels and signals keep the shared dark colors across animation cycles', async () => {
+  await withPage(1440, async page => {
+    await showMethod(page);
+    await state(page, 'running');
+    const palette = await sitePalette(page);
+    const samples = await page.locator(selector).evaluate(workflow => {
+      const animations = workflow.getAnimations({ subtree: true });
+      animations.forEach(animation => animation.pause());
+      const sample = time => {
+        animations.forEach(animation => { animation.currentTime = time; });
+        return {
+          label: getComputedStyle(workflow.querySelector('.method-label')).color,
+          signal: getComputedStyle(workflow.querySelector('.method-signal')).backgroundColor,
+          marker: getComputedStyle(workflow.querySelector('.method-marker')).backgroundColor,
+        };
+      };
+      const duration = animations[0].effect.getTiming().duration;
+      return [0, duration, duration * 2].map(cycle => ({
+        active: sample(cycle + 80), resting: sample(cycle + 900),
+      }));
+    });
+    for (const sample of samples) {
+      assert.deepEqual(sample.active, { label: palette.black, signal: palette.ink, marker: palette.ink });
+      assert.deepEqual(sample.resting, { label: palette.ink, signal: palette.ink, marker: palette.paper });
+    }
+  }, { reducedMotion: 'no-preference' });
 });

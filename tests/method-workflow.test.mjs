@@ -50,8 +50,11 @@ test('the previous text-only Method writer cannot overwrite the diagram', () => 
   assert.match(redesign, /initializeMethodWorkflow\(\);/);
 });
 
-test('Option 1 uses the selected dark monochrome treatment only inside Method', () => {
-  assert.match(methodCss, /#method\.method-section\{[^}]*--method-bg:#141414/);
+test('Option 1 inherits the site palette instead of defining a separate dark theme', () => {
+  for (const [local, shared] of [['bg', 'paper'], ['ink', 'ink'], ['muted', 'muted'], ['line', 'line']]) {
+    assert.ok(methodCss.includes(`--method-${local}:var(--${shared})`), `${local} must follow the site's ${shared} token`);
+  }
+  assert.doesNotMatch(methodCss, /#[0-9a-f]{3,8}\b|\brgba?\(/i, 'Method colors must use shared tokens, including animation keyframes');
   assert.match(methodCss, /\.method-node-final \.method-marker\{[^}]*background:var\(--method-ink\)/);
   assert.doesNotMatch(methodCss, /\.method-node-final\{[^}]*background:var\(--black\)/);
 });
