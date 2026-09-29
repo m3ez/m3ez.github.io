@@ -88,6 +88,16 @@ test('redesign preserves hero carousel and removes only the legacy static creden
   assert.match(source, /legacyList\.remove\(\)/);
 });
 
+
+test('hero credential carousel uses the same cert source as the credential grid', () => {
+  const source = readFileSync(new URL('../assets/portfolio-interactions.js', import.meta.url), 'utf8');
+  assert.match(source, /import \{ certs \} from '\.\/certs\.js';/);
+  assert.match(source, /const items = certs\.map\(\(cert\) => \(\{/);
+  assert.match(source, /title: cert\.name/);
+  assert.match(source, /href: cert\.verificationUrl/);
+  assert.doesNotMatch(source, /credential-list li\[data-kind="credential"\]/);
+});
+
 test('every credential card renders its brief description', () => {
   const source = readFileSync(new URL('../assets/portfolio-redesign.js', import.meta.url), 'utf8');
   assert.match(source, /link\.appendChild\(element\('span', 'credential-proof', cert\.description\)\);/);

@@ -1,5 +1,7 @@
+import { certs } from './certs.js';
+
 // Interaction code moved from the exported Next.js chunk.
-// Mount the carousel before the redesign replaces its credential source list.
+// The hero carousel and credential grid share assets/certs.js as their source of truth.
 export function initializeInteractions() {
   (() => {
     const MARKER = "m3ez-credential-carousel-v1";
@@ -32,27 +34,12 @@ export function initializeInteractions() {
       if (document.getElementById(MARKER)) return;
       const hero = document.querySelector(".hero");
       if (!hero) return;
-      const sourceItems = [
-        ...document.querySelectorAll(
-          '.credential-list li[data-kind="credential"]',
-        ),
-      ]
-        .map((li) => {
-          const link = li.querySelector("a");
-          if (!link) return null;
-          const meta = li.querySelector(".record-meta")?.textContent || "";
-          const [issuer = "", issued = ""] = meta
-            .split("·")
-            .map((v) => v.trim());
-          return {
-            title: (link.textContent || "").trim(),
-            issuer,
-            issued: issued.slice(0, 4),
-            href: link.href,
-          };
-        })
-        .filter(Boolean);
-      const items = sourceItems;
+      const items = certs.map((cert) => ({
+        title: cert.name,
+        issuer: cert.issuer,
+        issued: String(cert.year),
+        href: cert.verificationUrl,
+      }));
       if (items.length < 2) return;
       const style = document.createElement("style");
       style.id = `${MARKER}-style`;
