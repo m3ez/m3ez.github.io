@@ -1,4 +1,4 @@
-import { certs } from './certs.js';
+import { certs, issuerMonogram } from './certs.js';
 
 // Interaction code moved from the exported Next.js chunk.
 // The hero carousel and credential grid share assets/certs.js as their source of truth.
@@ -17,11 +17,13 @@ export function initializeInteractions() {
 .credential-carousel-card[data-position="next"]{left:82%;z-index:2;opacity:.46;transform:translate(-50%,calc(-50% + .6rem)) scale(.78);pointer-events:auto}
 .credential-carousel-card[data-position="past"]{left:-12%;opacity:0;transform:translate(-50%,calc(-50% + .8rem)) scale(.68)}
 .credential-carousel-card[data-position="future"]{left:112%;opacity:0;transform:translate(-50%,calc(-50% + .8rem)) scale(.68)}
-.credential-carousel-kicker,.credential-carousel-issuer,.credential-carousel-issued,.credential-carousel-verify{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+.credential-carousel-head{display:flex;align-items:flex-start;justify-content:space-between;gap:.65rem}
+.credential-carousel-kicker,.credential-carousel-company,.credential-carousel-issuer,.credential-carousel-issued,.credential-carousel-verify{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
 .credential-carousel-kicker{color:var(--muted);font-size:10px;letter-spacing:.16em;text-transform:uppercase}
+.credential-carousel-company{max-width:48%;padding:.16rem .34rem;border:.5px solid var(--line);font-size:9px;font-weight:700;line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .credential-carousel-title{margin-top:1.05rem;font-size:clamp(26px,3vw,34px);line-height:1;letter-spacing:-.025em;overflow-wrap:anywhere}
 .credential-carousel-card.has-long-title .credential-carousel-title{margin-top:.85rem;font-size:clamp(21px,2.35vw,28px);line-height:1.02;letter-spacing:-.02em}
-.credential-carousel-issuer{margin-top:.7rem;font-size:13px}.credential-carousel-issued{margin-top:.2rem;color:var(--muted);font-size:11px}.credential-carousel-verify{align-self:flex-end;margin-top:auto;font-size:12px}
+.credential-carousel-issuer{margin-top:.7rem;font-size:13px}.credential-carousel-issued{margin-top:.2rem;color:var(--muted);font-size:11px}.credential-carousel-verify{align-self:flex-end;margin-top:auto;font-size:12px;text-decoration:underline;text-underline-offset:.18em}
 .credential-carousel-controls{order:1;display:grid;grid-template-columns:44px minmax(0,1fr) 44px;gap:.25rem;align-items:center;width:min(100%,30rem);margin:.1rem auto 0}
 .credential-carousel-arrow,.credential-carousel-dot{font:inherit;cursor:pointer}.credential-carousel-arrow{min-width:44px;min-height:44px;padding:0;border:0;background:transparent;color:var(--ink);opacity:0;pointer-events:none;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:20px}
 .credential-carousel:hover .credential-carousel-arrow,.credential-carousel:focus-within .credential-carousel-arrow{opacity:1;pointer-events:auto}
@@ -63,9 +65,15 @@ export function initializeInteractions() {
         card.rel = "noopener noreferrer";
         card.dataset.index = String(index);
         if (item.title.length > 24) card.classList.add("has-long-title");
+        const head = document.createElement("div");
+        head.className = "credential-carousel-head";
         const kicker = document.createElement("span");
         kicker.className = "credential-carousel-kicker";
         kicker.textContent = "Certification";
+        const company = document.createElement("span");
+        company.className = "credential-carousel-company";
+        company.textContent = issuerMonogram(item.issuer);
+        head.append(kicker, company);
         const title = document.createElement("strong");
         title.className = "credential-carousel-title";
         title.textContent = item.title;
@@ -77,7 +85,7 @@ export function initializeInteractions() {
         issued.textContent = item.issued;
         const verify = document.createElement("span");
         verify.className = "credential-carousel-verify";
-        card.append(kicker, title, issuer, issued, verify);
+        card.append(head, title, issuer, issued, verify);
         stage.appendChild(card);
         return { card, verify, item };
       });
