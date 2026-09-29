@@ -6,7 +6,7 @@ permissions:
   contents: write
 concurrency:
   group: pr32-integrated-merge-verification
-  cancel-in-progress: false
+  cancel-in-progress: true
 jobs:
   verify:
     if: github.ref == 'refs/heads/agent/method-text-only'
@@ -25,7 +25,7 @@ jobs:
           set -euo pipefail
           mkdir -p /tmp/pr32-integrated-review
           test "$GITHUB_REF" = 'refs/heads/agent/method-text-only'
-          test "$(git rev-parse HEAD^)" = '5271029e4ffb78cf42ae2325f0bd414266814d38'
+          test "$(git rev-parse HEAD^)" = '3103079c98bb0547c6eab3a31cfbed4ce180a986'
           git diff --exit-code "$REVIEW_HEAD" HEAD -- . ':(exclude).github/workflows/pr32-integration-verification.yml'
           git fetch origin gh-pages
           test "$(git rev-parse origin/gh-pages)" = "$PRODUCTION_HEAD"
@@ -109,7 +109,7 @@ jobs:
           assert text.count(count) == 1
           text = text.replace(count, "      assert.equal(await page.locator('.credential-grid-item').count(), certs.length);\n      assert.deepEqual(await page.locator('.credential-grid-item .credential-name').allTextContents(), certs.map(cert => cert.name));")
           old_identity = "await page.locator(currentCard).getAttribute('href')"
-          assert text.count(old_identity) == 16, text.count(old_identity)
+          assert text.count(old_identity) == 17, text.count(old_identity)
           text = text.replace(old_identity, "await currentCredentialHref(page)")
           old_focus = "    assert.ok(await page.evaluate(() => document.activeElement.matches('.credential-carousel-card')));"
           assert text.count(old_focus) == 1
