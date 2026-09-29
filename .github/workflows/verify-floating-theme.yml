@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     env:
-      EVIDENCE_DIR: ${{ runner.temp }}/theme-verification
+      EVIDENCE_DIR: /tmp/theme-verification
       EXPECTED_TREE: e4ae7a7b7977b4e781f8f80e6b4d6e90ead31cef
     steps:
       - uses: actions/checkout@v4
@@ -53,8 +53,8 @@ jobs:
       - name: Run the complete Chromium browser suite over HTTP
         shell: bash
         env:
-          UI_SCREENSHOTS: ${{ runner.temp }}/theme-verification/screenshots
-          THEME_SCREENSHOT_DIR: ${{ runner.temp }}/theme-verification/theme-screenshots
+          UI_SCREENSHOTS: /tmp/theme-verification/screenshots
+          THEME_SCREENSHOT_DIR: /tmp/theme-verification/theme-screenshots
         run: |
           set -euo pipefail
           npm run test:browser 2>&1 | tee "$EVIDENCE_DIR/browser-final.log"
@@ -78,7 +78,7 @@ jobs:
         with:
           name: floating-theme-verification
           path: |
-            ${{ runner.temp }}/theme-verification
+            /tmp/theme-verification
             test-results
           if-no-files-found: error
           retention-days: 14
