@@ -106,7 +106,7 @@ export const certs = [
     category: 'Offensive',
     flagship: false,
     description: 'Hands-on ethical hacking across networks, systems, and web applications',
-    verificationUrl: 'https://aspen.eccouncil.org/VerifyBadge?&type=certification&a=93Su70yxeQhkpvw/+udaTfqctW36VqRFyDcp9TaqyL4=',
+    verificationUrl: 'https://aspen.eccouncil.org/VerifyBadge?type=certification&a=93Su70yxeQhkpvw%2F%2BudaTfqctW36VqRFyDcp9TaqyL4%3D',
   },
   {
     name: 'PenTest+',

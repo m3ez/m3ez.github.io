@@ -19,7 +19,8 @@ export function initializeInteractions() {
 .credential-carousel-card[data-position="future"]{left:112%;opacity:0;transform:translate(-50%,calc(-50% + .8rem)) scale(.68)}
 .credential-carousel-kicker,.credential-carousel-issuer,.credential-carousel-issued,.credential-carousel-verify{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
 .credential-carousel-kicker{color:var(--muted);font-size:10px;letter-spacing:.16em;text-transform:uppercase}
-.credential-carousel-title{margin-top:1.05rem;font-size:clamp(26px,3vw,34px);line-height:1;letter-spacing:-.025em}
+.credential-carousel-title{margin-top:1.05rem;font-size:clamp(26px,3vw,34px);line-height:1;letter-spacing:-.025em;overflow-wrap:anywhere}
+.credential-carousel-card.has-long-title .credential-carousel-title{margin-top:.85rem;font-size:clamp(21px,2.35vw,28px);line-height:1.02;letter-spacing:-.02em}
 .credential-carousel-issuer{margin-top:.7rem;font-size:13px}.credential-carousel-issued{margin-top:.2rem;color:var(--muted);font-size:11px}.credential-carousel-verify{align-self:flex-end;margin-top:auto;font-size:12px}
 .credential-carousel-controls{order:1;display:grid;grid-template-columns:44px minmax(0,1fr) 44px;gap:.25rem;align-items:center;width:min(100%,30rem);margin:.1rem auto 0}
 .credential-carousel-arrow,.credential-carousel-dot{font:inherit;cursor:pointer}.credential-carousel-arrow{min-width:44px;min-height:44px;padding:0;border:0;background:transparent;color:var(--ink);opacity:0;pointer-events:none;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:20px}
@@ -28,7 +29,7 @@ export function initializeInteractions() {
 .credential-carousel-dot::before{position:absolute;top:50%;left:50%;width:6px;height:6px;background:var(--line);clip-path:circle(50%);content:"";transform:translate(-50%,-50%)}.credential-carousel-dot.is-active::before{background:var(--black)}
 @media (hover:none){.credential-carousel-arrow{opacity:1;pointer-events:auto}}@media (prefers-reduced-motion:reduce){.credential-carousel-card{transition:none}}
 @media (max-width:880px){.hero{grid-template-columns:1fr;column-gap:0}.credential-carousel{grid-column:1;grid-row:auto;max-width:36rem;justify-self:center;margin-top:1.75rem}}
-@media (max-width:640px){.credential-carousel-stage{height:12.5rem}.credential-carousel-card{width:min(72%,17rem);height:11.5rem;padding:1rem}.credential-carousel-card[data-position="previous"]{left:9%}.credential-carousel-card[data-position="next"]{left:91%}.credential-carousel-card[data-position="past"]{left:-24%}.credential-carousel-card[data-position="future"]{left:124%}.credential-carousel-title{font-size:clamp(24px,9vw,30px)}.credential-carousel-controls{width:100%}.credential-carousel-dot{width:16px;min-height:32px}.credential-carousel-arrow{opacity:1;pointer-events:auto}}
+@media (max-width:640px){.credential-carousel-stage{height:12.5rem}.credential-carousel-card{width:min(72%,17rem);height:11.5rem;padding:1rem}.credential-carousel-card[data-position="previous"]{left:9%}.credential-carousel-card[data-position="next"]{left:91%}.credential-carousel-card[data-position="past"]{left:-24%}.credential-carousel-card[data-position="future"]{left:124%}.credential-carousel-title{font-size:clamp(24px,9vw,30px)}.credential-carousel-card.has-long-title .credential-carousel-title{margin-top:.75rem;font-size:clamp(19px,6.8vw,24px);line-height:1.04}.credential-carousel-controls{width:100%}.credential-carousel-dot{width:16px;min-height:32px}.credential-carousel-arrow{opacity:1;pointer-events:auto}}
 `;
     function mount() {
       if (document.getElementById(MARKER)) return;
@@ -61,6 +62,7 @@ export function initializeInteractions() {
         card.target = "_blank";
         card.rel = "noopener noreferrer";
         card.dataset.index = String(index);
+        if (item.title.length > 24) card.classList.add("has-long-title");
         const kicker = document.createElement("span");
         kicker.className = "credential-carousel-kicker";
         kicker.textContent = "Certification";

@@ -89,6 +89,20 @@ test('redesign preserves hero carousel and removes only the legacy static creden
 });
 
 
+test('long credential titles get a compact hero treatment', () => {
+  const source = readFileSync(new URL('../assets/portfolio-interactions.js', import.meta.url), 'utf8');
+  assert.match(source, /item\.title\.length > 24/);
+  assert.match(source, /has-long-title/);
+  assert.match(source, /overflow-wrap:anywhere/);
+});
+
+test('EC-Council verification URL safely encodes its badge token', () => {
+  const ceh = certs.find((cert) => cert.issuer === 'EC-Council');
+  assert.ok(ceh);
+  assert.match(ceh.verificationUrl, /%2F%2B/);
+  assert.match(ceh.verificationUrl, /%3D$/);
+});
+
 test('hero credential carousel uses the same cert source as the credential grid', () => {
   const source = readFileSync(new URL('../assets/portfolio-interactions.js', import.meta.url), 'utf8');
   assert.match(source, /import \{ certs \} from '\.\/certs\.js';/);
