@@ -1,0 +1,131 @@
+name: Method section border verification
+on:
+  push:
+    branches: [agent/method-text-only]
+permissions:
+  contents: write
+jobs:
+  verify:
+    if: github.ref == 'refs/heads/agent/method-text-only'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+      - name: Guard reviewed baseline
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF" = 'refs/heads/agent/method-text-only'
+          git diff --exit-code 7ce049a85067d62012287b06101937f0aa2d6e15 HEAD -- . ':(exclude).github/workflows/method-border-verification.yml'
+          mkdir -p /tmp/method-border-review
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium > /tmp/browser-install.log 2>&1 || { tail -n 60 /tmp/browser-install.log; exit 1; }
+      - name: Add outer-border regression assertions
+        run: |
+          python <<'PY'
+          from pathlib import Path
+          p = Path('tests/method-workflow.test.mjs')
+          s = p.read_text()
+          addition = r'''
+          test('Method preserves shared section borders while workflow stages remain borderless', () => {
+            assert.match(html, /<section\b[^>]*class="trace-section method-section"[^>]*id="method"/);
+            const wrapperRules = [...methodCss.matchAll(/#method\.method-section\{([^}]*)\}/g)];
+            assert.ok(wrapperRules.length > 0);
+            for (const [, rule] of wrapperRules) {
+              assert.doesNotMatch(rule, /(?:^|;)\s*border(?:-[a-z-]+)?\s*:/,
+                'Method must retain the responsive .trace-section borders rather than reset them');
+            }
+            assert.match(methodCss, /\.method-node\{[^}]*border:0[^}]*background:transparent/);
+          });
+          '''
+          assert 'Method preserves shared section borders' not in s
+          p.write_text(s + addition)
+          p = Path('tests/browser/method-workflow.test.mjs')
+          s = p.read_text()
+          old = '[[320,true],[390,true],[768,true]'
+          assert s.count(old) == 1
+          s = s.replace(old, '[[320,true],[390,true],[640,true],[641,true],[768,true]')
+          needle = '      await assertMethodPalette(page);'
+          replacement = '''      const sectionBorders = await page.evaluate(() => {
+                  const read = selector => {
+                    const style = getComputedStyle(document.querySelector(selector));
+                    return Object.fromEntries(['Top', 'Right', 'Bottom', 'Left'].map(side => [side, {
+                      width: style[`border${side}Width`],
+                      style: style[`border${side}Style`],
+                      color: style[`border${side}Color`],
+                    }]));
+                  };
+                  return { method: read('#method'), contact: read('#contact') };
+                });
+                assert.deepEqual(sectionBorders.method, sectionBorders.contact,
+                  'Method outer borders must match the other site sections, not the borderless stages');
+                assert.deepEqual(sectionBorders.method.Bottom,
+                  { width: '1px', style: 'solid', color: (await sitePalette(page)).black });
+                assert.equal(sectionBorders.method.Left.width, width <= 640 ? '0px' : '2px');
+                assert.equal(sectionBorders.method.Top.width, width <= 640 ? '2px' : '0px');
+                await assertMethodPalette(page);'''
+          assert s.count(needle) == 1
+          p.write_text(s.replace(needle, replacement))
+          PY
+      - name: Prove the missing border fails the revised tests
+        run: |
+          set -euo pipefail
+          if npm test > /tmp/method-border-review/source-red.log 2>&1; then
+            cat /tmp/method-border-review/source-red.log
+            echo 'Expected the missing section border assertion to fail'; exit 1
+          fi
+          grep -q '^# fail 1$' /tmp/method-border-review/source-red.log
+          grep -q 'Method must retain the responsive .trace-section borders' /tmp/method-border-review/source-red.log
+          if node --test --test-name-pattern='Option 1 is borderless, grouped, and readable' tests/browser/method-workflow.test.mjs > /tmp/method-border-review/browser-red.log 2>&1; then
+            cat /tmp/method-border-review/browser-red.log
+            echo 'Expected the outer-border checks to reject the old wrapper'; exit 1
+          fi
+          grep -q '^# fail 11$' /tmp/method-border-review/browser-red.log
+          grep -q 'Method outer borders must match the other site sections' /tmp/method-border-review/browser-red.log
+      - name: Restore the native section borders
+        run: |
+          python <<'PY'
+          from pathlib import Path
+          p = Path('assets/research-credentials.css')
+          s = p.read_text()
+          old = 'row-gap:2rem;border:0;background:var(--method-bg)'
+          new = 'row-gap:2rem;background:var(--method-bg)'
+          assert s.count(old) == 1
+          p.write_text(s.replace(old, new))
+          PY
+      - name: Full source and browser validation
+        env:
+          UI_SCREENSHOTS: /tmp/method-border-review/screenshots
+        run: |
+          set -euo pipefail
+          git diff --check
+          npm test | tee /tmp/method-border-review/source.log
+          npm run test:browser | tee /tmp/method-border-review/browser.log
+      - name: Commit the clean tree and verify again
+        env:
+          UI_SCREENSHOTS: /tmp/method-border-review/screenshots
+        run: |
+          set -euo pipefail
+          git rm .github/workflows/method-border-verification.yml
+          git add assets/research-credentials.css tests/method-workflow.test.mjs tests/browser/method-workflow.test.mjs
+          test "$(git write-tree)" = '98b731b27382601ffbe2da661bc3a7f37442eae6'
+          git -c user.name='m3ez portfolio automation' -c user.email='72428471+m3ez@users.noreply.github.com' commit -m 'Restore Method section borders while keeping workflow steps borderless'
+          printf 'VERIFIED_COMMIT=%s\nVERIFIED_TREE=%s\n' "$(git rev-parse HEAD)" "$(git rev-parse HEAD^{tree})" | tee /tmp/method-border-review/final.txt
+          npm test | tee /tmp/method-border-review/source-final.log
+          npm run test:browser | tee /tmp/method-border-review/browser-final.log
+          test -z "$(git status --porcelain)"
+          git archive --format=tar HEAD > /tmp/method-border-review/reviewed-source.tar
+          git push origin HEAD:refs/heads/agent/method-text-only
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: method-border-review
+          path: /tmp/method-border-review
+          if-no-files-found: error
