@@ -86,3 +86,15 @@ test('Method ends with one shared-theme divider without adding a card frame', ()
   assert.match(methodCss, /#method \+ #research\{[^}]*border-top:0/,
     'Research must not duplicate the Method divider on mobile');
 });
+
+
+test('Research has responsive outer spacing after Method without changing its internal padding', () => {
+  const rules = [...methodCss.matchAll(/#method \+ #research\{([^}]*)\}/g)].map(match => match[1]);
+  assert.match(rules[0], /(?:^|;)margin-top:2rem(?:;|$)/,
+    'Research needs a 2rem gap below the Method divider on desktop');
+  assert.match(rules[0], /padding-top:clamp\(1\.5rem,3vw,2rem\)/,
+    'Research keeps its existing internal top padding');
+  const mobile = methodCss.slice(methodCss.indexOf('@media (max-width:980px)'));
+  assert.match(mobile, /#method \+ #research\{margin-top:1\.5rem\}/,
+    'The outer gap is 1.5rem on mobile and tablet');
+});
