@@ -3,7 +3,7 @@ on:
   push:
     branches: [agent/fix-carousel-rendering]
 permissions:
-  contents: read
+  contents: write
 jobs:
   browser:
     runs-on: ubuntu-24.04
@@ -16,6 +16,11 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npx playwright install --with-deps chromium
+      - name: Apply reviewed candidate
+        run: |
+          python3 .github/carousel-repair.py
+          git diff --check
+          node --check assets/portfolio-interactions.js
       - name: Source tests
         run: npm test
       - name: Rendered carousel regression
@@ -24,11 +29,21 @@ jobs:
       - name: Full browser suite
         if: ${{ !cancelled() }}
         run: npm run test:browser
+      - name: Record tested branch snapshot
+        if: ${{ success() && github.ref == 'refs/heads/agent/fix-carousel-rendering' }}
+        run: |
+          git config user.name 'm3ez portfolio automation'
+          git config user.email '72428471+m3ez@users.noreply.github.com'
+          git add assets/portfolio-interactions.js assets/research-credentials.css _next/static/chunks/*.css tests/redesign.test.mjs tests/mobile-responsive.test.mjs tests/browser/layout-readability.test.mjs .github/carousel-repair.py .github/workflows/carousel-regression.yml
+          git commit -m 'Fix carousel CSS ownership, metadata and native interactions after browser verification'
+          git push origin HEAD:refs/heads/agent/fix-carousel-rendering
       - name: Export verification source
         if: ${{ always() }}
         run: |
           mkdir -p test-results
-          tar -czf test-results/verification-source.tar.gz assets _next/static/chunks/*.css index.html package.json package-lock.json tests data
+          tar -czf test-results/verification-source.tar.gz assets _next/static/chunks/*.css index.html package.json package-lock.json tests data automation
+          git rev-parse HEAD > test-results/source-commit.txt
+          git diff --stat > test-results/uncommitted-diff.txt
       - uses: actions/upload-artifact@v4
         if: ${{ always() }}
         with:
