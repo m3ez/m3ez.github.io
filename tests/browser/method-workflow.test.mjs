@@ -60,6 +60,99 @@ async function showMethod(page) {
   await page.locator('#method').evaluate(node => node.scrollIntoView({ behavior: 'instant', block: 'center' }));
 }
 
+// Research is off the Method viewport both before and after the approved move.
+// Do not assume the top of the page is offscreen now that Method follows the hero.
+async function hideMethod(page) {
+  await page.locator('#research').evaluate(node => window.scrollTo({
+    top: node.getBoundingClientRect().top + window.scrollY + 100,
+    behavior: 'instant',
+  }));
+}
+
+async function assertMethodPlacement(page, width) {
+  const layout = await page.evaluate(() => {
+    const method = document.getElementById('method');
+    const style = getComputedStyle(method);
+    const box = selector => document.querySelector(selector).getBoundingClientRect().toJSON();
+    return {
+      previous: method.previousElementSibling?.id, next: method.nextElementSibling?.id,
+      hero: box('#top'), method: box('#method'), research: box('#research'),
+      heroTitle: box('#hero-title'), heading: box('#method-title'),
+      researchHeading: box('#research-title'), workflow: box('#method .method-workflow'),
+      borders: ['Top', 'Right', 'Bottom', 'Left'].map(side => style[`border${side}Width`]),
+      dividerStyle: style.borderBottomStyle, dividerColor: style.borderBottomColor,
+      researchBorderTop: getComputedStyle(document.getElementById('research')).borderTopWidth,
+      methodPaddingBottom: parseFloat(style.paddingBottom),
+      researchMarginTop: parseFloat(getComputedStyle(document.getElementById('research')).marginTop),
+      researchPaddingTop: parseFloat(getComputedStyle(document.getElementById('research')).paddingTop),
+      rootFontSize: parseFloat(getComputedStyle(document.documentElement).fontSize),
+      feedback: box('#method .method-feedback-label'),
+      padding: [style.paddingLeft, style.paddingRight],
+    };
+  });
+  assert.deepEqual([layout.previous, layout.next], ['top', 'research'],
+    'Method must sit directly between hero and Research');
+  assert.deepEqual(layout.borders, ['0px', '0px', '1px', '0px'],
+    'Method has one bottom divider, not an outer card frame');
+  assert.equal(layout.dividerStyle, 'solid');
+  assert.equal(layout.dividerColor, (await sitePalette(page)).line);
+  assert.equal(layout.researchBorderTop, '0px', 'Research must not double the divider');
+  assert.ok(layout.feedback.bottom < layout.method.bottom - 1,
+    'the divider must remain below the feedback path and caption');
+  assert.deepEqual(layout.padding, ['0px', '0px'], 'no card-like horizontal inset');
+  for (const neighbour of [layout.hero, layout.research]) {
+    assert.ok(Math.abs(layout.method.x - neighbour.x) < 1);
+    assert.ok(Math.abs(layout.method.right - neighbour.right) < 1);
+  }
+  assert.ok(Math.abs(layout.heading.x - layout.heroTitle.x) < 1);
+  assert.ok(Math.abs(layout.workflow.x - layout.heroTitle.x) < 1);
+  assert.ok(layout.method.y >= layout.hero.bottom - 1);
+  const extraSpace = (width <= 980 ? 1.5 : 2) * layout.rootFontSize;
+  const expectedBottomPadding = layout.rootFontSize + extraSpace;
+  assert.ok(Math.abs(layout.methodPaddingBottom - expectedBottomPadding) < 0.1,
+    'Whitespace must be above the Method divider, not below it');
+  assert.ok(Math.abs(layout.method.bottom - 1 - layout.workflow.bottom - expectedBottomPadding) < 1,
+    `The extra space must be inside Method before its bottom line: ${JSON.stringify(layout)}`);
+  assert.equal(layout.researchMarginTop, 0, 'Research must not add a gap after the divider');
+  assert.ok(Math.abs(layout.research.y - layout.method.bottom) < 1,
+    `Research starts immediately after the divider: ${JSON.stringify(layout)}`);
+  const expectedPadding = Math.min(2 * layout.rootFontSize, Math.max(1.5 * layout.rootFontSize, width * 0.03));
+  assert.ok(Math.abs(layout.researchPaddingTop - expectedPadding) < 0.1,
+    'Research internal padding remains unchanged');
+  assert.ok(layout.researchHeading.y - layout.research.y <= 40,
+    'Research keeps its compact internal heading spacing');
+  assert.ok(layout.method.height - extraSpace <= (width <= 980 ? 650 : 340),
+    `Method should not become a second hero: ${JSON.stringify(layout)}`);
+
+  if (width <= 980) {
+    const rows = await page.locator('.method-node').evaluateAll(nodes => nodes.map(node => {
+      const rect = selector => node.querySelector(selector).getBoundingClientRect().toJSON();
+      return { height: node.getBoundingClientRect().height, number: rect('.method-step'),
+        marker: rect('.method-marker'), label: rect('.method-label'), detail: rect('.method-detail') };
+    }));
+    for (const row of rows) {
+      assert.ok(row.height <= 56, `mobile rows remain content-sized: ${JSON.stringify(row)}`);
+      assert.ok(row.number.x >= row.marker.right + 3 && row.number.right <= row.label.x);
+      assert.ok(row.detail.x >= row.label.right - 1, 'description sits beside the stage title');
+    }
+  }
+}
+
+async function screenshotOverview(page, name) {
+  if (!process.env.UI_SCREENSHOTS) return;
+  await mkdir(process.env.UI_SCREENSHOTS, { recursive: true });
+  const original = page.viewportSize();
+  const end = await page.locator('#research-title').evaluate(node =>
+    Math.ceil(node.getBoundingClientRect().bottom + window.scrollY + 48));
+  try {
+    await page.setViewportSize({ width: original.width, height: end });
+    await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'instant' }));
+    await page.screenshot({ path: resolve(process.env.UI_SCREENSHOTS, name) });
+  } finally {
+    await page.setViewportSize(original);
+  }
+}
+
 async function state(page, value) {
   await page.waitForFunction(value => document.querySelector('#method .method-workflow').dataset.flowState === value, value);
 }
@@ -67,7 +160,60 @@ async function state(page, value) {
 async function screenshot(page, name) {
   if (!process.env.UI_SCREENSHOTS) return;
   await mkdir(process.env.UI_SCREENSHOTS, { recursive: true });
-  await page.locator('#method').screenshot({ path: resolve(process.env.UI_SCREENSHOTS, name) });
+  const section=page.locator('#method');
+  const original=page.viewportSize();
+  const box=await section.boundingBox();
+  try {
+    await page.setViewportSize({width:original.width,height:Math.max(original.height,Math.ceil(box.height)+180)});
+    await showMethod(page);
+    await section.screenshot({path:resolve(process.env.UI_SCREENSHOTS,name)});
+  } finally {
+    await page.setViewportSize(original);
+  }
+}
+
+// Resolve shared tokens outside Method so a section-local palette cannot pass.
+async function sitePalette(page) {
+  return page.evaluate(() => {
+    const probe = document.createElement('span');
+    document.body.appendChild(probe);
+    try {
+      return Object.fromEntries(['paper', 'ink', 'muted', 'line', 'black'].map(token => {
+        probe.style.color = `var(--${token})`;
+        return [token, getComputedStyle(probe).color];
+      }));
+    } finally {
+      probe.remove();
+    }
+  });
+}
+
+async function assertMethodPalette(page) {
+  const palette = await sitePalette(page);
+  const actual = await page.locator('#method').evaluate(section => {
+    const color = (selector, property = 'color', pseudo = null) =>
+      getComputedStyle(section.querySelector(selector), pseudo)[property];
+    return {
+      background: getComputedStyle(section).backgroundColor,
+      text: getComputedStyle(section).color,
+      label: color('.method-label'),
+      detail: color('.method-detail'),
+      number: color('.method-step'),
+      phase: color('.method-phase-title'),
+      divider: color('.method-phase-title', 'borderBottomColor'),
+      rail: color('.method-track', 'backgroundColor', '::before'),
+      marker: color('.method-marker', 'backgroundColor'),
+      markerBorder: color('.method-marker', 'borderTopColor'),
+      endpoint: color('.method-node-final .method-marker', 'backgroundColor'),
+      feedback: color('.method-feedback'),
+    };
+  });
+  assert.deepEqual(actual, {
+    background: palette.paper, text: palette.ink, label: palette.ink,
+    detail: palette.muted, number: palette.muted, phase: palette.ink,
+    divider: palette.line, rail: palette.line, marker: palette.paper,
+    markerBorder: palette.muted, endpoint: palette.ink, feedback: palette.muted,
+  });
 }
 
 const phases = ['Discover', 'Test', 'Deliver'];
@@ -100,124 +246,143 @@ async function feedbackGeometry(page, width) {
 }
 
 for (const [width, javaScriptEnabled] of [[320,true],[390,true],[768,true],[980,true],[981,true],[1024,true],[1440,true],[320,false],[1440,false]]) {
-  test(`Method segmented layout groups phases and fits at ${width}px (JavaScript ${javaScriptEnabled})`, async () => {
+  test(`Option 1 is borderless, grouped, and readable at ${width}px (JavaScript ${javaScriptEnabled})`, async () => {
     await withPage(width, async page => {
       await showMethod(page);
       const graph = page.locator(selector);
       assert.deepEqual(await graph.locator('.method-phase-title').allTextContents(), phases);
       assert.deepEqual(await graph.locator('.method-label').allTextContents(), expected);
-      assert.equal(await graph.locator('.method-step').count(), 0);
+      assert.deepEqual(await graph.locator('.method-step').allTextContents(), ['01','02','03','04','05','06','07','08']);
       assert.deepEqual(await graph.locator('.method-strip').evaluateAll(lists => lists.map(list => list.children.length)), [3,3,2]);
-      assert.equal(await graph.locator('.method-connector, .method-arrow, .method-pulse').count(), 0);
+      assert.equal(await graph.locator('.method-marker').count(), 8);
+      assert.equal(await graph.locator('.method-signal').count(), 7);
       assert.equal(await graph.locator('button, a, [tabindex], [aria-live]').count(), 0);
       const boxes = await graph.locator('.method-node').evaluateAll(nodes => nodes.map(node => {
         const rect = node.getBoundingClientRect();
-        const textRects = [...node.children].map(child => child.getBoundingClientRect());
-        return {...rect.toJSON(), clipped: node.scrollHeight > node.clientHeight + 1 || node.scrollWidth > node.clientWidth + 1, textFits: textRects.every(r => r.left >= rect.left && r.right <= rect.right + 1 && r.bottom <= rect.bottom + 1)};
+        const textRects = [...node.querySelectorAll('.method-step,.method-label,.method-detail')].map(child => child.getBoundingClientRect());
+        const css = getComputedStyle(node);
+        const marker = node.querySelector('.method-marker').getBoundingClientRect();
+        return {...rect.toJSON(), marker:marker.toJSON(), bg:css.backgroundColor, borders:[css.borderTopWidth,css.borderRightWidth,css.borderBottomWidth,css.borderLeftWidth], textFits:textRects.every(r => r.left >= rect.left && r.right <= rect.right+1 && r.bottom <= rect.bottom+1)};
       }));
-      boxes.forEach(box => {
-        assert.ok(box.x >= 0 && box.right <= width + 1, JSON.stringify(box));
-        assert.equal(box.clipped, false, 'node content must not clip');
-        assert.equal(box.textFits, true, 'titles and details fit inside boxes');
-      });
+      for (const box of boxes) {
+        assert.ok(box.x >= 0 && box.right <= width+1, JSON.stringify(box));
+        assert.deepEqual(box.borders, ['0px','0px','0px','0px']);
+        assert.equal(box.bg, 'rgba(0, 0, 0, 0)');
+        assert.ok(box.textFits, 'text must fit without truncation or overlap');
+      }
       for (let i=1; i<boxes.length; i++) {
         if (width > 980) {
-          assert.ok(Math.abs(boxes[i].y - boxes[0].y) < 1);
-          assert.ok(Math.abs(boxes[i].x - boxes[i-1].right) < 1, 'desktop cells touch even between phases');
-          assert.ok(Math.abs(boxes[i].height - boxes[0].height) < 1);
+          assert.ok(Math.abs(boxes[i].marker.y-boxes[0].marker.y)<1, 'desktop markers share a baseline');
+          assert.ok(boxes[i].x >= boxes[i-1].right-1);
         } else {
-          assert.ok(boxes[i].y >= boxes[i-1].bottom - 1);
-          if (![3,6].includes(i)) assert.ok(Math.abs(boxes[i].y - boxes[i-1].bottom) < 1, 'mobile cells share borders within each phase');
+          assert.ok(boxes[i].y >= boxes[i-1].bottom-1);
+          assert.ok(Math.abs(boxes[i].marker.x-boxes[0].marker.x)<1, 'mobile markers share a vertical axis');
         }
       }
-      const endpoint = await graph.locator('.method-node-final').evaluate(node => ({label: node.querySelector('.method-label').textContent, bg: getComputedStyle(node).backgroundColor, fg: getComputedStyle(node).color}));
-      assert.equal(endpoint.label, 'Report');
-      assert.equal(endpoint.bg, 'rgb(0, 0, 0)');
-      assert.equal(endpoint.fg, 'rgb(255, 255, 255)');
-      await feedbackGeometry(page, width);
-      assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
-      assert.equal(await graph.evaluate(node => node.getAnimations({subtree:true}).length), 0);
-      if (javaScriptEnabled) {
-        assert.equal(await page.locator('.credential-carousel-rotation').count(), 0);
-        assert.equal(await page.locator('.research-dropdown-trigger').count(), 2);
-        assert.equal(await page.locator('#contact a[href="https://x.com/Supakiad_Mee"]').count(), 1);
+      const endpoints = await graph.locator('.method-track').evaluateAll(tracks => tracks.map(track => {
+        const rect=track.getBoundingClientRect();
+        const line=getComputedStyle(track,'::before');
+        return {rect:rect.toJSON(),visible:line.display!=='none',startX:rect.x+parseFloat(line.left),startY:rect.y+parseFloat(line.top),width:parseFloat(line.width),height:parseFloat(line.height)};
+      }));
+      for (let i=0;i<7;i++) {
+        const line=endpoints[i];
+        if (width<=980 && [2,5].includes(i)) { assert.equal(line.visible,false); continue; }
+        assert.equal(line.visible,true);
+        const next=boxes[i+1].marker;
+        if (width>980) assert.ok(Math.abs(line.startX+line.width-(next.x+next.width/2))<1.5, 'rail reaches next marker');
+        else assert.ok(Math.abs(line.startY+line.height-(next.y+next.height/2))<1.5, 'vertical rail reaches next marker');
       }
-      await screenshot(page, `${width}-method-static-js-${javaScriptEnabled}.png`);
+      assert.equal(endpoints[7].visible,false,'rail stops at Report');
+      await assertMethodPlacement(page, width);
+      await assertMethodPalette(page);
+      assert.equal(await graph.locator('.method-node-final').evaluate(n=>getComputedStyle(n).backgroundColor),'rgba(0, 0, 0, 0)');
+      assert.equal(await graph.locator('.method-node-final .method-marker').evaluate(n=>getComputedStyle(n).backgroundColor),(await sitePalette(page)).ink);
+      await feedbackGeometry(page,width);
+      await graph.locator('.method-node-final').scrollIntoViewIfNeeded();
+      assert.ok(await graph.locator('.method-node-final .method-detail').evaluate(node=>{
+        const box=node.getBoundingClientRect();return node.contains(document.elementFromPoint(box.x+box.width/2,box.y+box.height/2));
+      }), 'Report text remains visible at the bottom of the workflow');
+      assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
+      assert.equal(await graph.evaluate(n=>n.getAnimations({subtree:true}).length),0);
+      if (javaScriptEnabled) {
+        assert.equal(await page.locator('.credential-carousel-rotation').count(),0);
+        assert.equal(await page.locator('.research-dropdown-trigger').count(),2);
+        assert.equal(await page.locator('#contact a[href="https://x.com/Supakiad_Mee"]').count(),1);
+      }
+      await screenshot(page,`${width}-method-static-js-${javaScriptEnabled}.png`);
+      if (javaScriptEnabled && [390,1440].includes(width)) await screenshotOverview(page, `${width}-hero-method-research.png`);
     }, {javaScriptEnabled});
   });
 }
 
-test('strip highlights move across eight nodes and loop through a third cycle without layout shift', async () => {
-  await withPage(1440, async page => {
-    await state(page, 'waiting');
-    const graph = page.locator(selector);
-    assert.equal(await graph.evaluate(n => n.getAnimations({subtree:true}).length), 0);
-    await showMethod(page);
-    await state(page, 'running');
-    const before = await graph.boundingBox();
-    const sample = await graph.evaluate(node => {
-      const animations = node.getAnimations({subtree:true});
-      const highlights = animations.filter(a => a.animationName === 'method-segment-flow');
-      if (highlights.length !== 7) return {count:highlights.length};
-      const timing = highlights[0].effect.getTiming();
-      const edge = animations.find(a => a.animationName === 'method-segment-edge');
-      const edgeTiming = edge.effect.getTiming();
-      edge.pause();
-      const frames = [0,edgeTiming.duration].map(cycle => {
-        edge.currentTime = cycle + edgeTiming.delay + 60;
-        const first = getComputedStyle(edge.effect.target,'::before').transform;
-        edge.currentTime = cycle + edgeTiming.delay + 440;
-        const second = getComputedStyle(edge.effect.target,'::before').transform;
-        return {first,second,opacity:+getComputedStyle(edge.effect.target,'::before').opacity};
+test('Option 1 signal moves between square markers across multiple iterations, including a live third cycle', async () => {
+  await withPage(1440,async page=>{
+    await hideMethod(page);
+    await state(page,'waiting');
+    const graph=page.locator(selector);
+    assert.equal(await graph.evaluate(n=>n.getAnimations({subtree:true}).length),0);
+    await showMethod(page);await state(page,'running');
+    const before=await graph.boundingBox();
+    const samples=await graph.evaluate(node=>{
+      const animations=node.getAnimations({subtree:true});
+      const signals=animations.filter(a=>a.animationName==='method-signal-travel');
+      if(signals.length!==7) return {count:signals.length};
+      const animation=signals[0];const timing=animation.effect.getTiming();animation.pause();
+      const frames=[0,timing.duration].map(cycle=>{
+        animation.currentTime=cycle+timing.delay+80;
+        const first=animation.effect.target.getBoundingClientRect().x;
+        animation.currentTime=cycle+timing.delay+480;
+        return {first,second:animation.effect.target.getBoundingClientRect().x,opacity:+getComputedStyle(animation.effect.target).opacity};
       });
-      edge.currentTime = 0; edge.play();
-      return {count:highlights.length, duration:timing.duration, infinite:animations.every(a => a.effect.getTiming().iterations === Infinity), delays:highlights.map(a => a.effect.getTiming().delay), frames};
+      animation.currentTime=0;animation.play();
+      return {count:signals.length,duration:timing.duration,infinite:animations.every(a=>a.effect.getTiming().iterations===Infinity),delays:signals.map(a=>a.effect.getTiming().delay),frames};
     });
-    assert.equal(sample.count, 7, 'the seven white nodes receive the fill tint');
-    assert.equal(sample.infinite, true);
-    assert.deepEqual(sample.delays, [0,600,1200,1800,2400,3000,3600]);
-    sample.frames.forEach(frame => {assert.notEqual(frame.first,frame.second);assert.ok(frame.opacity > 0);});
-    await page.waitForTimeout(sample.duration * 2 + 150);
-    assert.equal(await graph.getAttribute('data-flow-state'), 'running');
-    assert.ok(await graph.evaluate(n => n.getAnimations({subtree:true}).some(a => a.effect.getComputedTiming().currentIteration >= 2)));
-    const after = await graph.boundingBox();
+    assert.equal(samples.count,7);
+    assert.equal(samples.infinite,true);
+    assert.deepEqual(samples.delays,[0,600,1200,1800,2400,3000,3600]);
+    samples.frames.forEach(f=>{assert.ok(f.second>f.first+5);assert.ok(f.opacity>0);});
+    await page.waitForTimeout(samples.duration*2+200);
+    assert.equal(await graph.getAttribute('data-flow-state'),'running');
+    assert.ok(await graph.evaluate(n=>n.getAnimations({subtree:true}).some(a=>a.effect.getComputedTiming().currentIteration>=2)));
+    const after=await graph.boundingBox();
     assert.ok(Math.abs(after.height-before.height)<1 && Math.abs(after.y-before.y)<1);
-    await screenshot(page, '1440-method-loop.png');
-  }, {reducedMotion:'no-preference'});
+    await screenshot(page,'1440-method-loop.png');
+  },{reducedMotion:'no-preference'});
 });
 
-test('Report stays black through its active pulse and every restart', async () => {
-  await withPage(1440, async page => {
-    await showMethod(page); await state(page,'running');
-    const colors = await page.locator('.method-node-final').evaluate(node => {
-      const animations = node.getAnimations({subtree:true});
-      return [0,4400,5500,6000,11200].map(time => {
-        animations.forEach(a => {a.pause(); a.currentTime=time;});
-        return {bg:getComputedStyle(node).backgroundColor,fg:getComputedStyle(node).color};
+test('Option 1 Report stays text-only rather than inverting a card during playback',async()=>{
+  await withPage(1440,async page=>{
+    await showMethod(page);await state(page,'running');
+    const colors=await page.locator('.method-node-final').evaluate(node=>{
+      const animations=document.querySelector('#method .method-workflow').getAnimations({subtree:true});
+      return [0,4400,5600,11200].map(time=>{
+        animations.forEach(a=>{a.pause();a.currentTime=time;});
+        return {bg:getComputedStyle(node).backgroundColor,marker:getComputedStyle(node.querySelector('.method-marker')).backgroundColor};
       });
     });
-    colors.forEach(c => assert.deepEqual(c,{bg:'rgb(0, 0, 0)',fg:'rgb(255, 255, 255)'}));
-  }, {reducedMotion:'no-preference'});
+    const palette = await sitePalette(page);
+    colors.forEach(c=>assert.deepEqual(c,{bg:'rgba(0, 0, 0, 0)',marker:palette.ink}));
+  },{reducedMotion:'no-preference'});
 });
 
-test('Method stops offscreen and resumes its strip on re-entry', async () => {
+test('Method stops offscreen and resumes its signal on re-entry', async () => {
   await withPage(1440, async page => {
     const graph=page.locator(selector);
     await showMethod(page); await state(page,'running');
-    await page.evaluate(() => window.scrollTo({top:0,behavior:'instant'}));
+    await hideMethod(page);
     await state(page,'waiting');
     assert.equal(await graph.evaluate(n => n.getAnimations({subtree:true}).length),0);
     await showMethod(page); await state(page,'running');
-    assert.equal(await graph.evaluate(n => n.getAnimations({subtree:true}).filter(a => a.animationName === 'method-segment-edge').length),8);
+    assert.equal(await graph.evaluate(n => n.getAnimations({subtree:true}).filter(a => a.animationName === 'method-signal-travel').length),7);
   }, {reducedMotion:'no-preference'});
 });
 
-test('live reduced motion stops all highlights without clearing the black Report', async () => {
+test('live reduced motion stops all highlights without hiding the Report endpoint', async () => {
   await withPage(1440, async page => {
     await showMethod(page); await state(page,'running');
     await page.emulateMedia({reducedMotion:'reduce'}); await state(page,'complete');
     assert.equal(await page.locator(selector).evaluate(n => n.getAnimations({subtree:true}).length),0);
-    assert.equal(await page.locator('.method-node-final').evaluate(n => getComputedStyle(n).backgroundColor),'rgb(0, 0, 0)');
+    assert.equal(await page.locator('.method-node-final .method-marker').evaluate(n => getComputedStyle(n).backgroundColor),(await sitePalette(page)).ink);
     await page.emulateMedia({reducedMotion:'no-preference'}); await state(page,'running');
   }, {reducedMotion:'no-preference'});
 });
@@ -235,11 +400,20 @@ test('a static initial load starts later and repeat initialization keeps all gro
   });
 });
 
-test('resize preserves connected mobile cells and aligns the returning feedback path', async () => {
+test('resize preserves vertical signal tracks and aligns the returning feedback path', async () => {
   await withPage(1440, async page => {
     await showMethod(page); await state(page,'running');
     await page.setViewportSize({width:390,height:900}); await showMethod(page); await state(page,'running');
     await feedbackGeometry(page,390);
+    const travel=await page.locator(selector).evaluate(n=>{
+      const a=n.getAnimations({subtree:true}).find(a=>a.animationName==='method-signal-down');
+      if(!a)return null;
+      a.pause();a.currentTime=a.effect.getTiming().delay+80;
+      const first=a.effect.target.getBoundingClientRect().y;
+      a.currentTime=a.effect.getTiming().delay+480;
+      return {first,second:a.effect.target.getBoundingClientRect().y};
+    });
+    assert.ok(travel && travel.second>travel.first+5,'mobile signal travels downward');
     assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
     await screenshot(page,'390-method-loop.png');
   }, {reducedMotion:'no-preference'});
@@ -278,3 +452,52 @@ test('unsupported IntersectionObserver keeps the grouped static workflow', async
     assert.equal(await page.locator(selector).evaluate(n => n.getAnimations({subtree:true}).length),0);
   }, {reducedMotion:'no-preference',init:()=>{delete window.IntersectionObserver;}});
 });
+
+
+test('Method labels and signals keep the shared dark colors across animation cycles', async () => {
+  await withPage(1440, async page => {
+    await showMethod(page);
+    await state(page, 'running');
+    const palette = await sitePalette(page);
+    const samples = await page.locator(selector).evaluate(workflow => {
+      const animations = workflow.getAnimations({ subtree: true });
+      animations.forEach(animation => animation.pause());
+      const sample = time => {
+        animations.forEach(animation => { animation.currentTime = time; });
+        return {
+          label: getComputedStyle(workflow.querySelector('.method-label')).color,
+          signal: getComputedStyle(workflow.querySelector('.method-signal')).backgroundColor,
+          marker: getComputedStyle(workflow.querySelector('.method-marker')).backgroundColor,
+        };
+      };
+      const duration = animations[0].effect.getTiming().duration;
+      return [0, duration, duration * 2].map(cycle => ({
+        active: sample(cycle + 80), resting: sample(cycle + 900),
+      }));
+    });
+    for (const sample of samples) {
+      assert.deepEqual(sample.active, { label: palette.black, signal: palette.ink, marker: palette.ink });
+      assert.deepEqual(sample.resting, { label: palette.ink, signal: palette.ink, marker: palette.paper });
+    }
+  }, { reducedMotion: 'no-preference' });
+});
+
+
+for (const width of [390, 1440]) {
+  test(`View Research bypasses Method and direct research anchors remain usable at ${width}px`, async () => {
+    await withPage(width, async page => {
+      const assertResearchVisible = async () => {
+        await page.waitForFunction(() => {
+          const heading = document.getElementById('research-title').getBoundingClientRect();
+          const header = document.querySelector('.site-header').getBoundingClientRect();
+          return location.hash === '#research' && heading.top >= header.bottom && heading.top < innerHeight / 2;
+        });
+        assert.equal(await page.locator('#method').count(), 1);
+      };
+      await page.locator('#top .hero-actions a[href="#research"]').click();
+      await assertResearchVisible();
+      await page.goto(`${origin}/#research`, {waitUntil: 'networkidle'});
+      await assertResearchVisible();
+    });
+  });
+}
