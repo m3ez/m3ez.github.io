@@ -1,0 +1,157 @@
+diff --git a/assets/portfolio-theme.css b/assets/portfolio-theme.css
+index f6979b7..cc2d76c 100644
+--- a/assets/portfolio-theme.css
++++ b/assets/portfolio-theme.css
+@@ -14,7 +14,7 @@
+   color-scheme: dark;
+ }
+ 
+-/* Mirror the back-to-top control at the opposite bottom corner. */
++/* Keep the back-to-top hit area and spacing, with only the theme icon visible. */
+ #m3ez-theme-toggle-v1 {
+   position: fixed;
+   left: max(1rem, env(safe-area-inset-left));
+@@ -25,19 +25,18 @@
+   width: 44px;
+   height: 44px;
+   padding: 0;
+-  border: 1px solid var(--black);
++  border: 0;
+   border-radius: 0;
+-  background: var(--paper);
+-  color: var(--ink);
++  background: transparent;
++  box-shadow: none;
++  color: var(--black);
+   font: inherit;
+   cursor: pointer;
+-  transition: background-color 120ms ease, color 120ms ease;
++  transition: opacity 120ms ease;
+ }
+ 
+-#m3ez-theme-toggle-v1:hover,
+-#m3ez-theme-toggle-v1:focus-visible {
+-  background: var(--black);
+-  color: var(--paper);
++#m3ez-theme-toggle-v1:hover {
++  opacity: .65;
+ }
+ 
+ #m3ez-theme-toggle-v1:focus-visible {
+diff --git a/tests/browser/theme-switcher.test.mjs b/tests/browser/theme-switcher.test.mjs
+index 6ca5c0a..59d3c53 100644
+--- a/tests/browser/theme-switcher.test.mjs
++++ b/tests/browser/theme-switcher.test.mjs
+@@ -94,6 +94,80 @@ for (const width of [320, 390, 768, 1440]) {
+   });
+ }
+ 
++for (const width of [390, 1440]) {
++  for (const theme of ['light', 'dark']) {
++    test(`icon-only toggle stays transparent for pointer and keyboard input in ${theme} at ${width}px`, async () => {
++      const page = await browser.newPage({ viewport: { width, height: 900 }, reducedMotion: 'reduce' });
++      try {
++        await page.addInitScript(value => localStorage.setItem('m3ez-theme', value), theme);
++        await load(page);
++        const button = page.locator(toggle);
++        const ink = theme === 'light' ? 'rgb(0, 0, 0)' : 'rgb(255, 255, 255)';
++        async function appearance() {
++          return button.evaluate(node => {
++            const style = getComputedStyle(node);
++            return {
++              background: style.backgroundColor, image: style.backgroundImage,
++              borders: ['Top', 'Right', 'Bottom', 'Left'].map(side => style[`border${side}Width`]),
++              shadow: style.boxShadow, color: style.color, opacity: style.opacity,
++              outline: style.outlineStyle === 'none' ? '0px' : style.outlineWidth,
++              focusVisible: node.matches(':focus-visible'),
++            };
++          });
++        }
++        function assertIconOnly(style) {
++          assert.equal(style.background, 'rgba(0, 0, 0, 0)', 'button background stays transparent');
++          assert.equal(style.image, 'none');
++          assert.deepEqual(style.borders, ['0px', '0px', '0px', '0px']);
++          assert.equal(style.shadow, 'none');
++        }
++        const resting = await appearance();
++        assertIconOnly(resting);
++        assert.equal(resting.color, ink);
++        assert.equal(resting.opacity, '1');
++        assert.equal(resting.outline, '0px');
++        const box = await button.boundingBox();
++        assert.equal(box.width, 44); assert.equal(box.height, 44);
++
++        await button.hover();
++        const hovered = await appearance();
++        assertIconOnly(hovered);
++        assert.equal(hovered.color, ink);
++        assert.equal(hovered.opacity, '0.65');
++        assert.equal(hovered.outline, '0px');
++        await page.mouse.down();
++        assertIconOnly(await appearance());
++        await page.mouse.up();
++        assert.equal(await page.locator('html').getAttribute('data-theme'), theme === 'light' ? 'dark' : 'light');
++        assertIconOnly(await appearance());
++        assert.equal((await appearance()).focusVisible, false, 'mouse click must not show the keyboard outline');
++
++        // Click outside the 18px glyph but inside the preserved 44px hit area.
++        await button.click({ position: { x: 3, y: 3 } });
++        assert.equal(await page.locator('html').getAttribute('data-theme'), theme);
++        await page.mouse.move(0, 0);
++        await page.keyboard.press('Tab');
++        await page.keyboard.press('Shift+Tab');
++        assert.equal(await button.evaluate(node => node === document.activeElement), true);
++        const focused = await appearance();
++        assertIconOnly(focused);
++        assert.equal(focused.focusVisible, true);
++        assert.equal(focused.outline, '2px');
++        assert.equal(focused.color, ink);
++        assert.equal(focused.opacity, '1');
++        await page.keyboard.press('Enter');
++        assert.equal(await page.locator('html').getAttribute('data-theme'), theme === 'light' ? 'dark' : 'light');
++        assertIconOnly(await appearance());
++        await page.keyboard.press('Space');
++        assert.equal(await page.locator('html').getAttribute('data-theme'), theme);
++        assertIconOnly(await appearance());
++        await button.blur();
++        await screenshot(page, `${width}-${theme}-icon-only.png`);
++      } finally { await page.close(); }
++    });
++  }
++}
++
+ test('theme choice persists across reloads, including an explicit return to light', async () => {
+   const page = await browser.newPage();
+   try {
+diff --git a/tests/theme-switcher.test.mjs b/tests/theme-switcher.test.mjs
+index a814ae9..72cca6d 100644
+--- a/tests/theme-switcher.test.mjs
++++ b/tests/theme-switcher.test.mjs
+@@ -29,6 +29,27 @@ test('dark palette is the exact grayscale inverse of the existing light palette'
+   assert.doesNotMatch(css, /filter\s*:\s*invert/);
+ });
+ 
++test('theme toggle is icon-only without reducing its click target or keyboard focus', async () => {
++  const css = await readFile(new URL('assets/portfolio-theme.css', root), 'utf8');
++  const button = css.match(/#m3ez-theme-toggle-v1\s*\{([^}]+)\}/)?.[1];
++  assert.ok(button, 'theme button rule must exist');
++  assert.match(button, /border:\s*0\s*;/, 'theme button must have no border');
++  assert.match(button, /background:\s*transparent\s*;/, 'theme button must have no filled background');
++  assert.match(button, /box-shadow:\s*none\s*;/, 'theme button must have no shadow');
++  assert.match(button, /color:\s*var\(--black\)\s*;/, 'icon must use black in light mode and white in dark mode');
++  assert.match(button, /width:\s*44px\s*;/);
++  assert.match(button, /height:\s*44px\s*;/);
++  assert.match(button, /transition:\s*opacity\s+120ms\s+ease\s*;/);
++  const hover = css.match(/#m3ez-theme-toggle-v1:hover\s*\{([^}]+)\}/)?.[1];
++  assert.ok(hover, 'hover feedback must have its own rule');
++  assert.match(hover, /opacity:\s*\.65\s*;/);
++  assert.doesNotMatch(hover, /(?:background|border|box-shadow|color)\s*:/, 'hover must not restore a button box');
++  const focus = css.match(/#m3ez-theme-toggle-v1:focus-visible\s*\{([^}]+)\}/)?.[1];
++  assert.ok(focus, 'keyboard users must retain visible focus');
++  assert.match(focus, /outline:\s*2px solid var\(--black\)\s*;/);
++  assert.doesNotMatch(focus, /(?:background|border|box-shadow|color)\s*:/, 'keyboard focus must not fill the button');
++});
++
+ test('export asset injector restores theme wiring once and remains idempotent', async () => {
+   const directory = await mkdtemp(join(tmpdir(), 'portfolio-theme-'));
+   const file = join(directory, 'index.html');
