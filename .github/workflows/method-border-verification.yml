@@ -1,9 +1,12 @@
-name: Method section border verification
+name: Method placement verification
 on:
   push:
     branches: [agent/method-text-only]
 permissions:
   contents: write
+concurrency:
+  group: method-placement-review
+  cancel-in-progress: false
 jobs:
   verify:
     if: github.ref == 'refs/heads/agent/method-text-only'
@@ -19,7 +22,7 @@ jobs:
           set -euo pipefail
           test "$GITHUB_REF" = 'refs/heads/agent/method-text-only'
           git diff --exit-code 7ce049a85067d62012287b06101937f0aa2d6e15 HEAD -- . ':(exclude).github/workflows/method-border-verification.yml'
-          mkdir -p /tmp/method-border-review
+          mkdir -p /tmp/method-placement-review
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
         with:
           node-version: 22
@@ -27,105 +30,62 @@ jobs:
       - run: npm ci --ignore-scripts
       - name: Install Chromium
         run: npx playwright install --with-deps chromium > /tmp/browser-install.log 2>&1 || { tail -n 60 /tmp/browser-install.log; exit 1; }
-      - name: Add outer-border regression assertions
+      - name: Recover digest-verified tests and design
         run: |
           python <<'PY'
+          import base64, gzip, hashlib, json
           from pathlib import Path
-          p = Path('tests/method-workflow.test.mjs')
-          s = p.read_text()
-          addition = r'''
-          test('Method preserves shared section borders while workflow stages remain borderless', () => {
-            assert.match(html, /<section\b[^>]*class="trace-section method-section"[^>]*id="method"/);
-            const wrapperRules = [...methodCss.matchAll(/#method\.method-section\{([^}]*)\}/g)];
-            assert.ok(wrapperRules.length > 0);
-            for (const [, rule] of wrapperRules) {
-              assert.doesNotMatch(rule, /(?:^|;)\s*border(?:-[a-z-]+)?\s*:/,
-                'Method must retain the responsive .trace-section borders rather than reset them');
-            }
-            assert.match(methodCss, /\.method-node\{[^}]*border:0[^}]*background:transparent/);
-          });
-          '''
-          assert 'Method preserves shared section borders' not in s
-          p.write_text(s + addition)
-          p = Path('tests/browser/method-workflow.test.mjs')
-          s = p.read_text()
-          old = '[[320,true],[390,true],[768,true]'
-          assert s.count(old) == 1
-          s = s.replace(old, '[[320,true],[390,true],[640,true],[641,true],[768,true]')
-          needle = '      await assertMethodPalette(page);'
-          replacement = '''      const sectionBorders = await page.evaluate(() => {
-                  const read = selector => {
-                    const style = getComputedStyle(document.querySelector(selector));
-                    return Object.fromEntries(['Top', 'Right', 'Bottom', 'Left'].map(side => [side, {
-                      width: style[`border${side}Width`],
-                      style: style[`border${side}Style`],
-                      color: style[`border${side}Color`],
-                    }]));
-                  };
-                  return { method: read('#method'), contact: read('#contact') };
-                });
-                assert.deepEqual(sectionBorders.method, sectionBorders.contact,
-                  'Method outer borders must match the other site sections, not the borderless stages');
-                assert.deepEqual(sectionBorders.method.Bottom,
-                  { width: '1px', style: 'solid', color: (await sitePalette(page)).black });
-                assert.equal(sectionBorders.method.Left.width, width <= 640 ? '0px' : '2px');
-                assert.equal(sectionBorders.method.Top.width, width <= 640 ? '2px' : '0px');
-                await assertMethodPalette(page);'''
-          assert s.count(needle) == 1
-          p.write_text(s.replace(needle, replacement))
+          payload = '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'
+          raw = base64.b64decode(payload, validate=True)
+          assert hashlib.sha256(raw).hexdigest() == '564df09e55d612baa681640b8c42272e867b4e72f1eb7dfb733e36c40ba541e8'
+          data = json.loads(gzip.decompress(raw))
+          assert set(data) == {'tests', 'apply'}
+          Path('/tmp/method-placement-tests.patch').write_text(data['tests'])
+          Path('/tmp/method-placement-apply.py').write_text(data['apply'])
           PY
-      - name: Prove the missing border fails the revised tests
+          git apply --check /tmp/method-placement-tests.patch
+          git apply /tmp/method-placement-tests.patch
+      - name: Prove placement assertions reject the previous layout
         run: |
           set -euo pipefail
-          if npm test > /tmp/method-border-review/source-red.log 2>&1; then
-            cat /tmp/method-border-review/source-red.log
-            echo 'Expected the missing section border assertion to fail'; exit 1
+          if npm test > /tmp/method-placement-review/source-red.log 2>&1; then
+            cat /tmp/method-placement-review/source-red.log; exit 1
           fi
-          grep -q '^# fail 1$' /tmp/method-border-review/source-red.log
-          grep -q 'Method must retain the responsive .trace-section borders' /tmp/method-border-review/source-red.log
-          if node --test --test-name-pattern='Option 1 is borderless, grouped, and readable' tests/browser/method-workflow.test.mjs > /tmp/method-border-review/browser-red.log 2>&1; then
-            cat /tmp/method-border-review/browser-red.log
-            echo 'Expected the outer-border checks to reject the old wrapper'; exit 1
+          grep -q '^# fail 1$' /tmp/method-placement-review/source-red.log
+          grep -q 'Method must introduce Research' /tmp/method-placement-review/source-red.log
+          if node --test --test-name-pattern='Option 1 is borderless, grouped, and readable' tests/browser/method-workflow.test.mjs > /tmp/method-placement-review/browser-red.log 2>&1; then
+            cat /tmp/method-placement-review/browser-red.log; exit 1
           fi
-          grep -q '^# fail 11$' /tmp/method-border-review/browser-red.log
-          grep -q 'Method outer borders must match the other site sections' /tmp/method-border-review/browser-red.log
-      - name: Restore the native section borders
-        run: |
-          python <<'PY'
-          from pathlib import Path
-          p = Path('assets/research-credentials.css')
-          s = p.read_text()
-          old = 'row-gap:2rem;border:0;background:var(--method-bg)'
-          new = 'row-gap:2rem;background:var(--method-bg)'
-          assert s.count(old) == 1
-          p.write_text(s.replace(old, new))
-          PY
+          grep -q '^# fail 9$' /tmp/method-placement-review/browser-red.log
+          grep -q 'Method must sit directly between hero and Research' /tmp/method-placement-review/browser-red.log
+      - name: Apply approved Method placement and compact spacing
+        run: python /tmp/method-placement-apply.py
       - name: Full source and browser validation
         env:
-          UI_SCREENSHOTS: /tmp/method-border-review/screenshots
+          UI_SCREENSHOTS: /tmp/method-placement-review/screenshots
         run: |
           set -euo pipefail
           git diff --check
-          npm test | tee /tmp/method-border-review/source.log
-          npm run test:browser | tee /tmp/method-border-review/browser.log
-      - name: Commit the clean tree and verify again
+          npm test | tee /tmp/method-placement-review/source.log
+          npm run test:browser | tee /tmp/method-placement-review/browser.log
+      - name: Remove temporary workflow and verify final commit
         env:
-          UI_SCREENSHOTS: /tmp/method-border-review/screenshots
+          UI_SCREENSHOTS: /tmp/method-placement-review/screenshots
         run: |
           set -euo pipefail
           git rm .github/workflows/method-border-verification.yml
-          git add assets/research-credentials.css tests/method-workflow.test.mjs tests/browser/method-workflow.test.mjs
-          test "$(git write-tree)" = '98b731b27382601ffbe2da661bc3a7f37442eae6'
-          git -c user.name='m3ez portfolio automation' -c user.email='72428471+m3ez@users.noreply.github.com' commit -m 'Restore Method section borders while keeping workflow steps borderless'
-          printf 'VERIFIED_COMMIT=%s\nVERIFIED_TREE=%s\n' "$(git rev-parse HEAD)" "$(git rev-parse HEAD^{tree})" | tee /tmp/method-border-review/final.txt
-          npm test | tee /tmp/method-border-review/source-final.log
-          npm run test:browser | tee /tmp/method-border-review/browser-final.log
+          git add index.html assets/research-credentials.css tests/method-workflow.test.mjs tests/browser/method-workflow.test.mjs
+          test "$(git write-tree)" = '5c2435055e699bac8d52014ad383e3756f7c7f33'
+          git -c user.name='m3ez portfolio automation' -c user.email='72428471+m3ez@users.noreply.github.com' commit -m 'Move borderless Method before Research and compact its responsive spacing'
+          printf 'VERIFIED_COMMIT=%s\nVERIFIED_TREE=%s\n' "$(git rev-parse HEAD)" "$(git rev-parse HEAD^{tree})" | tee /tmp/method-placement-review/final.txt
+          npm test | tee /tmp/method-placement-review/source-final.log
+          npm run test:browser | tee /tmp/method-placement-review/browser-final.log
           test -z "$(git status --porcelain)"
-          git archive --format=tar HEAD > /tmp/method-border-review/reviewed-source.tar
+          git archive --format=tar HEAD > /tmp/method-placement-review/reviewed-source.tar
           git push origin HEAD:refs/heads/agent/method-text-only
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         if: always()
         with:
-          name: method-border-review
-          path: /tmp/method-border-review
+          name: method-placement-review
+          path: /tmp/method-placement-review
           if-no-files-found: error
