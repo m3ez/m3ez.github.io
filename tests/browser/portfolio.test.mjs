@@ -42,7 +42,7 @@ after(async () => {
 
 async function ready(page) {
   await page.waitForFunction(() =>
-    document.querySelectorAll('.credential-grid-item').length === 13 &&
+    document.querySelectorAll('.credential-grid-item').length === 14 &&
     document.querySelectorAll('.cve-row-v2').length === 10 &&
     document.querySelector('#m3ez-credential-carousel-v1') &&
     document.querySelector('.mobile-nav-toggle'), null, { timeout: 8000 });
@@ -60,7 +60,8 @@ test('cold loads preserve the redesigned content without hydration errors', asyn
       await ready(page);
       assert.deepEqual(errors, []);
       assert.equal(await page.locator('#top .proof-links a').count(), 7);
-      assert.equal(await page.locator('.credential-grid-item').count(), 13);
+      assert.equal(await page.locator('.credential-grid-item').count(), 14);
+      assert.equal(await page.locator('.credential-carousel-card').count(), 14);
     } finally {
       await page.close();
     }
@@ -105,11 +106,30 @@ test('CVE controls, carousel, mobile navigation and back-to-top remain usable', 
     const severities = await page.locator('.cve-row-v2 .severity-chip').allTextContents();
     assert.ok(severities.length > 0 && severities.every(value => value === 'CRITICAL'));
     const current = page.locator('.credential-carousel-card[data-position="current"]');
-    const first = await current.getAttribute('href');
+    let verify = current.locator('.credential-carousel-verify');
+    assert.equal(await verify.evaluate(node => node.tagName), 'A');
+    assert.equal(await verify.getAttribute('target'), '_blank');
+    assert.ok((await verify.getAttribute('href'))?.length > 0);
+
+    const firstTitle = await current.locator('.credential-carousel-title').textContent();
     await page.getByRole('button', { name: 'Next credential', exact: true }).click();
-    assert.notEqual(await current.getAttribute('href'), first);
+    assert.notEqual(await current.locator('.credential-carousel-title').textContent(), firstTitle);
     await page.getByRole('button', { name: 'Previous credential', exact: true }).click();
-    assert.equal(await current.getAttribute('href'), first);
+    assert.equal(await current.locator('.credential-carousel-title').textContent(), firstTitle);
+
+    await page.getByRole('button', { name: 'Show Certified Ethical Hacker (Practical) credential', exact: true }).click();
+    assert.equal(await current.locator('.credential-carousel-title').textContent(), 'Certified Ethical Hacker (Practical)');
+    assert.equal(await current.locator('.credential-carousel-company').textContent(), 'EC-Council');
+    assert.ok(await current.locator('.credential-carousel-company').evaluate(node => node.getBoundingClientRect().width > 0));
+
+    verify = current.locator('.credential-carousel-verify');
+    await verify.evaluate((node, href) => { node.href = href; }, `${origin}/?verify-click-test=1`);
+    const popupPromise = page.waitForEvent('popup');
+    await verify.click();
+    const popup = await popupPromise;
+    await popup.waitForLoadState('domcontentloaded');
+    assert.match(popup.url(), /verify-click-test=1/);
+    await popup.close();
     await page.getByRole('button', { name: 'Open navigation menu' }).click();
     await page.locator('#mobile-primary-navigation').getByRole('link', { name: 'Contact', exact: true }).click();
     await page.waitForFunction(() => location.hash === '#contact' && scrollY > 200);
@@ -131,7 +151,8 @@ test('a failed CVE refresh preserves the exported research and other interaction
     assert.ok(await fallback.isVisible());
     assert.ok(await fallback.locator('a').count() > 0);
     assert.equal(await page.locator('.research-index-v2').count(), 0);
-    assert.equal(await page.locator('.credential-grid-item').count(), 13);
+    assert.equal(await page.locator('.credential-grid-item').count(), 14);
+    assert.equal(await page.locator('.credential-carousel-card').count(), 14);
     assert.ok(await page.locator('#m3ez-credential-carousel-v1').isVisible());
   } finally {
     await page.close();

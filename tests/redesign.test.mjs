@@ -10,8 +10,8 @@ import {
   normalizeWordfenceDocument,
 } from '../assets/research-data.js';
 
-test('credentials source contains 13 certifications with flagships first', () => {
-  assert.equal(certs.length, 13);
+test('credentials source contains 14 certifications with flagships first', () => {
+  assert.equal(certs.length, 14);
   assert.deepEqual(CATEGORIES, ['All', 'Offensive', 'Web', 'Identity', 'Mobile', 'Systems', 'Foundational']);
   assert.deepEqual(certs.filter((cert) => cert.flagship).map((cert) => cert.name), ['OSEP', 'OSCP+', 'OSWE', 'eWPTX', 'CRTP']);
   assert.ok(certs.slice(0, 5).every((cert) => cert.flagship));
@@ -86,6 +86,48 @@ test('redesign preserves hero carousel and removes only the legacy static creden
   assert.doesNotMatch(source, /legacyStyle\?\.remove\(\)/);
   assert.doesNotMatch(source, /redesign-legacy-carousel-stub/);
   assert.match(source, /legacyList\.remove\(\)/);
+});
+
+
+test('carousel preserves its issuer header and real external verification link', () => {
+  const source = readFileSync(new URL('../assets/portfolio-interactions.js', import.meta.url), 'utf8');
+  assert.match(source, /company\.className = "credential-carousel-company"/);
+  assert.match(source, /head\.className = "credential-carousel-head"/);
+  assert.match(source, /company\.textContent = issuerMonogram\(item\.issuer\)/);
+  assert.match(source, /head\.append\(kicker, company\)/);
+  assert.match(source, /kicker\.textContent = item\.category \|\| "Certification"/);
+  assert.match(source, /card\.append\(head, title, issuer, issued, verify\)/);
+  assert.match(source, /const verify = document\.createElement\("a"\)/);
+  assert.match(source, /verify\.href = item\.href/);
+  assert.match(source, /verify\.target = "_blank"/);
+  assert.match(source, /verify\.rel = "noopener noreferrer"/);
+  assert.match(source, /text-decoration:underline/);
+});
+
+test('long credential titles get a compact hero treatment', () => {
+  const source = readFileSync(new URL('../assets/portfolio-interactions.js', import.meta.url), 'utf8');
+  assert.match(source, /item\.title\.length > 24/);
+  assert.match(source, /has-long-title/);
+  assert.match(source, /overflow-wrap:anywhere/);
+});
+
+test('EC-Council verification URL safely encodes its badge token', () => {
+  const ceh = certs.find((cert) => cert.issuer === 'EC-Council');
+  assert.ok(ceh);
+  assert.match(ceh.verificationUrl, /%2F%2B/);
+  assert.match(ceh.verificationUrl, /%3D$/);
+});
+
+test('hero credential carousel uses the same cert source as the credential grid', () => {
+  const source = readFileSync(new URL('../assets/portfolio-interactions.js', import.meta.url), 'utf8');
+  const names = source.match(/^import\s+\{\s*([^}]+)\}\s+from\s+['"]\.\/certs\.js['"]/m)?.[1]
+    .split(',').map(name => name.trim()) ?? [];
+  assert.ok(names.includes('certs'), 'carousel must import the shared certification list');
+  assert.ok(names.includes('issuerMonogram'), 'carousel must import the shared issuer formatter');
+  assert.match(source, /const items = certs\.map\(\(cert\) => \(\{/);
+  assert.match(source, /title: cert\.name/);
+  assert.match(source, /href: cert\.verificationUrl/);
+  assert.doesNotMatch(source, /credential-list li\[data-kind="credential"\]/);
 });
 
 test('every credential card renders its brief description', () => {
