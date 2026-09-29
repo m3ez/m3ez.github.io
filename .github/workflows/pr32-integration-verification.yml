@@ -1,0 +1,76 @@
+name: PR32 integrated merge verification
+on:
+  push:
+    branches: [agent/method-text-only]
+permissions:
+  contents: write
+concurrency:
+  group: pr32-integrated-merge-verification
+  cancel-in-progress: false
+jobs:
+  verify:
+    if: github.ref == 'refs/heads/agent/method-text-only'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      REVIEW_HEAD: 35ad1e4369666119767de4e52c8567b8de5d46ab
+      PRODUCTION_HEAD: 9e7e22c700764e1dbe36716e9162f1b4801e0264
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+      - name: Guard refs and integrate current production
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/pr32-integrated-review
+          test "$GITHUB_REF" = 'refs/heads/agent/method-text-only'
+          test "$(git rev-parse HEAD^)" = "$REVIEW_HEAD"
+          git diff --exit-code "$REVIEW_HEAD" HEAD -- . ':(exclude).github/workflows/pr32-integration-verification.yml'
+          git fetch origin gh-pages
+          test "$(git rev-parse origin/gh-pages)" = "$PRODUCTION_HEAD"
+          git config user.name 'm3ez portfolio automation'
+          git config user.email '72428471+m3ez@users.noreply.github.com'
+          git merge --no-commit --no-ff "$PRODUCTION_HEAD"
+          git rm .github/workflows/pr32-integration-verification.yml
+          git diff --exit-code "$REVIEW_HEAD" -- index.html assets/research-credentials.css tests/method-workflow.test.mjs tests/browser/method-workflow.test.mjs assets/method-workflow.js
+          git diff --exit-code "$PRODUCTION_HEAD" -- assets/certs.js assets/portfolio-interactions.js tests/browser/portfolio.test.mjs tests/redesign.test.mjs
+          python <<'PY'
+          import os, subprocess
+          changed = set(subprocess.check_output(['git','diff','--cached','--name-only',os.environ['PRODUCTION_HEAD']], text=True).splitlines())
+          assert changed == {'index.html','assets/research-credentials.css','tests/method-workflow.test.mjs','tests/browser/method-workflow.test.mjs'}, changed
+          PY
+          git diff --cached --check
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium > /tmp/pr32-browser-install.log 2>&1 || { tail -n 60 /tmp/pr32-browser-install.log; exit 1; }
+      - name: Validate combined changes
+        run: |
+          set -euo pipefail
+          npm test | tee /tmp/pr32-integrated-review/source.log
+          npm run test:browser | tee /tmp/pr32-integrated-review/browser.log
+      - name: Commit integration and verify exact final tree
+        run: |
+          set -euo pipefail
+          git commit -m 'Integrate current CEH and carousel fixes before merging Method timeline'
+          printf 'VERIFIED_COMMIT=%s\nVERIFIED_TREE=%s\nPRODUCTION_HEAD=%s\n' "$(git rev-parse HEAD)" "$(git rev-parse HEAD^{tree})" "$PRODUCTION_HEAD" | tee /tmp/pr32-integrated-review/final.txt
+          npm test | tee /tmp/pr32-integrated-review/source-final.log
+          npm run test:browser | tee /tmp/pr32-integrated-review/browser-final.log
+          test -z "$(git status --porcelain)"
+          git diff --check "$PRODUCTION_HEAD" HEAD
+          git archive --format=tar HEAD > /tmp/pr32-integrated-review/reviewed-source.tar
+          git diff --stat "$PRODUCTION_HEAD" HEAD > /tmp/pr32-integrated-review/scope.txt
+          git fetch origin gh-pages agent/method-text-only
+          test "$(git rev-parse origin/gh-pages)" = "$PRODUCTION_HEAD"
+          test "$(git rev-parse origin/agent/method-text-only)" = "$GITHUB_SHA"
+          git push origin HEAD:refs/heads/agent/method-text-only
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: pr32-integrated-review
+          path: /tmp/pr32-integrated-review
+          if-no-files-found: error
