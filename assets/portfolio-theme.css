@@ -14,7 +14,7 @@
   color-scheme: dark;
 }
 
-/* Mirror the back-to-top control at the opposite bottom corner. */
+/* Keep the back-to-top hit area and spacing, with only the theme icon visible. */
 #m3ez-theme-toggle-v1 {
   position: fixed;
   left: max(1rem, env(safe-area-inset-left));
@@ -25,19 +25,18 @@
   width: 44px;
   height: 44px;
   padding: 0;
-  border: 1px solid var(--black);
+  border: 0;
   border-radius: 0;
-  background: var(--paper);
-  color: var(--ink);
+  background: transparent;
+  box-shadow: none;
+  color: var(--black);
   font: inherit;
   cursor: pointer;
-  transition: background-color 120ms ease, color 120ms ease;
+  transition: opacity 120ms ease;
 }
 
-#m3ez-theme-toggle-v1:hover,
-#m3ez-theme-toggle-v1:focus-visible {
-  background: var(--black);
-  color: var(--paper);
+#m3ez-theme-toggle-v1:hover {
+  opacity: .65;
 }
 
 #m3ez-theme-toggle-v1:focus-visible {
