@@ -29,6 +29,27 @@ test('dark palette is the exact grayscale inverse of the existing light palette'
   assert.doesNotMatch(css, /filter\s*:\s*invert/);
 });
 
+test('theme toggle is icon-only without reducing its click target or keyboard focus', async () => {
+  const css = await readFile(new URL('assets/portfolio-theme.css', root), 'utf8');
+  const button = css.match(/#m3ez-theme-toggle-v1\s*\{([^}]+)\}/)?.[1];
+  assert.ok(button, 'theme button rule must exist');
+  assert.match(button, /border:\s*0\s*;/, 'theme button must have no border');
+  assert.match(button, /background:\s*transparent\s*;/, 'theme button must have no filled background');
+  assert.match(button, /box-shadow:\s*none\s*;/, 'theme button must have no shadow');
+  assert.match(button, /color:\s*var\(--black\)\s*;/, 'icon must use black in light mode and white in dark mode');
+  assert.match(button, /width:\s*44px\s*;/);
+  assert.match(button, /height:\s*44px\s*;/);
+  assert.match(button, /transition:\s*opacity\s+120ms\s+ease\s*;/);
+  const hover = css.match(/#m3ez-theme-toggle-v1:hover\s*\{([^}]+)\}/)?.[1];
+  assert.ok(hover, 'hover feedback must have its own rule');
+  assert.match(hover, /opacity:\s*\.65\s*;/);
+  assert.doesNotMatch(hover, /(?:background|border|box-shadow|color)\s*:/, 'hover must not restore a button box');
+  const focus = css.match(/#m3ez-theme-toggle-v1:focus-visible\s*\{([^}]+)\}/)?.[1];
+  assert.ok(focus, 'keyboard users must retain visible focus');
+  assert.match(focus, /outline:\s*2px solid var\(--black\)\s*;/);
+  assert.doesNotMatch(focus, /(?:background|border|box-shadow|color)\s*:/, 'keyboard focus must not fill the button');
+});
+
 test('export asset injector restores theme wiring once and remains idempotent', async () => {
   const directory = await mkdtemp(join(tmpdir(), 'portfolio-theme-'));
   const file = join(directory, 'index.html');

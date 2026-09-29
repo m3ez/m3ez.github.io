@@ -94,6 +94,80 @@ for (const width of [320, 390, 768, 1440]) {
   });
 }
 
+for (const width of [390, 1440]) {
+  for (const theme of ['light', 'dark']) {
+    test(`icon-only toggle stays transparent for pointer and keyboard input in ${theme} at ${width}px`, async () => {
+      const page = await browser.newPage({ viewport: { width, height: 900 }, reducedMotion: 'reduce' });
+      try {
+        await page.addInitScript(value => localStorage.setItem('m3ez-theme', value), theme);
+        await load(page);
+        const button = page.locator(toggle);
+        const ink = theme === 'light' ? 'rgb(0, 0, 0)' : 'rgb(255, 255, 255)';
+        async function appearance() {
+          return button.evaluate(node => {
+            const style = getComputedStyle(node);
+            return {
+              background: style.backgroundColor, image: style.backgroundImage,
+              borders: ['Top', 'Right', 'Bottom', 'Left'].map(side => style[`border${side}Width`]),
+              shadow: style.boxShadow, color: style.color, opacity: style.opacity,
+              outline: style.outlineStyle === 'none' ? '0px' : style.outlineWidth,
+              focusVisible: node.matches(':focus-visible'),
+            };
+          });
+        }
+        function assertIconOnly(style) {
+          assert.equal(style.background, 'rgba(0, 0, 0, 0)', 'button background stays transparent');
+          assert.equal(style.image, 'none');
+          assert.deepEqual(style.borders, ['0px', '0px', '0px', '0px']);
+          assert.equal(style.shadow, 'none');
+        }
+        const resting = await appearance();
+        assertIconOnly(resting);
+        assert.equal(resting.color, ink);
+        assert.equal(resting.opacity, '1');
+        assert.equal(resting.outline, '0px');
+        const box = await button.boundingBox();
+        assert.equal(box.width, 44); assert.equal(box.height, 44);
+
+        await button.hover();
+        const hovered = await appearance();
+        assertIconOnly(hovered);
+        assert.equal(hovered.color, ink);
+        assert.equal(hovered.opacity, '0.65');
+        assert.equal(hovered.outline, '0px');
+        await page.mouse.down();
+        assertIconOnly(await appearance());
+        await page.mouse.up();
+        assert.equal(await page.locator('html').getAttribute('data-theme'), theme === 'light' ? 'dark' : 'light');
+        assertIconOnly(await appearance());
+        assert.equal((await appearance()).focusVisible, false, 'mouse click must not show the keyboard outline');
+
+        // Click outside the 18px glyph but inside the preserved 44px hit area.
+        await button.click({ position: { x: 3, y: 3 } });
+        assert.equal(await page.locator('html').getAttribute('data-theme'), theme);
+        await page.mouse.move(0, 0);
+        await page.keyboard.press('Tab');
+        await page.keyboard.press('Shift+Tab');
+        assert.equal(await button.evaluate(node => node === document.activeElement), true);
+        const focused = await appearance();
+        assertIconOnly(focused);
+        assert.equal(focused.focusVisible, true);
+        assert.equal(focused.outline, '2px');
+        assert.equal(focused.color, ink);
+        assert.equal(focused.opacity, '1');
+        await page.keyboard.press('Enter');
+        assert.equal(await page.locator('html').getAttribute('data-theme'), theme === 'light' ? 'dark' : 'light');
+        assertIconOnly(await appearance());
+        await page.keyboard.press('Space');
+        assert.equal(await page.locator('html').getAttribute('data-theme'), theme);
+        assertIconOnly(await appearance());
+        await button.blur();
+        await screenshot(page, `${width}-${theme}-icon-only.png`);
+      } finally { await page.close(); }
+    });
+  }
+}
+
 test('theme choice persists across reloads, including an explicit return to light', async () => {
   const page = await browser.newPage();
   try {
