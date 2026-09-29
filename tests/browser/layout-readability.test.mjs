@@ -109,7 +109,7 @@ for (const width of [320, 390]) {
   });
 }
 
-for (const width of [390, 1440]) {
+for (const width of [320, 390, 768, 1440]) {
   test(`hero prioritizes Research and Contact without dropping profile links at ${width}px`, async () => {
     await withPage(width, async page => {
       const actions = page.locator('#top .hero-actions a');
@@ -117,7 +117,21 @@ for (const width of [390, 1440]) {
       assert.deepEqual(await actions.allTextContents(), ['View Research', 'Contact']);
       assert.deepEqual(await actions.evaluateAll(nodes => nodes.map(node => node.getAttribute('href'))), ['#research', '#contact']);
       assert.equal(await page.locator('#top .hero-profiles .proof-links a').count(), 7);
-      assert.equal(await page.locator('#top .hero-profiles-label').textContent(), 'Profiles & verification');
+      assert.equal(await page.locator('#top .hero-profiles-label').count(), 0, 'the removed heading must not leave a hidden or empty element');
+      assert.doesNotMatch(await page.locator('#top').innerText(), /Profiles\s*&\s*verification/i);
+      assert.deepEqual(await page.locator('#top .hero-profiles').evaluate(node => [...node.children].map(child => child.className)), ['proof-links']);
+      const profileLinks = page.locator('#top .hero-profiles .proof-links a');
+      assert.deepEqual(await profileLinks.evaluateAll(nodes => nodes.map(node => [node.textContent, node.getAttribute('href')])), [
+        ['YouTube', 'https://www.youtube.com/@SupakiadS'],
+        ['Medium', 'https://m3ez.medium.com/'],
+        ['OffSec Credential', 'https://credentials.offsec.com/profile/supakiadsatuwan533944/wallet'],
+        ['Accredible Credential', 'https://www.credential.net/profile/supakiadsatuwan533944/wallet'],
+        ['Credly Badges', 'https://www.credly.com/users/supakiad-satuwan/badges/credly'],
+        ['Wordfence Researcher', 'https://www.wordfence.com/threat-intel/vulnerabilities/researchers/supakiad-s'],
+        ['Patchstack Researcher', 'https://patchstack.com/database/researchers/d7a606d8-9d89-4bcf-a973-f8ebe721b82f'],
+      ]);
+      assert.ok(await profileLinks.evaluateAll(nodes => nodes.every(node => node.target === '_blank' && node.relList.contains('noopener') && node.relList.contains('noreferrer'))));
+      for (const link of await profileLinks.all()) assert.ok(await link.isVisible());
       assert.equal(await page.locator('.credential-grid-item').count(), certs.length);
       assert.deepEqual(await page.locator('.credential-grid-item .credential-name').allTextContents(), certs.map(cert => cert.name));
       assert.ok(await page.locator(carousel).isVisible());

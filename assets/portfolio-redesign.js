@@ -71,9 +71,8 @@ function renderHeroProofLinks() {
       actions.appendChild(link);
     }
     const profiles = element('div', 'hero-profiles');
-    const label = element('p', 'hero-profiles-label', 'Profiles & verification');
     list.before(actions, profiles);
-    profiles.append(label, list);
+    profiles.append(list);
   }
 
   list.replaceChildren();

@@ -180,3 +180,11 @@ test('export styles cannot reintroduce generated badges or carousel grid overrid
     assert.doesNotMatch(css, /\.credential-carousel-(?:card|kicker|title|issuer|issued|stage)[\s:{.\[]/, path);
   }
 });
+
+
+test('hero profile links render without the extra heading or its unused styles', () => {
+  const source = readFileSync(new URL('../assets/portfolio-redesign.js', import.meta.url), 'utf8');
+  const css = readFileSync(new URL('../assets/research-credentials.css', import.meta.url), 'utf8');
+  assert.doesNotMatch(source, /hero-profiles-label|Profiles & verification/, 'remove the heading rather than hiding it');
+  assert.doesNotMatch(css, /\.hero-profiles-label/, 'remove only the unused heading rule');
+});
