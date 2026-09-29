@@ -112,6 +112,13 @@ for (const width of [320, 390]) {
 for (const width of [320, 390, 768, 1440]) {
   test(`hero prioritizes Research and Contact without dropping profile links at ${width}px`, async () => {
     await withPage(width, async page => {
+      const statement = page.locator('#top .trust-statement');
+      assert.equal(await statement.textContent(), 'I find broken trust boundaries.', 'hero copy must end after trust boundaries');
+      assert.ok(await statement.isVisible());
+      const introduction = page.locator('#top .hero-copy');
+      assert.equal(await introduction.textContent(), 'Independent security researcher and authorized assessments.', 'hero introduction must match the requested wording');
+      assert.ok(await introduction.isVisible());
+      assert.ok(await statement.evaluate(node => parseInt(getComputedStyle(node).fontWeight, 10) >= 600), 'preserve the existing bold emphasis');
       const actions = page.locator('#top .hero-actions a');
       assert.equal(await actions.count(), 2);
       assert.deepEqual(await actions.allTextContents(), ['View Research', 'Contact']);
@@ -260,3 +267,19 @@ test('legacy research remains readable when JavaScript is unavailable', async ()
     assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
   }, { javaScriptEnabled: false });
 });
+
+
+for (const width of [390, 1440]) {
+  test(`short hero copy remains visible without JavaScript at ${width}px`, async () => {
+    await withPage(width, async page => {
+      const statement = page.locator('#top .trust-statement');
+      assert.equal(await statement.textContent(), 'I find broken trust boundaries.', 'hero copy must end after trust boundaries');
+      assert.ok(await statement.isVisible());
+      const introduction = page.locator('#top .hero-copy');
+      assert.equal(await introduction.textContent(), 'Independent security researcher and authorized assessments.', 'hero introduction must match the requested wording');
+      assert.ok(await introduction.isVisible());
+      assert.ok(await statement.evaluate(node => parseInt(getComputedStyle(node).fontWeight, 10) >= 600));
+      assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
+    }, { javaScriptEnabled: false });
+  });
+}
