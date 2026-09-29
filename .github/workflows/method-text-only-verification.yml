@@ -1,0 +1,102 @@
+name: Text-only Method verification
+on:
+  push:
+    branches: [agent/method-text-only]
+permissions:
+  contents: write
+jobs:
+  verify:
+    if: github.ref == 'refs/heads/agent/method-text-only'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+      - name: Guard production baseline
+        run: |
+          set -euo pipefail
+          git diff --exit-code c052c54fa36db76b308f0de1f57e4bc9248047b2 HEAD -- . ':(exclude).github/workflows/method-text-only-verification.yml'
+          mkdir -p /tmp/method-option1-review
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium > /tmp/browser-install.log 2>&1 || { tail -n 60 /tmp/browser-install.log; exit 1; }
+      - name: Stage selected design and its regression tests
+        run: |
+          python <<'PY'
+          import base64,gzip,hashlib,io,tarfile
+          from pathlib import Path
+          payload = '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'
+          raw=base64.b64decode(payload)
+          assert hashlib.sha256(raw).hexdigest() == '7935c3daee902026e3ddfac154bcb14bd25f6a35e40c751f5ae31eee600600c5'
+          stage=Path('/tmp/method-option1-stage'); stage.mkdir()
+          with tarfile.open(fileobj=io.BytesIO(gzip.decompress(raw))) as archive:
+              assert set(archive.getnames()) == {'method.css','tests/method-workflow.test.mjs','tests/browser/method-workflow.test.mjs'}
+              archive.extractall(stage,filter='data')
+          for path in ['tests/method-workflow.test.mjs','tests/browser/method-workflow.test.mjs']:
+              Path(path).write_bytes((stage/path).read_bytes())
+          PY
+      - name: Prove tests reject the previous boxed design
+        run: |
+          set +e
+          npm test > /tmp/method-option1-review/source-red.log 2>&1
+          source_status=$?
+          node --test --test-name-pattern='Option 1 is borderless' tests/browser/method-workflow.test.mjs > /tmp/method-option1-review/browser-red.log 2>&1
+          browser_status=$?
+          set -e
+          test "$source_status" = 1
+          test "$browser_status" = 1
+          grep '^# fail 4$' /tmp/method-option1-review/source-red.log
+          grep '^# fail 9$' /tmp/method-option1-review/browser-red.log
+      - name: Apply selected Option 1 presentation
+        run: |
+          python <<'PY'
+          from pathlib import Path
+          import re
+          p=Path('index.html'); text=p.read_text()
+          old=re.search(r'<section\b[^>]*id="method"[^>]*>.*?</section>',text).group(0)
+          count=0
+          def inject(match):
+              global count
+              count+=1
+              signal='<span class="method-signal"></span>' if count<8 else ''
+              return match[0]+f'<span class="method-track" aria-hidden="true"><span class="method-marker"></span>{signal}</span><span class="method-step" aria-hidden="true">{count:02d}</span>'
+          new=re.sub(r'<div class="method-node(?: method-node-final)?" id="method-[^"]+">',inject,old)
+          assert count==8
+          p.write_text(text.replace(old,new))
+          p=Path('assets/research-credentials.css'); text=p.read_text()
+          p.write_text(text[:text.index('/* Method:')]+Path('/tmp/method-option1-stage/method.css').read_text())
+          PY
+      - name: Verify full source and browser suites
+        env:
+          UI_SCREENSHOTS: /tmp/method-option1-review/screenshots
+        run: |
+          set -euo pipefail
+          git diff --check
+          npm test | tee /tmp/method-option1-review/source.log
+          npm run test:browser | tee /tmp/method-option1-review/browser.log
+      - name: Commit clean tree and verify again
+        env:
+          UI_SCREENSHOTS: /tmp/method-option1-review/screenshots
+        run: |
+          set -euo pipefail
+          git rm .github/workflows/method-text-only-verification.yml
+          git add index.html assets/research-credentials.css tests/method-workflow.test.mjs tests/browser/method-workflow.test.mjs
+          test "$(git write-tree)" = 'cc921f348f48bff1e2077891159de964ba68c7e9'
+          git -c user.name='m3ez portfolio automation' -c user.email='72428471+m3ez@users.noreply.github.com' commit -m 'Apply Option 1: borderless Method timeline with looping square signals'
+          printf 'VERIFIED_COMMIT=%s\nVERIFIED_TREE=%s\n' "$(git rev-parse HEAD)" "$(git rev-parse HEAD^{tree})" | tee /tmp/method-option1-review/final.txt
+          npm test | tee /tmp/method-option1-review/source.log
+          npm run test:browser | tee /tmp/method-option1-review/browser.log
+          git archive --format=tar HEAD > /tmp/method-option1-review/reviewed-source.tar
+          git push origin HEAD:refs/heads/agent/method-text-only
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: method-option1-review
+          path: /tmp/method-option1-review
+          if-no-files-found: error
