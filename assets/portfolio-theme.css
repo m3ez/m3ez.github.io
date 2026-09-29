@@ -1,0 +1,75 @@
+/* Reuse the existing palette. No page-wide filter: images and fixed controls
+   keep their original rendering, while all shared surfaces switch together. */
+:root {
+  color-scheme: light;
+}
+
+:root[data-theme="dark"] {
+  --paper: #000;
+  --black: #fff;
+  --ink: #eee;
+  --muted: #a6a6a6;
+  --line: #474747;
+  --soft: #191919;
+  color-scheme: dark;
+}
+
+/* Mirror the back-to-top control at the opposite bottom corner. */
+#m3ez-theme-toggle-v1 {
+  position: fixed;
+  left: max(1rem, env(safe-area-inset-left));
+  bottom: max(1rem, env(safe-area-inset-bottom));
+  z-index: 30;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 1px solid var(--black);
+  border-radius: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font: inherit;
+  cursor: pointer;
+  transition: background-color 120ms ease, color 120ms ease;
+}
+
+#m3ez-theme-toggle-v1:hover,
+#m3ez-theme-toggle-v1:focus-visible {
+  background: var(--black);
+  color: var(--paper);
+}
+
+#m3ez-theme-toggle-v1:focus-visible {
+  outline: 2px solid var(--black);
+  outline-offset: 3px;
+}
+
+#m3ez-theme-toggle-v1 svg {
+  display: block;
+  width: 18px;
+  height: 18px;
+  pointer-events: none;
+}
+
+#m3ez-theme-toggle-v1 .theme-icon-sun,
+:root[data-theme="dark"] #m3ez-theme-toggle-v1 .theme-icon-moon {
+  display: none;
+}
+
+:root[data-theme="dark"] #m3ez-theme-toggle-v1 .theme-icon-sun {
+  display: block;
+}
+
+@media (max-width: 640px) {
+  #m3ez-theme-toggle-v1 {
+    left: max(.75rem, env(safe-area-inset-left));
+    bottom: max(.75rem, env(safe-area-inset-bottom));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #m3ez-theme-toggle-v1 {
+    transition: none;
+  }
+}
