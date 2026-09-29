@@ -89,25 +89,19 @@ test('redesign preserves hero carousel and removes only the legacy static creden
 });
 
 
-test('carousel renders one explicit header, description, grouped metadata and native link', () => {
+test('carousel preserves its issuer header and real external verification link', () => {
   const source = readFileSync(new URL('../assets/portfolio-interactions.js', import.meta.url), 'utf8');
+  assert.match(source, /company\.className = "credential-carousel-company"/);
+  assert.match(source, /head\.className = "credential-carousel-head"/);
   assert.match(source, /company\.textContent = issuerMonogram\(item\.issuer\)/);
   assert.match(source, /head\.append\(kicker, company\)/);
   assert.match(source, /kicker\.textContent = item\.category \|\| "Certification"/);
-  assert.match(source, /description: cert\.description/);
-  assert.match(source, /description\.textContent = item\.description/);
-  assert.match(source, /metadata\.append\(issuer, document\.createTextNode\("·"\), issued\)/);
   assert.match(source, /card\.append\(head, title, description, footer\)/);
   assert.match(source, /const verify = document\.createElement\("a"\)/);
   assert.match(source, /verify\.href = item\.href/);
   assert.match(source, /verify\.target = "_blank"/);
-});
-
-test('export styles cannot reintroduce URL-dependent pseudo badges or card grid overrides', () => {
-  for (const path of ['../_next/static/chunks/03~_g8i41_-g_.css', '../_next/static/chunks/03~_g8i41_-g_-base.css', '../assets/research-credentials.css']) {
-    const css = readFileSync(new URL(path, import.meta.url), 'utf8');
-    assert.doesNotMatch(css, /\.credential-carousel-(?:card|kicker|title|issuer|issued|stage)[\s:{.\[]/, path);
-  }
+  assert.match(source, /verify\.rel = "noopener noreferrer"/);
+  assert.match(source, /text-decoration:underline/);
 });
 
 test('long credential titles get a compact hero treatment', () => {
@@ -126,7 +120,10 @@ test('EC-Council verification URL safely encodes its badge token', () => {
 
 test('hero credential carousel uses the same cert source as the credential grid', () => {
   const source = readFileSync(new URL('../assets/portfolio-interactions.js', import.meta.url), 'utf8');
-  assert.match(source, /import \{ certs, issuerMonogram \} from '\.\/certs\.js';/);
+  const names = source.match(/^import\s+\{\s*([^}]+)\}\s+from\s+['"]\.\/certs\.js['"]/m)?.[1]
+    .split(',').map(name => name.trim()) ?? [];
+  assert.ok(names.includes('certs'), 'carousel must import the shared certification list');
+  assert.ok(names.includes('issuerMonogram'), 'carousel must import the shared issuer formatter');
   assert.match(source, /const items = certs\.map\(\(cert\) => \(\{/);
   assert.match(source, /title: cert\.name/);
   assert.match(source, /href: cert\.verificationUrl/);
@@ -167,4 +164,19 @@ test('CVE severity and score are centered in desktop columns and right aligned o
   assert.match(scoreRule, /text-align:center/);
   assert.match(css, /@media \(max-width:760px\)\{[\s\S]*?\.severity-chip\{[^}]*justify-self:end[^}]*\}/);
   assert.match(css, /@media \(max-width:760px\)\{[\s\S]*?\.cve-score-v2\{[^}]*justify-self:end[^}]*\}/);
+});
+
+
+test('hero descriptions and grouped metadata come from the shared credential source', () => {
+  const source = readFileSync(new URL('../assets/portfolio-interactions.js', import.meta.url), 'utf8');
+  assert.match(source, /description: cert\.description/);
+  assert.match(source, /description\.textContent = item\.description/);
+  assert.match(source, /metadata\.append\(issuer, document\.createTextNode\("·"\), issued\)/);
+});
+
+test('export styles cannot reintroduce generated badges or carousel grid overrides', () => {
+  for (const path of ['../_next/static/chunks/03~_g8i41_-g_.css', '../_next/static/chunks/03~_g8i41_-g_-base.css', '../assets/research-credentials.css']) {
+    const css = readFileSync(new URL(path, import.meta.url), 'utf8');
+    assert.doesNotMatch(css, /\.credential-carousel-(?:card|kicker|title|issuer|issued|stage)[\s:{.\[]/, path);
+  }
 });
