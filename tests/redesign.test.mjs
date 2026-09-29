@@ -89,6 +89,14 @@ test('redesign preserves hero carousel and removes only the legacy static creden
 });
 
 
+test('carousel renders issuer chip and visible verify affordance', () => {
+  const source = readFileSync(new URL('../assets/portfolio-interactions.js', import.meta.url), 'utf8');
+  assert.match(source, /issuerMonogram\(item\.issuer\)/);
+  assert.match(source, /credential-carousel-company/);
+  assert.match(source, /credential-carousel-head/);
+  assert.match(source, /text-decoration:underline/);
+});
+
 test('long credential titles get a compact hero treatment', () => {
   const source = readFileSync(new URL('../assets/portfolio-interactions.js', import.meta.url), 'utf8');
   assert.match(source, /item\.title\.length > 24/);
