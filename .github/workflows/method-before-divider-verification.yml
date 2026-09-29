@@ -1,0 +1,142 @@
+name: Method whitespace before divider
+on:
+  push:
+    branches: [agent/method-text-only]
+permissions:
+  contents: write
+concurrency:
+  group: method-before-divider-review
+  cancel-in-progress: false
+jobs:
+  verify:
+    if: github.ref == 'refs/heads/agent/method-text-only'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+      - name: Guard reviewed baseline
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF" = 'refs/heads/agent/method-text-only'
+          git diff --exit-code 28cd458f32464079458dc3a7ffc23c89ff835bcb HEAD -- . ':(exclude).github/workflows/method-before-divider-verification.yml'
+          mkdir -p /tmp/method-before-divider-review
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium > /tmp/browser-install.log 2>&1 || { tail -n 60 /tmp/browser-install.log; exit 1; }
+      - name: Assert whitespace belongs above the divider
+        run: |
+          python <<'PY'
+          from pathlib import Path
+          p = Path('tests/method-workflow.test.mjs')
+          s = p.read_text()
+          start = s.index("test('Research has responsive outer spacing after Method without changing its internal padding'")
+          old = s[start:]
+          assert old.endswith('});\n')
+          new = r"""test('responsive whitespace belongs above the Method divider, not before Research', () => {
+            const methodRules = [...methodCss.matchAll(/#method\.method-section\{([^}]*)\}/g)].map(match => match[1]);
+            assert.match(methodRules[0], /padding:clamp\(1\.5rem,3vw,2rem\) 0 3rem(?:;|$)/,
+              'The extra 2rem belongs inside Method above the divider, on top of its existing 1rem padding');
+            assert.match(methodRules[1], /padding:1\.25rem 0 2\.5rem(?:;|$)/,
+              'Mobile keeps its existing 1rem padding plus 1.5rem before the divider');
+            const researchRules = [...methodCss.matchAll(/#method \+ #research\{([^}]*)\}/g)].map(match => match[1]);
+            assert.equal(researchRules.length, 1, 'No mobile margin override may put the gap back below the divider');
+            assert.match(researchRules[0], /(?:^|;)margin-top:0(?:;|$)/,
+              'Research starts immediately after the Method divider');
+            assert.match(researchRules[0], /padding-top:clamp\(1\.5rem,3vw,2rem\)/,
+              'Research keeps its existing internal top padding');
+          });
+          """
+          p.write_text(s[:start] + new)
+          p = Path('tests/browser/method-workflow.test.mjs')
+          s = p.read_text()
+          old = "      researchMarginTop: parseFloat(getComputedStyle(document.getElementById('research')).marginTop),"
+          new = "      methodPaddingBottom: parseFloat(style.paddingBottom),\n" + old
+          assert s.count(old) == 1
+          s = s.replace(old, new)
+          old = """  const expectedGap = (width <= 980 ? 1.5 : 2) * layout.rootFontSize;
+            assert.ok(Math.abs(layout.researchMarginTop - expectedGap) < 0.1,
+              'Research needs responsive outer spacing below the Method divider');
+            assert.ok(Math.abs(layout.research.y - layout.method.bottom - expectedGap) < 1,
+              `The gap must precede the Research panel, not just its title: ${JSON.stringify(layout)}`);"""
+          new = """  const extraSpace = (width <= 980 ? 1.5 : 2) * layout.rootFontSize;
+            const expectedBottomPadding = layout.rootFontSize + extraSpace;
+            assert.ok(Math.abs(layout.methodPaddingBottom - expectedBottomPadding) < 0.1,
+              'Whitespace must be above the Method divider, not below it');
+            assert.ok(Math.abs(layout.method.bottom - 1 - layout.workflow.bottom - expectedBottomPadding) < 1,
+              `The extra space must be inside Method before its bottom line: ${JSON.stringify(layout)}`);
+            assert.equal(layout.researchMarginTop, 0, 'Research must not add a gap after the divider');
+            assert.ok(Math.abs(layout.research.y - layout.method.bottom) < 1,
+              `Research starts immediately after the divider: ${JSON.stringify(layout)}`);"""
+          assert s.count(old) == 1
+          s = s.replace(old, new)
+          old = "  assert.ok(layout.method.height <= (width <= 980 ? 650 : 340),"
+          new = "  assert.ok(layout.method.height - extraSpace <= (width <= 980 ? 650 : 340),"
+          assert s.count(old) == 1
+          p.write_text(s.replace(old, new))
+          PY
+      - name: Prove tests reject the gap below the divider
+        run: |
+          set -euo pipefail
+          if npm test > /tmp/method-before-divider-review/source-red.log 2>&1; then
+            cat /tmp/method-before-divider-review/source-red.log; exit 1
+          fi
+          grep -q '^# fail 1$' /tmp/method-before-divider-review/source-red.log
+          grep -q 'The extra 2rem belongs inside Method above the divider' /tmp/method-before-divider-review/source-red.log
+          if node --test --test-name-pattern='Option 1 is borderless, grouped, and readable' tests/browser/method-workflow.test.mjs > /tmp/method-before-divider-review/browser-red.log 2>&1; then
+            cat /tmp/method-before-divider-review/browser-red.log; exit 1
+          fi
+          grep -q '^# fail 9$' /tmp/method-before-divider-review/browser-red.log
+          grep -q 'Whitespace must be above the Method divider, not below it' /tmp/method-before-divider-review/browser-red.log
+      - name: Move the gap above the line
+        run: |
+          python <<'PY'
+          from pathlib import Path
+          p = Path('assets/research-credentials.css')
+          s = p.read_text()
+          changes = {
+              'padding:clamp(1.5rem,3vw,2rem) 0 1rem;margin-top:0': 'padding:clamp(1.5rem,3vw,2rem) 0 3rem;margin-top:0',
+              '#method + #research{margin-top:2rem;': '#method + #research{margin-top:0;',
+              '#method.method-section{grid-template-columns:1fr;row-gap:.65rem;padding:1.25rem 0 1rem}': '#method.method-section{grid-template-columns:1fr;row-gap:.65rem;padding:1.25rem 0 2.5rem}',
+              '  #method + #research{margin-top:1.5rem}\n': '',
+          }
+          for old, new in changes.items():
+              assert s.count(old) == 1, old
+              s = s.replace(old, new)
+          p.write_text(s)
+          PY
+      - name: Full source and browser validation
+        env:
+          UI_SCREENSHOTS: /tmp/method-before-divider-review/screenshots
+        run: |
+          set -euo pipefail
+          git diff --check
+          npm test | tee /tmp/method-before-divider-review/source.log
+          npm run test:browser | tee /tmp/method-before-divider-review/browser.log
+      - name: Remove temporary workflow and verify the final commit
+        env:
+          UI_SCREENSHOTS: /tmp/method-before-divider-review/screenshots
+        run: |
+          set -euo pipefail
+          git rm .github/workflows/method-before-divider-verification.yml
+          git add assets/research-credentials.css tests/method-workflow.test.mjs tests/browser/method-workflow.test.mjs
+          test "$(git write-tree)" = '3d11504dfed8b9f4e9905cf4675031d88326b506'
+          git -c user.name='m3ez portfolio automation' -c user.email='72428471+m3ez@users.noreply.github.com' commit -m 'Move Method whitespace above its divider instead of below it'
+          printf 'VERIFIED_COMMIT=%s\nVERIFIED_TREE=%s\n' "$(git rev-parse HEAD)" "$(git rev-parse HEAD^{tree})" | tee /tmp/method-before-divider-review/final.txt
+          npm test | tee /tmp/method-before-divider-review/source-final.log
+          npm run test:browser | tee /tmp/method-before-divider-review/browser-final.log
+          test -z "$(git status --porcelain)"
+          git archive --format=tar HEAD > /tmp/method-before-divider-review/reviewed-source.tar
+          git push origin HEAD:refs/heads/agent/method-text-only
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: method-before-divider-review
+          path: /tmp/method-before-divider-review
+          if-no-files-found: error
