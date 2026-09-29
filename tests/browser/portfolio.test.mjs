@@ -42,7 +42,7 @@ after(async () => {
 
 async function ready(page) {
   await page.waitForFunction(() =>
-    document.querySelectorAll('.credential-grid-item').length === 13 &&
+    document.querySelectorAll('.credential-grid-item').length === 14 &&
     document.querySelectorAll('.cve-row-v2').length === 10 &&
     document.querySelector('#m3ez-credential-carousel-v1') &&
     document.querySelector('.mobile-nav-toggle'), null, { timeout: 8000 });
@@ -60,7 +60,8 @@ test('cold loads preserve the redesigned content without hydration errors', asyn
       await ready(page);
       assert.deepEqual(errors, []);
       assert.equal(await page.locator('#top .proof-links a').count(), 7);
-      assert.equal(await page.locator('.credential-grid-item').count(), 13);
+      assert.equal(await page.locator('.credential-grid-item').count(), 14);
+      assert.equal(await page.locator('.credential-carousel-card').count(), 14);
     } finally {
       await page.close();
     }
@@ -131,7 +132,8 @@ test('a failed CVE refresh preserves the exported research and other interaction
     assert.ok(await fallback.isVisible());
     assert.ok(await fallback.locator('a').count() > 0);
     assert.equal(await page.locator('.research-index-v2').count(), 0);
-    assert.equal(await page.locator('.credential-grid-item').count(), 13);
+    assert.equal(await page.locator('.credential-grid-item').count(), 14);
+    assert.equal(await page.locator('.credential-carousel-card').count(), 14);
     assert.ok(await page.locator('#m3ez-credential-carousel-v1').isVisible());
   } finally {
     await page.close();
