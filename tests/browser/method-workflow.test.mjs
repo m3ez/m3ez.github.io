@@ -60,6 +60,75 @@ async function showMethod(page) {
   await page.locator('#method').evaluate(node => node.scrollIntoView({ behavior: 'instant', block: 'center' }));
 }
 
+// Research is off the Method viewport both before and after the approved move.
+// Do not assume the top of the page is offscreen now that Method follows the hero.
+async function hideMethod(page) {
+  await page.locator('#research').evaluate(node => window.scrollTo({
+    top: node.getBoundingClientRect().top + window.scrollY + 100,
+    behavior: 'instant',
+  }));
+}
+
+async function assertMethodPlacement(page, width) {
+  const layout = await page.evaluate(() => {
+    const method = document.getElementById('method');
+    const style = getComputedStyle(method);
+    const box = selector => document.querySelector(selector).getBoundingClientRect().toJSON();
+    return {
+      previous: method.previousElementSibling?.id, next: method.nextElementSibling?.id,
+      hero: box('#top'), method: box('#method'), research: box('#research'),
+      heroTitle: box('#hero-title'), heading: box('#method-title'),
+      researchHeading: box('#research-title'), workflow: box('#method .method-workflow'),
+      borders: ['Top', 'Right', 'Bottom', 'Left'].map(side => style[`border${side}Width`]),
+      padding: [style.paddingLeft, style.paddingRight],
+    };
+  });
+  assert.deepEqual([layout.previous, layout.next], ['top', 'research'],
+    'Method must sit directly between hero and Research');
+  assert.deepEqual(layout.borders, ['0px', '0px', '0px', '0px']);
+  assert.deepEqual(layout.padding, ['0px', '0px'], 'no card-like horizontal inset');
+  for (const neighbour of [layout.hero, layout.research]) {
+    assert.ok(Math.abs(layout.method.x - neighbour.x) < 1);
+    assert.ok(Math.abs(layout.method.right - neighbour.right) < 1);
+  }
+  assert.ok(Math.abs(layout.heading.x - layout.heroTitle.x) < 1);
+  assert.ok(Math.abs(layout.workflow.x - layout.heroTitle.x) < 1);
+  assert.ok(layout.method.y >= layout.hero.bottom - 1);
+  assert.ok(layout.research.y >= layout.method.bottom - 1);
+  assert.ok(layout.researchHeading.y - layout.method.bottom <= 40,
+    'Research follows the compact transition without a second large top gap');
+  assert.ok(layout.method.height <= (width <= 980 ? 650 : 340),
+    `Method should not become a second hero: ${JSON.stringify(layout)}`);
+
+  if (width <= 980) {
+    const rows = await page.locator('.method-node').evaluateAll(nodes => nodes.map(node => {
+      const rect = selector => node.querySelector(selector).getBoundingClientRect().toJSON();
+      return { height: node.getBoundingClientRect().height, number: rect('.method-step'),
+        marker: rect('.method-marker'), label: rect('.method-label'), detail: rect('.method-detail') };
+    }));
+    for (const row of rows) {
+      assert.ok(row.height <= 56, `mobile rows remain content-sized: ${JSON.stringify(row)}`);
+      assert.ok(row.number.x >= row.marker.right + 3 && row.number.right <= row.label.x);
+      assert.ok(row.detail.x >= row.label.right - 1, 'description sits beside the stage title');
+    }
+  }
+}
+
+async function screenshotOverview(page, name) {
+  if (!process.env.UI_SCREENSHOTS) return;
+  await mkdir(process.env.UI_SCREENSHOTS, { recursive: true });
+  const original = page.viewportSize();
+  const end = await page.locator('#research-title').evaluate(node =>
+    Math.ceil(node.getBoundingClientRect().bottom + window.scrollY + 48));
+  try {
+    await page.setViewportSize({ width: original.width, height: end });
+    await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'instant' }));
+    await page.screenshot({ path: resolve(process.env.UI_SCREENSHOTS, name) });
+  } finally {
+    await page.setViewportSize(original);
+  }
+}
+
 async function state(page, value) {
   await page.waitForFunction(value => document.querySelector('#method .method-workflow').dataset.flowState === value, value);
 }
@@ -200,6 +269,7 @@ for (const [width, javaScriptEnabled] of [[320,true],[390,true],[768,true],[980,
         else assert.ok(Math.abs(line.startY+line.height-(next.y+next.height/2))<1.5, 'vertical rail reaches next marker');
       }
       assert.equal(endpoints[7].visible,false,'rail stops at Report');
+      await assertMethodPlacement(page, width);
       await assertMethodPalette(page);
       assert.equal(await graph.locator('.method-node-final').evaluate(n=>getComputedStyle(n).backgroundColor),'rgba(0, 0, 0, 0)');
       assert.equal(await graph.locator('.method-node-final .method-marker').evaluate(n=>getComputedStyle(n).backgroundColor),(await sitePalette(page)).ink);
@@ -216,12 +286,14 @@ for (const [width, javaScriptEnabled] of [[320,true],[390,true],[768,true],[980,
         assert.equal(await page.locator('#contact a[href="https://x.com/Supakiad_Mee"]').count(),1);
       }
       await screenshot(page,`${width}-method-static-js-${javaScriptEnabled}.png`);
+      if (javaScriptEnabled && [390,1440].includes(width)) await screenshotOverview(page, `${width}-hero-method-research.png`);
     }, {javaScriptEnabled});
   });
 }
 
 test('Option 1 signal moves between square markers across multiple iterations, including a live third cycle', async () => {
   await withPage(1440,async page=>{
+    await hideMethod(page);
     await state(page,'waiting');
     const graph=page.locator(selector);
     assert.equal(await graph.evaluate(n=>n.getAnimations({subtree:true}).length),0);
@@ -273,7 +345,7 @@ test('Method stops offscreen and resumes its signal on re-entry', async () => {
   await withPage(1440, async page => {
     const graph=page.locator(selector);
     await showMethod(page); await state(page,'running');
-    await page.evaluate(() => window.scrollTo({top:0,behavior:'instant'}));
+    await hideMethod(page);
     await state(page,'waiting');
     assert.equal(await graph.evaluate(n => n.getAnimations({subtree:true}).length),0);
     await showMethod(page); await state(page,'running');
@@ -385,3 +457,23 @@ test('Method labels and signals keep the shared dark colors across animation cyc
     }
   }, { reducedMotion: 'no-preference' });
 });
+
+
+for (const width of [390, 1440]) {
+  test(`View Research bypasses Method and direct research anchors remain usable at ${width}px`, async () => {
+    await withPage(width, async page => {
+      const assertResearchVisible = async () => {
+        await page.waitForFunction(() => {
+          const heading = document.getElementById('research-title').getBoundingClientRect();
+          const header = document.querySelector('.site-header').getBoundingClientRect();
+          return location.hash === '#research' && heading.top >= header.bottom && heading.top < innerHeight / 2;
+        });
+        assert.equal(await page.locator('#method').count(), 1);
+      };
+      await page.locator('#top .hero-actions a[href="#research"]').click();
+      await assertResearchVisible();
+      await page.goto(`${origin}/#research`, {waitUntil: 'networkidle'});
+      await assertResearchVisible();
+    });
+  });
+}

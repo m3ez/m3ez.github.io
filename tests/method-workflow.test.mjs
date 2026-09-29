@@ -65,3 +65,16 @@ test('motion loops on tracks and markers, with vertical travel and reduced-motio
   assert.match(methodCss, /prefers-reduced-motion:reduce/);
   assert.match(methodCss, /\.method-signal\{[^}]*animation:none!important/);
 });
+
+
+test('Method appears once directly after the hero and before Research in static HTML', () => {
+  assert.equal((html.match(/id="method"/g) ?? []).length, 1);
+  const start = html.indexOf('<section class="trace-section method-section" id="method"');
+  const end = html.indexOf('</section>', start) + '</section>'.length;
+  const hero = html.indexOf('id="top"');
+  const research = html.indexOf('<section class="trace-section" id="research"');
+  assert.ok(hero < start && start < research, 'Method must introduce Research, not remain near Contact');
+  assert.equal(html.slice(end, research).trim(), '', 'Research follows Method directly without duplicate or spacer sections');
+  assert.equal(html.indexOf('</section>', hero) + '</section>'.length, start,
+    'Method follows the hero without depending on a JavaScript reorder');
+});
