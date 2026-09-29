@@ -1,0 +1,97 @@
+name: Verify icon-only theme toggle
+
+on:
+  push:
+    branches: [agent/icon-only-theme-toggle]
+    paths: [.github/workflows/verify-icon-only-theme.yml]
+
+permissions:
+  contents: write
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      EVIDENCE_DIR: /tmp/icon-only-theme-verification
+      EXPECTED_TREE: 84e1fa7ef04eee7a507556ec2dd9d6a5db195edb
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/icon-only-theme-toggle
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Prepare only the approved CSS and test changes
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$EVIDENCE_DIR"
+          test "$(git rev-parse origin/gh-pages)" = f74b80eb29325cb6b78cb6487a3f050364b55ba3
+          cp .github/icon-only-theme.patch "$EVIDENCE_DIR/change.patch"
+          git apply --check .github/icon-only-theme.patch
+          git apply .github/icon-only-theme.patch
+          git rm -- .github/icon-only-theme.patch .github/workflows/verify-icon-only-theme.yml
+          git add -- assets/portfolio-theme.css tests/theme-switcher.test.mjs tests/browser/theme-switcher.test.mjs
+          git diff --cached --check
+          test "$(git write-tree)" = "$EXPECTED_TREE"
+          printf '%s\n' "$EXPECTED_TREE" > "$EVIDENCE_DIR/tested-tree.txt"
+          git archive --format=tar "$EXPECTED_TREE" > "$EVIDENCE_DIR/reviewed-source.tar"
+          git diff --cached f74b80eb29325cb6b78cb6487a3f050364b55ba3 --stat > "$EVIDENCE_DIR/diff-stat.txt"
+      - name: Install unchanged pinned browser dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm ci 2>&1 | tee "$EVIDENCE_DIR/npm-ci.log"
+          npx playwright install --with-deps chromium 2>&1 | tee "$EVIDENCE_DIR/browser-install.log"
+      - name: Verify all four new browser cases reject the original boxed button
+        shell: bash
+        run: |
+          set -euo pipefail
+          trap 'git restore --worktree assets/portfolio-theme.css' EXIT
+          git show f74b80eb29325cb6b78cb6487a3f050364b55ba3:assets/portfolio-theme.css > assets/portfolio-theme.css
+          set +e
+          node --test --test-reporter=tap --test-name-pattern='icon-only toggle stays transparent' tests/browser/theme-switcher.test.mjs > "$EVIDENCE_DIR/browser-red.log" 2>&1
+          status=$?
+          set -e
+          cat "$EVIDENCE_DIR/browser-red.log"
+          test "$status" -eq 1
+          grep -q '^# fail 4$' "$EVIDENCE_DIR/browser-red.log"
+          grep -q 'button background stays transparent' "$EVIDENCE_DIR/browser-red.log"
+      - name: Run the complete source and unit suite
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm test 2>&1 | tee "$EVIDENCE_DIR/source-final.log"
+      - name: Run the complete browser suite over HTTP
+        shell: bash
+        env:
+          UI_SCREENSHOTS: /tmp/icon-only-theme-verification/screenshots
+          THEME_SCREENSHOT_DIR: /tmp/icon-only-theme-verification/theme-screenshots
+        run: |
+          set -euo pipefail
+          npm run test:browser 2>&1 | tee "$EVIDENCE_DIR/browser-final.log"
+      - name: Publish the verified changes only to the feature branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git write-tree)" = "$EXPECTED_TREE"
+          git diff --exit-code
+          git restore --source=HEAD --staged --worktree .github/workflows/verify-icon-only-theme.yml
+          git config user.name 'Supakiad S. (m3ez)'
+          git config user.email '72428471+m3ez@users.noreply.github.com'
+          git commit -m 'Make the floating theme toggle icon-only with transparent interaction states'
+          git push origin HEAD:refs/heads/agent/icon-only-theme-toggle
+          git rev-parse HEAD > "$EVIDENCE_DIR/verified-branch-head.txt"
+      - name: Retain logs, exact tested source, and screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: icon-only-theme-verification
+          path: |
+            /tmp/icon-only-theme-verification
+            test-results
+          if-no-files-found: error
+          retention-days: 14
