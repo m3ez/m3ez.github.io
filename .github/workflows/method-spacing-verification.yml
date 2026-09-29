@@ -1,0 +1,133 @@
+name: Method Research spacing verification
+on:
+  push:
+    branches: [agent/method-text-only]
+permissions:
+  contents: write
+concurrency:
+  group: method-spacing-review
+  cancel-in-progress: false
+jobs:
+  verify:
+    if: github.ref == 'refs/heads/agent/method-text-only'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+      - name: Guard reviewed baseline
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF" = 'refs/heads/agent/method-text-only'
+          git diff --exit-code 8ffa2b1028986e9b425495647d3f3734b154d78f HEAD -- . ':(exclude).github/workflows/method-spacing-verification.yml'
+          mkdir -p /tmp/method-spacing-review
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium > /tmp/browser-install.log 2>&1 || { tail -n 60 /tmp/browser-install.log; exit 1; }
+      - name: Add responsive outer-spacing assertions
+        run: |
+          python <<'PY'
+          from pathlib import Path
+          p = Path('tests/method-workflow.test.mjs')
+          s = p.read_text()
+          s += r'''
+
+          test('Research has responsive outer spacing after Method without changing its internal padding', () => {
+            const rules = [...methodCss.matchAll(/#method \+ #research\{([^}]*)\}/g)].map(match => match[1]);
+            assert.match(rules[0], /(?:^|;)margin-top:2rem(?:;|$)/,
+              'Research needs a 2rem gap below the Method divider on desktop');
+            assert.match(rules[0], /padding-top:clamp\(1\.5rem,3vw,2rem\)/,
+              'Research keeps its existing internal top padding');
+            const mobile = methodCss.slice(methodCss.indexOf('@media (max-width:980px)'));
+            assert.match(mobile, /#method \+ #research\{margin-top:1\.5rem\}/,
+              'The outer gap is 1.5rem on mobile and tablet');
+          });
+          '''
+          p.write_text(s)
+          p = Path('tests/browser/method-workflow.test.mjs')
+          s = p.read_text()
+          old = "      researchBorderTop: getComputedStyle(document.getElementById('research')).borderTopWidth,"
+          new = old + "\n      researchMarginTop: parseFloat(getComputedStyle(document.getElementById('research')).marginTop),\n      researchPaddingTop: parseFloat(getComputedStyle(document.getElementById('research')).paddingTop),\n      rootFontSize: parseFloat(getComputedStyle(document.documentElement).fontSize),"
+          assert s.count(old) == 1
+          s = s.replace(old, new)
+          old = """  assert.ok(layout.research.y >= layout.method.bottom - 1);
+            assert.ok(layout.researchHeading.y - layout.method.bottom <= 40,
+              'Research follows the compact transition without a second large top gap');"""
+          new = """  const expectedGap = (width <= 980 ? 1.5 : 2) * layout.rootFontSize;
+            assert.ok(Math.abs(layout.researchMarginTop - expectedGap) < 0.1,
+              'Research needs responsive outer spacing below the Method divider');
+            assert.ok(Math.abs(layout.research.y - layout.method.bottom - expectedGap) < 1,
+              `The gap must precede the Research panel, not just its title: ${JSON.stringify(layout)}`);
+            const expectedPadding = Math.min(2 * layout.rootFontSize, Math.max(1.5 * layout.rootFontSize, width * 0.03));
+            assert.ok(Math.abs(layout.researchPaddingTop - expectedPadding) < 0.1,
+              'Research internal padding remains unchanged');
+            assert.ok(layout.researchHeading.y - layout.research.y <= 40,
+              'Research keeps its compact internal heading spacing');"""
+          assert s.count(old) == 1
+          p.write_text(s.replace(old, new))
+          PY
+      - name: Prove assertions reject the previous zero-gap layout
+        run: |
+          set -euo pipefail
+          if npm test > /tmp/method-spacing-review/source-red.log 2>&1; then
+            cat /tmp/method-spacing-review/source-red.log; exit 1
+          fi
+          grep -q '^# fail 1$' /tmp/method-spacing-review/source-red.log
+          grep -q 'Research needs a 2rem gap below the Method divider on desktop' /tmp/method-spacing-review/source-red.log
+          if node --test --test-name-pattern='Option 1 is borderless, grouped, and readable' tests/browser/method-workflow.test.mjs > /tmp/method-spacing-review/browser-red.log 2>&1; then
+            cat /tmp/method-spacing-review/browser-red.log; exit 1
+          fi
+          grep -q '^# fail 9$' /tmp/method-spacing-review/browser-red.log
+          grep -q 'Research needs responsive outer spacing below the Method divider' /tmp/method-spacing-review/browser-red.log
+      - name: Add the gap before Research without changing internal padding
+        run: |
+          python <<'PY'
+          from pathlib import Path
+          p = Path('assets/research-credentials.css')
+          s = p.read_text()
+          old = '#method + #research{padding-top:clamp(1.5rem,3vw,2rem);border-top:0}'
+          new = '#method + #research{margin-top:2rem;padding-top:clamp(1.5rem,3vw,2rem);border-top:0}'
+          assert s.count(old) == 1
+          s = s.replace(old, new)
+          old = '  #method.method-section{grid-template-columns:1fr;row-gap:.65rem;padding:1.25rem 0 1rem}'
+          new = old + '\n  #method + #research{margin-top:1.5rem}'
+          assert s.count(old) == 1
+          p.write_text(s.replace(old, new))
+          PY
+      - name: Full source and browser validation
+        env:
+          UI_SCREENSHOTS: /tmp/method-spacing-review/screenshots
+        run: |
+          set -euo pipefail
+          git diff --check
+          node --check tests/method-workflow.test.mjs
+          node --check tests/browser/method-workflow.test.mjs
+          npm test | tee /tmp/method-spacing-review/source.log
+          npm run test:browser | tee /tmp/method-spacing-review/browser.log
+      - name: Remove temporary workflow and verify exact final commit
+        env:
+          UI_SCREENSHOTS: /tmp/method-spacing-review/screenshots
+        run: |
+          set -euo pipefail
+          git rm .github/workflows/method-spacing-verification.yml
+          git add assets/research-credentials.css tests/method-workflow.test.mjs tests/browser/method-workflow.test.mjs
+          test "$(git write-tree)" = '4072662db4f6c8d643cb8f681f0c2ac0ffc033d5'
+          git -c user.name='m3ez portfolio automation' -c user.email='72428471+m3ez@users.noreply.github.com' commit -m 'Add responsive whitespace before Research after the Method divider'
+          printf 'VERIFIED_COMMIT=%s\nVERIFIED_TREE=%s\n' "$(git rev-parse HEAD)" "$(git rev-parse HEAD^{tree})" | tee /tmp/method-spacing-review/final.txt
+          npm test | tee /tmp/method-spacing-review/source-final.log
+          npm run test:browser | tee /tmp/method-spacing-review/browser-final.log
+          test -z "$(git status --porcelain)"
+          git archive --format=tar HEAD > /tmp/method-spacing-review/reviewed-source.tar
+          git push origin HEAD:refs/heads/agent/method-text-only
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: method-spacing-review
+          path: /tmp/method-spacing-review
+          if-no-files-found: error
