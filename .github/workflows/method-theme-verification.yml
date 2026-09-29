@@ -1,0 +1,192 @@
+name: Method theme verification
+on:
+  push:
+    branches: [agent/method-text-only]
+permissions:
+  contents: write
+jobs:
+  verify:
+    if: github.ref == 'refs/heads/agent/method-text-only'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+      - name: Guard reviewed baseline
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF" = 'refs/heads/agent/method-text-only'
+          git diff --exit-code 6621d69dfca842b7200babd246114ef5ec113f1f HEAD -- . ':(exclude).github/workflows/method-theme-verification.yml'
+          mkdir -p /tmp/method-theme-review
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium > /tmp/browser-install.log 2>&1 || { tail -n 60 /tmp/browser-install.log; exit 1; }
+      - name: Add shared-theme regression assertions
+        run: |
+          python <<'PY'
+          from pathlib import Path
+          
+          def replace_once(path, old, new):
+              text = path.read_text()
+              assert text.count(old) == 1, (path, text.count(old))
+              path.write_text(text.replace(old, new))
+          
+          replace_once(Path('tests/method-workflow.test.mjs'), """test('Option 1 uses the selected dark monochrome treatment only inside Method', () => {
+            assert.match(methodCss, /#method\\.method-section\\{[^}]*--method-bg:#141414/);""", """test('Option 1 inherits the site palette instead of defining a separate dark theme', () => {
+            for (const [local, shared] of [['bg', 'paper'], ['ink', 'ink'], ['muted', 'muted'], ['line', 'line']]) {
+              assert.ok(methodCss.includes(`--method-${local}:var(--${shared})`), `${local} must follow the site's ${shared} token`);
+            }
+            assert.doesNotMatch(methodCss, /#[0-9a-f]{3,8}\\b|\\brgba?\\(/i, 'Method colors must use shared tokens, including animation keyframes');""")
+          
+          p = Path('tests/browser/method-workflow.test.mjs')
+          replace_once(p, "const phases = ['Discover', 'Test', 'Deliver'];", """// Resolve shared tokens outside Method so a section-local palette cannot pass.
+          async function sitePalette(page) {
+            return page.evaluate(() => {
+              const probe = document.createElement('span');
+              document.body.appendChild(probe);
+              try {
+                return Object.fromEntries(['paper', 'ink', 'muted', 'line', 'black'].map(token => {
+                  probe.style.color = `var(--${token})`;
+                  return [token, getComputedStyle(probe).color];
+                }));
+              } finally {
+                probe.remove();
+              }
+            });
+          }
+          
+          async function assertMethodPalette(page) {
+            const palette = await sitePalette(page);
+            const actual = await page.locator('#method').evaluate(section => {
+              const color = (selector, property = 'color', pseudo = null) =>
+                getComputedStyle(section.querySelector(selector), pseudo)[property];
+              return {
+                background: getComputedStyle(section).backgroundColor,
+                text: getComputedStyle(section).color,
+                label: color('.method-label'),
+                detail: color('.method-detail'),
+                number: color('.method-step'),
+                phase: color('.method-phase-title'),
+                divider: color('.method-phase-title', 'borderBottomColor'),
+                rail: color('.method-track', 'backgroundColor', '::before'),
+                marker: color('.method-marker', 'backgroundColor'),
+                markerBorder: color('.method-marker', 'borderTopColor'),
+                endpoint: color('.method-node-final .method-marker', 'backgroundColor'),
+                feedback: color('.method-feedback'),
+              };
+            });
+            assert.deepEqual(actual, {
+              background: palette.paper, text: palette.ink, label: palette.ink,
+              detail: palette.muted, number: palette.muted, phase: palette.ink,
+              divider: palette.line, rail: palette.line, marker: palette.paper,
+              markerBorder: palette.muted, endpoint: palette.ink, feedback: palette.muted,
+            });
+          }
+          
+          const phases = ['Discover', 'Test', 'Deliver'];""")
+          replace_once(p, "      assert.equal(await page.locator('#method').evaluate(n=>getComputedStyle(n).backgroundColor),'rgb(20, 20, 20)');", "      await assertMethodPalette(page);")
+          text = p.read_text()
+          old = "'rgb(245, 245, 245)'"
+          assert text.count(old) == 3
+          # These expected values follow the existing site token, not the former mockup palette.
+          text = text.replace("      assert.equal(await graph.locator('.method-node-final .method-marker').evaluate(n=>getComputedStyle(n).backgroundColor),'rgb(245, 245, 245)');", "      assert.equal(await graph.locator('.method-node-final .method-marker').evaluate(n=>getComputedStyle(n).backgroundColor),(await sitePalette(page)).ink);")
+          text = text.replace("    colors.forEach(c=>assert.deepEqual(c,{bg:'rgba(0, 0, 0, 0)',marker:'rgb(245, 245, 245)'}));", "    const palette = await sitePalette(page);\n    colors.forEach(c=>assert.deepEqual(c,{bg:'rgba(0, 0, 0, 0)',marker:palette.ink}));")
+          text = text.replace("    assert.equal(await page.locator('.method-node-final .method-marker').evaluate(n => getComputedStyle(n).backgroundColor),'rgb(245, 245, 245)');", "    assert.equal(await page.locator('.method-node-final .method-marker').evaluate(n => getComputedStyle(n).backgroundColor),(await sitePalette(page)).ink);")
+          assert old not in text
+          p.write_text(text + """
+          
+          test('Method labels and signals keep the shared dark colors across animation cycles', async () => {
+            await withPage(1440, async page => {
+              await showMethod(page);
+              await state(page, 'running');
+              const palette = await sitePalette(page);
+              const samples = await page.locator(selector).evaluate(workflow => {
+                const animations = workflow.getAnimations({ subtree: true });
+                animations.forEach(animation => animation.pause());
+                const sample = time => {
+                  animations.forEach(animation => { animation.currentTime = time; });
+                  return {
+                    label: getComputedStyle(workflow.querySelector('.method-label')).color,
+                    signal: getComputedStyle(workflow.querySelector('.method-signal')).backgroundColor,
+                    marker: getComputedStyle(workflow.querySelector('.method-marker')).backgroundColor,
+                  };
+                };
+                const duration = animations[0].effect.getTiming().duration;
+                return [0, duration, duration * 2].map(cycle => ({
+                  active: sample(cycle + 80), resting: sample(cycle + 900),
+                }));
+              });
+              for (const sample of samples) {
+                assert.deepEqual(sample.active, { label: palette.black, signal: palette.ink, marker: palette.ink });
+                assert.deepEqual(sample.resting, { label: palette.ink, signal: palette.ink, marker: palette.paper });
+              }
+            }, { reducedMotion: 'no-preference' });
+          });
+          """)
+          PY
+      - name: Prove the dark panel fails the revised assertions
+        run: |
+          set -euo pipefail
+          if npm test > /tmp/method-theme-review/source-red.log 2>&1; then
+            cat /tmp/method-theme-review/source-red.log; exit 1
+          fi
+          grep -q '^# fail 1$' /tmp/method-theme-review/source-red.log
+          grep -q "bg must follow the site's paper token" /tmp/method-theme-review/source-red.log
+          if node --test --test-name-pattern='Option 1 is borderless' tests/browser/method-workflow.test.mjs > /tmp/method-theme-review/browser-red.log 2>&1; then
+            cat /tmp/method-theme-review/browser-red.log; exit 1
+          fi
+          grep -q '^# fail 9$' /tmp/method-theme-review/browser-red.log
+          grep -q '^# pass 0$' /tmp/method-theme-review/browser-red.log
+          cat /tmp/method-theme-review/browser-red.log
+      - name: Use the existing site theme tokens
+        run: |
+          python <<'PY'
+          from pathlib import Path
+          p = Path('assets/research-credentials.css')
+          s = p.read_text()
+          old = '--method-bg:#141414;--method-ink:#f5f5f5;--method-muted:#b8b8b8;--method-line:#555;'
+          new = '--method-bg:var(--paper);--method-ink:var(--ink);--method-muted:var(--muted);--method-line:var(--line);'
+          assert s.count(old) == 1
+          s = s.replace(old,new)
+          assert s.count('#dedede') == 2
+          s = s.replace('#dedede','var(--method-ink)')
+          old = '@keyframes method-label-active{0%,8%{color:var(--method-ink)}'
+          new = '@keyframes method-label-active{0%,8%{color:var(--black)}'
+          assert s.count(old) == 1
+          p.write_text(s.replace(old,new))
+          PY
+      - name: Full source and browser validation
+        env:
+          UI_SCREENSHOTS: /tmp/method-theme-review/screenshots
+        run: |
+          set -euo pipefail
+          git diff --check
+          node --check tests/browser/method-workflow.test.mjs
+          npm test | tee /tmp/method-theme-review/source.log
+          npm run test:browser | tee /tmp/method-theme-review/browser.log
+      - name: Commit clean review tree and reverify
+        env:
+          UI_SCREENSHOTS: /tmp/method-theme-review/screenshots
+        run: |
+          set -euo pipefail
+          git rm .github/workflows/method-theme-verification.yml
+          git add assets/research-credentials.css tests/method-workflow.test.mjs tests/browser/method-workflow.test.mjs
+          test "$(git write-tree)" = '0d3529c6bf1145655ca6664fa78a96c3fd34edd0'
+          git -c user.name='m3ez portfolio automation' -c user.email='72428471+m3ez@users.noreply.github.com' commit -m 'Match the text-only Method timeline to the existing light theme'
+          printf 'VERIFIED_COMMIT=%s\nVERIFIED_TREE=%s\n' "$(git rev-parse HEAD)" "$(git rev-parse HEAD^{tree})" | tee /tmp/method-theme-review/final.txt
+          npm test | tee /tmp/method-theme-review/source-final.log
+          npm run test:browser | tee /tmp/method-theme-review/browser-final.log
+          git archive --format=tar HEAD > /tmp/method-theme-review/reviewed-source.tar
+          git push origin HEAD:refs/heads/agent/method-text-only
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: method-theme-review
+          path: /tmp/method-theme-review
+          if-no-files-found: error
