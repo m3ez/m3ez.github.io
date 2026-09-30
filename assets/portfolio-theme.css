@@ -72,3 +72,124 @@
     transition: none;
   }
 }
+
+/* Playful divider runner. The hero's existing bottom border is the track.
+   Scope to this exact section order; do not change global stacking or controls. */
+#top.hero:has(+ #method) {
+  position: relative;
+}
+
+#top.hero:has(+ #method)::after {
+  --runner-width: 36px;
+  --runner-height: 43.2px;
+  --runner-crossing: 24s;
+  --runner-stride: .72s;
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: var(--runner-width);
+  height: var(--runner-height);
+  pointer-events: none;
+  background: var(--black);
+  opacity: 0;
+  -webkit-mask-image: url("./stickman-run-cycle.svg");
+  mask-image: url("./stickman-run-cycle.svg");
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-size: calc(var(--runner-width) * 16) 100%;
+  mask-size: calc(var(--runner-width) * 16) 100%;
+  -webkit-mask-position: 0 0;
+  mask-position: 0 0;
+  animation:
+    m3ez-divider-cross var(--runner-crossing) linear infinite,
+    m3ez-divider-stride var(--runner-stride) steps(16) infinite;
+}
+
+/* Each sprite cell has connected shoulders/elbows and hips/knees, with a
+   two-beat bounce. The stride advances independently of travel along the line. */
+@keyframes m3ez-divider-stride {
+  to {
+    -webkit-mask-position: calc(var(--runner-width) * -16) 0;
+    mask-position: calc(var(--runner-width) * -16) 0;
+  }
+}
+
+/* Stay inside the divider endpoints. Reset while invisible, never run backward.
+   Left is local to this one small absolute decoration, not the viewport. */
+@keyframes m3ez-divider-cross {
+  0% {
+    left: 0;
+    opacity: 0;
+  }
+  3% {
+    opacity: .28;
+  }
+  77% {
+    opacity: .28;
+  }
+  80%, 100% {
+    left: calc(100% - var(--runner-width));
+    opacity: 0;
+  }
+}
+
+@media (max-width: 640px) {
+  #top.hero:has(+ #method)::after {
+    --runner-width: 28px;
+    --runner-height: 33.6px;
+    --runner-crossing: 12s;
+    --runner-stride: .8s;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #top.hero:has(+ #method)::after {
+    content: none;
+    animation: none;
+  }
+}
+
+@media print {
+  #top.hero:has(+ #method)::after {
+    content: none;
+    animation: none;
+  }
+}
+
+/* Soft mountain strip behind the runner, on the same existing divider.
+   SVG alpha gradients provide the haze; the shared palette supplies the color.
+   ::before paints before the existing ::after runner without global z-index changes. */
+#top.hero:has(+ #method)::before {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 56px;
+  pointer-events: none;
+  background: var(--black);
+  -webkit-mask-image: url("./divider-scene.svg");
+  mask-image: url("./divider-scene.svg");
+  mask-mode: alpha;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
+  -webkit-mask-position: center bottom;
+  mask-position: center bottom;
+}
+
+/* Stay within the smaller hero bottom padding on phones and small tablets. */
+@media (max-width: 760px) {
+  #top.hero:has(+ #method)::before {
+    height: 30px;
+  }
+}
+
+/* A static landscape is retained for reduced motion; the runner already opts out. */
+@media print {
+  #top.hero:has(+ #method)::before {
+    content: none;
+  }
+}

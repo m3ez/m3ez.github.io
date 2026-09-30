@@ -1,0 +1,147 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 48" width="640" height="48" fill="none" stroke="black" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+  <!-- 16 cells, 40x48 each. Floor y=48; grounded soles reach y=47.9. -->
+  <g data-frame="0" transform="translate(0 0)">
+    <path data-limb="far-leg" opacity=".55" d="M18.00 27.27 L18.41 38.76 L7.00 37.31 L9.40 37.11"/>
+    <path data-limb="far-arm" opacity=".55" d="M21.00 18.27 L24.94 23.31 L26.54 17.74"/>
+    <path data-limb="near-leg" opacity="1" d="M18.00 27.27 L25.81 35.71 L28.00 47.00 L30.40 46.80"/>
+    <path data-limb="near-arm" opacity="1" d="M21.00 18.27 L17.06 23.31 L22.86 23.51"/>
+    <path d="M22.00 14.07 L21.00 18.27 L18.00 27.27"/>
+    <circle cx="23" cy="8.67" r="5.4"/>
+    <path opacity=".35" stroke-width="1.2" d="M2 21.07H5 M1 24.07H4"/>
+  </g>
+  <g data-frame="1" transform="translate(40 0)">
+    <path data-limb="far-leg" opacity=".55" d="M18.00 28.03 L19.48 39.43 L9.17 34.35 L11.57 34.15"/>
+    <path data-limb="far-arm" opacity=".55" d="M21.00 19.03 L24.68 24.26 L26.81 18.87"/>
+    <path data-limb="near-leg" opacity="1" d="M18.00 28.03 L26.62 35.63 L24.88 47.00 L27.27 46.80"/>
+    <path data-limb="near-arm" opacity="1" d="M21.00 19.03 L17.32 24.26 L23.11 23.90"/>
+    <path d="M22.00 14.83 L21.00 19.03 L18.00 28.03"/>
+    <circle cx="23" cy="9.43" r="5.4"/>
+    <path opacity=".35" stroke-width="1.2" d="M2 21.83H5 M1 24.83H4"/>
+  </g>
+  <g data-frame="2" transform="translate(80 0)">
+    <path data-limb="far-leg" opacity=".55" d="M18.00 28.30 L23.56 38.37 L13.33 33.10 L15.73 32.90"/>
+    <path data-limb="far-arm" opacity=".55" d="M21.00 19.30 L23.89 25.01 L26.97 20.09"/>
+    <path data-limb="near-leg" opacity="1" d="M18.00 28.30 L26.18 36.39 L21.75 47.00 L24.15 46.80"/>
+    <path data-limb="near-arm" opacity="1" d="M21.00 19.30 L18.11 25.01 L23.73 23.60"/>
+    <path d="M22.00 15.10 L21.00 19.30 L18.00 28.30"/>
+    <circle cx="23" cy="9.70" r="5.4"/>
+    <path opacity=".35" stroke-width="1.2" d="M2 22.10H5 M1 25.10H4"/>
+  </g>
+  <g data-frame="3" transform="translate(120 0)">
+    <path data-limb="far-leg" opacity=".55" d="M18.00 27.93 L29.11 30.88 L17.69 32.19 L20.09 31.99"/>
+    <path data-limb="far-arm" opacity=".55" d="M21.00 18.93 L22.61 25.12 L26.77 21.09"/>
+    <path data-limb="near-leg" opacity="1" d="M18.00 27.93 L24.66 37.30 L18.47 47.00 L20.87 46.80"/>
+    <path data-limb="near-arm" opacity="1" d="M21.00 18.93 L19.39 25.12 L24.52 22.41"/>
+    <path d="M22.00 14.73 L21.00 18.93 L18.00 27.93"/>
+    <circle cx="23" cy="9.33" r="5.4"/>
+    <path opacity=".35" stroke-width="1.2" d="M2 21.73H5 M1 24.73H4"/>
+  </g>
+  <g data-frame="4" transform="translate(160 0)">
+    <path data-limb="far-leg" opacity=".55" d="M18.00 27.13 L28.97 23.68 L23.42 33.75 L25.82 33.55"/>
+    <path data-limb="far-arm" opacity=".55" d="M21.00 18.13 L21.00 24.53 L26.07 21.72"/>
+    <path data-limb="near-leg" opacity="1" d="M18.00 27.13 L22.03 37.90 L15.00 47.00 L17.40 46.80"/>
+    <path data-limb="near-arm" opacity="1" d="M21.00 18.13 L21.00 24.53 L25.24 20.58"/>
+    <path d="M22.00 13.93 L21.00 18.13 L18.00 27.13"/>
+    <circle cx="23" cy="8.53" r="5.4"/>
+    <path opacity=".35" stroke-width="1.2" d="M2 20.93H5 M1 23.93H4"/>
+  </g>
+  <g data-frame="5" transform="translate(200 0)">
+    <path data-limb="far-leg" opacity=".55" d="M18.00 26.37 L29.31 24.29 L28.38 35.75 L30.77 35.55"/>
+    <path data-limb="far-arm" opacity=".55" d="M21.00 17.37 L19.39 23.57 L25.00 22.07"/>
+    <path data-limb="near-leg" opacity="1" d="M18.00 26.37 L18.51 37.86 L11.53 47.00 L13.93 46.80"/>
+    <path data-limb="near-arm" opacity="1" d="M21.00 17.37 L22.61 23.57 L25.77 18.71"/>
+    <path d="M22.00 13.17 L21.00 17.37 L18.00 26.37"/>
+    <circle cx="23" cy="7.77" r="5.4"/>
+    <path opacity=".35" stroke-width="1.2" d="M2 20.17H5 M1 23.17H4"/>
+  </g>
+  <g data-frame="6" transform="translate(240 0)">
+    <path data-limb="far-leg" opacity=".55" d="M18.00 26.10 L29.34 28.04 L30.25 39.50 L32.65 39.30"/>
+    <path data-limb="far-arm" opacity=".55" d="M21.00 17.10 L18.11 22.81 L23.89 22.39"/>
+    <path data-limb="near-leg" opacity="1" d="M18.00 26.10 L16.12 37.45 L8.25 45.83 L10.65 45.63"/>
+    <path data-limb="near-arm" opacity="1" d="M21.00 17.10 L23.89 22.81 L26.08 17.44"/>
+    <path d="M22.00 12.90 L21.00 17.10 L18.00 26.10"/>
+    <circle cx="23" cy="7.50" r="5.4"/>
+    <path opacity=".35" stroke-width="1.2" d="M2 19.90H5 M1 22.90H4"/>
+  </g>
+  <g data-frame="7" transform="translate(280 0)">
+    <path data-limb="far-leg" opacity=".55" d="M18.00 26.47 L28.15 31.88 L29.88 43.25 L32.27 43.05"/>
+    <path data-limb="far-arm" opacity=".55" d="M21.00 17.47 L17.32 22.71 L23.12 22.89"/>
+    <path data-limb="near-leg" opacity="1" d="M18.00 26.47 L17.73 37.97 L7.00 42.12 L9.40 41.92"/>
+    <path data-limb="near-arm" opacity="1" d="M21.00 17.47 L24.68 22.71 L26.30 17.14"/>
+    <path d="M22.00 13.27 L21.00 17.47 L18.00 26.47"/>
+    <circle cx="23" cy="7.87" r="5.4"/>
+    <path opacity=".35" stroke-width="1.2" d="M2 20.27H5 M1 23.27H4"/>
+  </g>
+  <g data-frame="8" transform="translate(320 0)">
+    <path data-limb="far-leg" opacity=".55" d="M18.00 27.27 L25.81 35.71 L28.00 47.00 L30.40 46.80"/>
+    <path data-limb="far-arm" opacity=".55" d="M21.00 18.27 L17.06 23.31 L22.86 23.51"/>
+    <path data-limb="near-leg" opacity="1" d="M18.00 27.27 L18.41 38.76 L7.00 37.31 L9.40 37.11"/>
+    <path data-limb="near-arm" opacity="1" d="M21.00 18.27 L24.94 23.31 L26.54 17.74"/>
+    <path d="M22.00 14.07 L21.00 18.27 L18.00 27.27"/>
+    <circle cx="23" cy="8.67" r="5.4"/>
+    <path opacity=".35" stroke-width="1.2" d="M2 21.07H5 M1 24.07H4"/>
+  </g>
+  <g data-frame="9" transform="translate(360 0)">
+    <path data-limb="far-leg" opacity=".55" d="M18.00 28.03 L26.62 35.63 L24.88 47.00 L27.27 46.80"/>
+    <path data-limb="far-arm" opacity=".55" d="M21.00 19.03 L17.32 24.26 L23.11 23.90"/>
+    <path data-limb="near-leg" opacity="1" d="M18.00 28.03 L19.48 39.43 L9.17 34.35 L11.57 34.15"/>
+    <path data-limb="near-arm" opacity="1" d="M21.00 19.03 L24.68 24.26 L26.81 18.87"/>
+    <path d="M22.00 14.83 L21.00 19.03 L18.00 28.03"/>
+    <circle cx="23" cy="9.43" r="5.4"/>
+    <path opacity=".35" stroke-width="1.2" d="M2 21.83H5 M1 24.83H4"/>
+  </g>
+  <g data-frame="10" transform="translate(400 0)">
+    <path data-limb="far-leg" opacity=".55" d="M18.00 28.30 L26.18 36.39 L21.75 47.00 L24.15 46.80"/>
+    <path data-limb="far-arm" opacity=".55" d="M21.00 19.30 L18.11 25.01 L23.73 23.60"/>
+    <path data-limb="near-leg" opacity="1" d="M18.00 28.30 L23.56 38.37 L13.33 33.10 L15.73 32.90"/>
+    <path data-limb="near-arm" opacity="1" d="M21.00 19.30 L23.89 25.01 L26.97 20.09"/>
+    <path d="M22.00 15.10 L21.00 19.30 L18.00 28.30"/>
+    <circle cx="23" cy="9.70" r="5.4"/>
+    <path opacity=".35" stroke-width="1.2" d="M2 22.10H5 M1 25.10H4"/>
+  </g>
+  <g data-frame="11" transform="translate(440 0)">
+    <path data-limb="far-leg" opacity=".55" d="M18.00 27.93 L24.66 37.30 L18.47 47.00 L20.87 46.80"/>
+    <path data-limb="far-arm" opacity=".55" d="M21.00 18.93 L19.39 25.12 L24.52 22.41"/>
+    <path data-limb="near-leg" opacity="1" d="M18.00 27.93 L29.11 30.88 L17.69 32.19 L20.09 31.99"/>
+    <path data-limb="near-arm" opacity="1" d="M21.00 18.93 L22.61 25.12 L26.77 21.09"/>
+    <path d="M22.00 14.73 L21.00 18.93 L18.00 27.93"/>
+    <circle cx="23" cy="9.33" r="5.4"/>
+    <path opacity=".35" stroke-width="1.2" d="M2 21.73H5 M1 24.73H4"/>
+  </g>
+  <g data-frame="12" transform="translate(480 0)">
+    <path data-limb="far-leg" opacity=".55" d="M18.00 27.13 L22.03 37.90 L15.00 47.00 L17.40 46.80"/>
+    <path data-limb="far-arm" opacity=".55" d="M21.00 18.13 L21.00 24.53 L25.24 20.58"/>
+    <path data-limb="near-leg" opacity="1" d="M18.00 27.13 L28.97 23.68 L23.42 33.75 L25.82 33.55"/>
+    <path data-limb="near-arm" opacity="1" d="M21.00 18.13 L21.00 24.53 L26.07 21.72"/>
+    <path d="M22.00 13.93 L21.00 18.13 L18.00 27.13"/>
+    <circle cx="23" cy="8.53" r="5.4"/>
+    <path opacity=".35" stroke-width="1.2" d="M2 20.93H5 M1 23.93H4"/>
+  </g>
+  <g data-frame="13" transform="translate(520 0)">
+    <path data-limb="far-leg" opacity=".55" d="M18.00 26.37 L18.51 37.86 L11.53 47.00 L13.93 46.80"/>
+    <path data-limb="far-arm" opacity=".55" d="M21.00 17.37 L22.61 23.57 L25.77 18.71"/>
+    <path data-limb="near-leg" opacity="1" d="M18.00 26.37 L29.31 24.29 L28.38 35.75 L30.77 35.55"/>
+    <path data-limb="near-arm" opacity="1" d="M21.00 17.37 L19.39 23.57 L25.00 22.07"/>
+    <path d="M22.00 13.17 L21.00 17.37 L18.00 26.37"/>
+    <circle cx="23" cy="7.77" r="5.4"/>
+    <path opacity=".35" stroke-width="1.2" d="M2 20.17H5 M1 23.17H4"/>
+  </g>
+  <g data-frame="14" transform="translate(560 0)">
+    <path data-limb="far-leg" opacity=".55" d="M18.00 26.10 L16.12 37.45 L8.25 45.83 L10.65 45.63"/>
+    <path data-limb="far-arm" opacity=".55" d="M21.00 17.10 L23.89 22.81 L26.08 17.44"/>
+    <path data-limb="near-leg" opacity="1" d="M18.00 26.10 L29.34 28.04 L30.25 39.50 L32.65 39.30"/>
+    <path data-limb="near-arm" opacity="1" d="M21.00 17.10 L18.11 22.81 L23.89 22.39"/>
+    <path d="M22.00 12.90 L21.00 17.10 L18.00 26.10"/>
+    <circle cx="23" cy="7.50" r="5.4"/>
+    <path opacity=".35" stroke-width="1.2" d="M2 19.90H5 M1 22.90H4"/>
+  </g>
+  <g data-frame="15" transform="translate(600 0)">
+    <path data-limb="far-leg" opacity=".55" d="M18.00 26.47 L17.73 37.97 L7.00 42.12 L9.40 41.92"/>
+    <path data-limb="far-arm" opacity=".55" d="M21.00 17.47 L24.68 22.71 L26.30 17.14"/>
+    <path data-limb="near-leg" opacity="1" d="M18.00 26.47 L28.15 31.88 L29.88 43.25 L32.27 43.05"/>
+    <path data-limb="near-arm" opacity="1" d="M21.00 17.47 L17.32 22.71 L23.12 22.89"/>
+    <path d="M22.00 13.27 L21.00 17.47 L18.00 26.47"/>
+    <circle cx="23" cy="7.87" r="5.4"/>
+    <path opacity=".35" stroke-width="1.2" d="M2 20.27H5 M1 23.27H4"/>
+  </g>
+</svg>
