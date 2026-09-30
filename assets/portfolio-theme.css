@@ -73,80 +73,86 @@
   }
 }
 
-
-/* Subtle background runner: decorative only, theme-aware, and motion-safe. */
-body {
-  isolation: isolate;
+/* Playful divider runner. The hero's existing bottom border is the track.
+   Scope to this exact section order; do not change global stacking or controls. */
+#top.hero:has(+ #method) {
+  position: relative;
 }
 
-body::before {
+#top.hero:has(+ #method)::after {
+  --runner-width: 36px;
+  --runner-height: 43.2px;
+  --runner-crossing: 24s;
+  --runner-stride: .72s;
   content: "";
-  position: fixed;
-  top: 70vh;
-  left: -3rem;
-  z-index: 0;
-  width: 1.7rem;
-  height: 2.55rem;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: var(--runner-width);
+  height: var(--runner-height);
   pointer-events: none;
   background: var(--black);
   opacity: 0;
-  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 48'%3E%3Cg fill='none' stroke='white' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='16' cy='7' r='4'/%3E%3Cpath d='M16 12 15 26M15 16 8 20 4 16M15 16 22 12 27 15M15 26 9 35 4 38M15 26 22 33 28 32'/%3E%3C/g%3E%3C/svg%3E") center / contain no-repeat;
-  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 48'%3E%3Cg fill='none' stroke='white' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='16' cy='7' r='4'/%3E%3Cpath d='M16 12 15 26M15 16 8 20 4 16M15 16 22 12 27 15M15 26 9 35 4 38M15 26 22 33 28 32'/%3E%3C/g%3E%3C/svg%3E") center / contain no-repeat;
-  will-change: transform, opacity;
-  animation: m3ez-background-runner 20s linear infinite;
+  -webkit-mask-image: url("./stickman-run-cycle.svg");
+  mask-image: url("./stickman-run-cycle.svg");
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-size: calc(var(--runner-width) * 16) 100%;
+  mask-size: calc(var(--runner-width) * 16) 100%;
+  -webkit-mask-position: 0 0;
+  mask-position: 0 0;
+  animation:
+    m3ez-divider-cross var(--runner-crossing) linear infinite,
+    m3ez-divider-stride var(--runner-stride) steps(16) infinite;
 }
 
-body > main,
-body > .site-footer {
-  position: relative;
-  z-index: 1;
+/* Each sprite cell has connected shoulders/elbows and hips/knees, with a
+   two-beat bounce. The stride advances independently of travel along the line. */
+@keyframes m3ez-divider-stride {
+  to {
+    -webkit-mask-position: calc(var(--runner-width) * -16) 0;
+    mask-position: calc(var(--runner-width) * -16) 0;
+  }
 }
 
-@keyframes m3ez-background-runner {
+/* Stay inside the divider endpoints. Reset while invisible, never run backward.
+   Left is local to this one small absolute decoration, not the viewport. */
+@keyframes m3ez-divider-cross {
   0% {
-    transform: translate3d(0, 0, 0) rotate(-3deg);
+    left: 0;
     opacity: 0;
   }
-  4% {
-    opacity: .08;
+  3% {
+    opacity: .28;
   }
-  10% {
-    transform: translate3d(16vw, -1px, 0) rotate(2deg);
+  77% {
+    opacity: .28;
   }
-  18% {
-    transform: translate3d(32vw, 1px, 0) rotate(-2deg);
-  }
-  26% {
-    transform: translate3d(48vw, -1px, 0) rotate(2deg);
-  }
-  34% {
-    transform: translate3d(64vw, 1px, 0) rotate(-2deg);
-  }
-  42% {
-    transform: translate3d(80vw, -1px, 0) rotate(2deg);
-  }
-  52% {
-    transform: translate3d(calc(100vw + 6rem), 0, 0) rotate(-2deg);
-    opacity: .08;
-  }
-  55%,
-  100% {
-    transform: translate3d(calc(100vw + 6rem), 0, 0);
+  80%, 100% {
+    left: calc(100% - var(--runner-width));
     opacity: 0;
   }
 }
 
 @media (max-width: 640px) {
-  body::before {
-    top: 76vh;
-    width: 1.35rem;
-    height: 2.05rem;
+  #top.hero:has(+ #method)::after {
+    --runner-width: 28px;
+    --runner-height: 33.6px;
+    --runner-crossing: 12s;
+    --runner-stride: .8s;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  body::before {
-    display: none;
+  #top.hero:has(+ #method)::after {
+    content: none;
+    animation: none;
+  }
+}
+
+@media print {
+  #top.hero:has(+ #method)::after {
+    content: none;
     animation: none;
   }
 }
