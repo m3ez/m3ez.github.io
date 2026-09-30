@@ -156,3 +156,40 @@
     animation: none;
   }
 }
+
+/* Soft mountain strip behind the runner, on the same existing divider.
+   SVG alpha gradients provide the haze; the shared palette supplies the color.
+   ::before paints before the existing ::after runner without global z-index changes. */
+#top.hero:has(+ #method)::before {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 56px;
+  pointer-events: none;
+  background: var(--black);
+  -webkit-mask-image: url("./divider-scene.svg");
+  mask-image: url("./divider-scene.svg");
+  mask-mode: alpha;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
+  -webkit-mask-position: center bottom;
+  mask-position: center bottom;
+}
+
+/* Stay within the smaller hero bottom padding on phones and small tablets. */
+@media (max-width: 760px) {
+  #top.hero:has(+ #method)::before {
+    height: 30px;
+  }
+}
+
+/* A static landscape is retained for reduced motion; the runner already opts out. */
+@media print {
+  #top.hero:has(+ #method)::before {
+    content: none;
+  }
+}
