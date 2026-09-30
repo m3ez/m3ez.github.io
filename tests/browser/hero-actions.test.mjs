@@ -78,20 +78,24 @@ async function withPage(width, theme, run, reducedMotion = 'reduce') {
 
 for (const width of [320, 360, 390, 560, 768, 880, 900, 1024, 1440]) {
   for (const theme of ['light', 'dark']) {
-    test(`hero actions are compact, side by side and theme-aware at ${width}px in ${theme}`, async () => {
+    test(`hero actions keep a side-by-side layout and respect the mobile half-width split at ${width}px in ${theme}`, async () => {
       await withPage(width, theme, async page => {
         const actions = page.locator('#top .hero-actions a');
         assert.deepEqual(await actions.allTextContents(), ['View Research', 'Contact']);
         assert.deepEqual(await actions.evaluateAll(nodes => nodes.map(node => node.getAttribute('href'))), ['#research', '#contact']);
         assert.equal(await page.getByRole('link', { name: 'View Research', exact: true }).count(), 1);
         assert.equal(await page.locator('#top').getByRole('link', { name: 'Contact', exact: true }).count(), 1);
-        const [primary, secondary] = await actions.evaluateAll(nodes => nodes.map(node => {
+        const [row, primary, secondary] = await page.locator('#top .hero-actions').evaluate(actions => [{
+          x: actions.getBoundingClientRect().x,
+          width: actions.getBoundingClientRect().width,
+          gap: parseFloat(getComputedStyle(actions).columnGap || getComputedStyle(actions).gap) || 0,
+        }, ...Array.from(actions.querySelectorAll('a')).map(node => {
           const box = node.getBoundingClientRect();
           const css = getComputedStyle(node);
           return { x: box.x, y: box.y, width: box.width, height: box.height,
             background: css.backgroundColor, color: css.color, radius: parseFloat(css.borderRadius),
             border: css.borderTopWidth, shadow: css.boxShadow, whiteSpace: css.whiteSpace };
-        }));
+        })]);
         assert.ok(Math.abs(primary.y - secondary.y) <= 1, 'mobile actions must stay on one row');
         assert.equal(primary.height, secondary.height, 'actions must share a baseline and hit-area height');
         assert.ok(primary.height >= 44 && secondary.height >= 44, 'retain touch-friendly hit areas');
@@ -100,12 +104,21 @@ for (const width of [320, 360, 390, 560, 768, 880, 900, 1024, 1440]) {
         assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false);
         assert.equal(primary.background, theme === 'light' ? 'rgb(0, 0, 0)' : 'rgb(255, 255, 255)');
         assert.equal(primary.color, theme === 'light' ? 'rgb(255, 255, 255)' : 'rgb(0, 0, 0)');
-        assert.ok(primary.radius >= 4 && primary.radius <= 8, 'use slight rounding, not a pill');
+        assert.equal(primary.radius, 0, 'the primary action should use square corners');
+        assert.equal(secondary.radius, 0, 'the secondary action should also stay square');
         assert.notEqual(primary.shadow, 'none', 'give the primary button a subtle shadow');
         assert.equal(secondary.background, 'rgba(0, 0, 0, 0)', 'Contact is a transparent text action');
         assert.equal(secondary.border, '0px', 'Contact has no visible button border');
         assert.equal(secondary.shadow, 'none');
         assert.equal(secondary.color, theme === 'light' ? 'rgb(17, 17, 17)' : 'rgb(238, 238, 238)');
+        if (width <= 560) {
+          assert.ok(row.x >= 12, 'the hero row should keep comfortable left gutter space on phones');
+          assert.ok(width - (row.x + row.width) >= 12, 'the hero row should keep comfortable right gutter space on phones');
+          assert.ok(Math.abs(primary.width - secondary.width) <= 2, 'mobile actions should split the row 50/50');
+          assert.ok(Math.abs(primary.width + secondary.width + row.gap - row.width) <= 2, 'mobile actions should span the hero row width');
+        } else {
+          assert.ok(primary.width > secondary.width, 'desktop keeps the filled CTA content-sized and more prominent');
+        }
         for (const [index, pseudo] of [[0, '::after'], [1, '::before']]) {
           const icon = await actions.nth(index).evaluate((node, pseudo) => {
             const css = getComputedStyle(node, pseudo);
