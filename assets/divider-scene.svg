@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 64" preserveAspectRatio="none" fill="none">
+  <!-- Alpha-only scenery: CSS supplies the light/dark foreground color.
+       Gentle ridges rise at the edges; the quiet center leaves room for the runner. -->
+  <defs>
+    <linearGradient id="haze-far" x1="0" y1="0" x2="0" y2="64" gradientUnits="userSpaceOnUse">
+      <stop stop-color="black" stop-opacity=".018"/>
+      <stop offset=".65" stop-color="black" stop-opacity=".042"/>
+      <stop offset="1" stop-color="black" stop-opacity=".006"/>
+    </linearGradient>
+    <linearGradient id="haze-middle" x1="0" y1="14" x2="0" y2="64" gradientUnits="userSpaceOnUse">
+      <stop stop-color="black" stop-opacity=".015"/>
+      <stop offset=".65" stop-color="black" stop-opacity=".038"/>
+      <stop offset="1" stop-color="black" stop-opacity=".01"/>
+    </linearGradient>
+    <linearGradient id="haze-near" x1="0" y1="34" x2="0" y2="64" gradientUnits="userSpaceOnUse">
+      <stop stop-color="black" stop-opacity=".01"/>
+      <stop offset=".65" stop-color="black" stop-opacity=".028"/>
+      <stop offset="1" stop-color="black" stop-opacity=".014"/>
+    </linearGradient>
+  </defs>
+  <path data-ridge="far" fill="url(#haze-far)" d="M0 53 C28 51 42 43 66 39 C96 34 118 23 150 16 Q158 13 167 17 C194 27 214 35 241 38 C268 41 292 46 318 41 C345 35 363 29 381 24 Q390 20 398 24 C418 31 431 42 449 44 C470 46 482 39 499 43 C530 53 549 49 577 55 C622 59 673 60 720 60 C770 60 816 58 854 59 C900 60 934 53 966 51 C1005 49 1021 38 1051 40 C1084 43 1108 35 1136 28 Q1145 26 1154 29 C1178 35 1201 30 1224 21 C1249 12 1267 15 1292 6 Q1302 2 1311 8 C1335 23 1355 25 1379 30 C1401 33 1424 41 1440 42 L1440 64 H0 Z"/>
+  <path data-ridge="middle" fill="url(#haze-middle)" d="M0 59 C30 54 54 50 75 45 Q83 42 91 46 C110 53 131 46 152 40 Q162 36 173 41 C203 50 222 53 248 49 C271 45 288 37 307 34 Q316 31 327 37 C350 48 373 49 396 47 C425 43 448 48 475 51 C504 55 525 47 550 50 C583 58 618 57 650 60 C713 62 763 60 813 61 C856 61 888 56 921 58 C950 59 976 48 1004 44 Q1014 42 1025 47 C1050 55 1073 51 1097 44 C1125 34 1147 36 1171 31 Q1181 28 1190 33 C1216 42 1235 40 1260 31 Q1270 27 1281 33 C1306 45 1325 46 1349 43 C1381 40 1405 50 1440 53 L1440 64 H0 Z"/>
+  <path data-ridge="near" fill="url(#haze-near)" d="M0 61 C41 56 70 55 102 53 C132 50 166 55 198 56 C230 56 251 50 276 48 Q288 47 299 51 C330 59 351 57 381 55 C419 51 444 58 478 57 C514 55 548 59 581 60 C624 61 678 62 720 62 C767 62 801 60 840 61 C881 62 918 56 951 57 C987 57 1020 51 1051 52 C1080 53 1103 44 1126 43 Q1139 42 1151 47 C1178 53 1205 49 1232 48 C1261 46 1286 51 1317 50 C1353 47 1396 54 1440 57 L1440 64 H0 Z"/>
+  <!-- Sparse ground accents only: the page border remains the sole horizon. -->
+  <g data-detail="grass" stroke="black" stroke-opacity=".12" stroke-width=".8" stroke-linecap="round">
+    <path d="M22 63 Q21 58 17 55 M22 63 Q23 58 26 54 M22 63 L22 53 M88 63 L85 60 M88 63 L90 58"/>
+    <path d="M302 63 Q299 58 296 56 M302 63 L303 53 M302 63 Q305 58 309 57 M398 63 L396 60 M398 63 L401 59"/>
+    <path d="M551 63 Q550 59 547 58 M551 63 L553 56 M648 63 L646 60 M648 63 L650 59"/>
+    <path d="M879 63 Q876 57 873 55 M879 63 L880 53 M879 63 Q882 58 886 56 M951 63 L949 59 M951 63 L954 58"/>
+    <path d="M1120 63 Q1118 59 1115 58 M1120 63 L1121 55 M1120 63 L1125 59 M1214 63 L1212 59 M1214 63 L1217 58"/>
+    <path d="M1344 63 Q1342 57 1338 55 M1344 63 L1345 53 M1344 63 Q1347 58 1351 56 M1401 63 L1398 59 M1401 63 L1404 58"/>
+  </g>
+</svg>
