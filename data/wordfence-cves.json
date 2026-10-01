@@ -4,6 +4,32 @@
   "profile": "https://www.wordfence.com/threat-intel/vulnerabilities/researchers/supakiad-s",
   "items": [
     {
+      "id": "CVE-2026-97248",
+      "title": "Booking Activities <= 1.18.7.1 - Unauthenticated PHP Object Injection",
+      "cvss": 8.1,
+      "href": "https://www.wordfence.com/threat-intel/vulnerabilities/id/639731d5-cd55-4689-b82d-4c94fa13b4da?source=api-prod",
+      "severity": "High",
+      "class": "Object injection",
+      "authContext": "Unauthenticated",
+      "unauthenticated": true,
+      "target": "Booking Activities",
+      "year": 2026,
+      "shortTitle": "Unauthenticated PHP Object Injection"
+    },
+    {
+      "id": "CVE-2026-97245",
+      "title": "SureCart – Ecommerce Made Easy For Selling Physical Products, Digital Downloads, Subscriptions, Donations, & Payments <= 4.7.2 - Authenticated (Shop Worker+) Privilege Escalation",
+      "cvss": 6.3,
+      "href": "https://www.wordfence.com/threat-intel/vulnerabilities/id/d57af81e-ef63-44ec-a1f6-dd1b5b627ec4?source=api-prod",
+      "severity": "Medium",
+      "class": "Privilege escalation",
+      "authContext": "Shop Worker+",
+      "unauthenticated": false,
+      "target": "SureCart – Ecommerce Made Easy For Selling Physical Products, Digital Downloads, Subscriptions, Donations, & Payments",
+      "year": 2026,
+      "shortTitle": "Authenticated (Shop Worker+) Privilege Escalation"
+    },
+    {
       "id": "CVE-2026-89413",
       "title": "Filter Gallery <= 1.1.4 - Missing Authorization to Authenticated (Subscriber+) Arbitrary Gallery Deletion via 'ufg_gallery_id' Parameter",
       "cvss": 8.1,
@@ -837,9 +863,9 @@
     }
   ],
   "stats": {
-    "total": 64,
+    "total": 66,
     "critical": 7,
-    "high": 27,
-    "unauthenticated": 34
+    "high": 28,
+    "unauthenticated": 35
   }
 }
