@@ -30,6 +30,19 @@
       "shortTitle": "Authenticated (Shop Worker+) Privilege Escalation"
     },
     {
+      "id": "CVE-2026-94541",
+      "title": "WPMobile.App <= 11.82 - Unauthenticated Admin Account Takeover via 'wpapp_category[]' Parameter",
+      "cvss": 9.8,
+      "href": "https://www.wordfence.com/threat-intel/vulnerabilities/id/18fddc88-53d5-42c0-946f-f88ef6abb39f?source=api-prod",
+      "severity": "Critical",
+      "class": "Other",
+      "authContext": "Unauthenticated",
+      "unauthenticated": true,
+      "target": "WPMobile.App",
+      "year": 2026,
+      "shortTitle": "Unauthenticated Admin Account Takeover via 'wpapp_category[]' Parameter"
+    },
+    {
       "id": "CVE-2026-89413",
       "title": "Filter Gallery <= 1.1.4 - Missing Authorization to Authenticated (Subscriber+) Arbitrary Gallery Deletion via 'ufg_gallery_id' Parameter",
       "cvss": 8.1,
@@ -863,9 +876,9 @@
     }
   ],
   "stats": {
-    "total": 66,
-    "critical": 7,
+    "total": 67,
+    "critical": 8,
     "high": 28,
-    "unauthenticated": 35
+    "unauthenticated": 36
   }
 }
