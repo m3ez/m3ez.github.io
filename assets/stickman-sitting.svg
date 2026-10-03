@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 48" fill="none">
+  <g stroke="black" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+    <circle data-head="true" cx="25.6" cy="8.2" r="5.2"/>
+    <path data-body="true" d="M23.4 13.2 L21.8 20.6 L20 28"/>
+    <path data-limb="far-arm" opacity=".58" d="M22 17.4 L17.6 23.7 L16 30.5"/>
+    <path data-limb="near-arm" d="M22.7 17.1 L26.8 22.2 L29.6 28.6"/>
+    <path data-limb="far-leg" opacity=".58" d="M20 28 L15.2 34.1 L17 43.8"/>
+    <path data-limb="near-leg" d="M20 28 L29.6 30.2 L28.8 43.2"/>
+    <path data-gaze="true" stroke-width="1.2" d="M30.2 9 L31.7 9.4"/>
+  </g>
+  <circle data-eye="true" cx="29.1" cy="8.1" r=".72" fill="black"/>
+</svg>
