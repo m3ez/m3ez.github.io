@@ -2,7 +2,7 @@ import { readFile, writeFile } from 'node:fs/promises';
 
 const path = process.argv[2] ?? 'index.html';
 const stylesheet = '<link rel="stylesheet" href="/assets/research-credentials.css"/>';
-const script = '<script type="module" src="/assets/portfolio-redesign.js?v=20261003-2"></script>';
+const script = '<script type="module" src="/assets/portfolio-redesign.js?v=20261003-3"></script>';
 const themeScript = '<script src="/assets/portfolio-theme.js?v=20261003-2"></script>';
 const themeStylesheet = '<link rel="stylesheet" href="/assets/portfolio-theme.css?v=20261003-2"/>';
 
