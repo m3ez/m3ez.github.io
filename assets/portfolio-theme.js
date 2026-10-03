@@ -47,10 +47,10 @@
     const nightCloud = '<g class="divider-cloud-drift" fill="none" stroke="currentColor" stroke-width="1.15" stroke-linecap="round"><path d="M3 14.5c4.7-3.5 9.5-3.7 14.1-1.3 3.6-4.4 11.2-4 14.1 1 3.7-1.6 7.2-1.2 9.8 1.2"/><path opacity=".55" d="M9 18c5.3-2.3 10.4-2.2 15.1.2 3-2.4 7.1-2.6 10.9-.7"/></g>';
 
     clouds.innerHTML =
-      '<svg class="divider-cloud divider-cloud-day divider-cloud-day-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 44 28" aria-hidden="true" focusable="false">' + dayCloud + '</svg>' +
-      '<svg class="divider-cloud divider-cloud-day divider-cloud-day-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 44 28" aria-hidden="true" focusable="false">' + dayCloud + '</svg>' +
-      '<svg class="divider-cloud divider-cloud-night divider-cloud-night-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 44 24" aria-hidden="true" focusable="false">' + nightCloud + '</svg>' +
-      '<svg class="divider-cloud divider-cloud-night divider-cloud-night-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 44 24" aria-hidden="true" focusable="false">' + nightCloud + '</svg>';
+      '<svg class="divider-cloud divider-cloud-day divider-cloud-day-1" xmlns="http://www.w3.org/2000/svg" viewBox="2 7 40 19" aria-hidden="true" focusable="false">' + dayCloud + '</svg>' +
+      '<svg class="divider-cloud divider-cloud-day divider-cloud-day-2" xmlns="http://www.w3.org/2000/svg" viewBox="2 7 40 19" aria-hidden="true" focusable="false">' + dayCloud + '</svg>' +
+      '<svg class="divider-cloud divider-cloud-night divider-cloud-night-1" xmlns="http://www.w3.org/2000/svg" viewBox="2 8 40 12" aria-hidden="true" focusable="false">' + nightCloud + '</svg>' +
+      '<svg class="divider-cloud divider-cloud-night divider-cloud-night-2" xmlns="http://www.w3.org/2000/svg" viewBox="2 8 40 12" aria-hidden="true" focusable="false">' + nightCloud + '</svg>';
 
     hero.appendChild(clouds);
   }
