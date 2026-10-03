@@ -55,6 +55,15 @@ export const certs = [
     verificationUrl: 'https://www.credential.net/02e37ded-be80-4118-b483-92f224d07165',
   },
   {
+    name: 'Certified Red Team Analyst (CRTA)',
+    issuer: 'Cyberwarfare Labs',
+    year: 2025,
+    category: 'Offensive',
+    flagship: false,
+    description: 'Hands-on red team methodology and practical enterprise attack assessment',
+    verificationUrl: 'https://labs.cyberwarfare.live/credential/achievement/68972d1fbf373ee66a1cdb20',
+  },
+  {
     name: 'OSCP',
     issuer: 'OffSec',
     year: 2020,
