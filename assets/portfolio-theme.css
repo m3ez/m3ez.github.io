@@ -80,6 +80,7 @@
 }
 
 #top.hero:has(+ #method)::after {
+  display: none;
   --runner-width: 36px;
   --runner-height: 43.2px;
   --runner-crossing: 24s;
