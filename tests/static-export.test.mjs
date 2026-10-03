@@ -29,7 +29,7 @@ test('preparing an export removes competing hydration and preserves content and 
     assert.ok(html.includes('href="/_next/static/site.css"'));
     assert.ok(html.includes('href="/favicon.ico"'));
     assert.ok(html.includes('href="https://m3ez.github.io/"'));
-    assert.ok(html.includes('src="/assets/portfolio-redesign.js?v=20261003-2"'));
+    assert.ok(html.includes('src="/assets/portfolio-redesign.js?v=20261003-3"'));
     assert.ok(html.includes('href="/assets/research-credentials.css"'));
     execFileSync(process.execPath, [injector, path]);
     assert.equal(await readFile(path, 'utf8'), html);
@@ -45,7 +45,7 @@ test('preparing an export with an existing stylesheet still installs its interac
     await writeFile(path, '<html><head><link rel="stylesheet" href="/assets/research-credentials.css"/></head><body></body></html>');
     execFileSync(process.execPath, [injector, path]);
     const html = await readFile(path, 'utf8');
-    assert.equal(html.match(/src="\/assets\/portfolio-redesign.js\?v=20261003-2"/g)?.length, 1);
+    assert.equal(html.match(/src="\/assets\/portfolio-redesign.js\?v=20261003-3"/g)?.length, 1);
     assert.equal(html.match(/href="\/assets\/research-credentials.css"/g)?.length, 1);
   } finally {
     await rm(directory, { recursive: true, force: true });

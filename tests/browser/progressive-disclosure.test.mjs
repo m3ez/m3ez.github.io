@@ -120,3 +120,27 @@ test('Explore more reveals the full portfolio and lands on Research', async () =
     await page.close();
   }
 });
+
+
+test('expanded content places Credentials immediately before Consulting', async () => {
+  const page = await pageAt('/#research');
+  try {
+    const order = await page.evaluate(() => {
+      const main = document.getElementById('content');
+      return [...main.children]
+        .map(node => node.id)
+        .filter(Boolean);
+    });
+    const recognition = order.indexOf('recognition');
+    const credentials = order.indexOf('credentials');
+    const consulting = order.indexOf('consulting');
+    const contact = order.indexOf('contact');
+    assert.ok(recognition < credentials);
+    assert.equal(consulting, credentials + 1);
+    assert.ok(consulting < contact);
+    assert.ok(await page.locator('#credentials').isVisible());
+    assert.ok(await page.locator('#consulting').isVisible());
+  } finally {
+    await page.close();
+  }
+});
