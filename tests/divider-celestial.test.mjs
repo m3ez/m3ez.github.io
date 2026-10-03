@@ -73,3 +73,13 @@ test('day and night clouds drift independently while respecting reduced motion',
   assert.match(css, /@media \(prefers-reduced-motion: reduce\)[\s\S]*?#m3ez-divider-clouds-v1 \.divider-cloud-drift\s*\{[^}]*animation:\s*none[^}]*transform:\s*none/s);
   assert.match(css, /@media print[\s\S]*?#m3ez-divider-clouds-v1\s*\{\s*display:\s*none;/s);
 });
+
+
+test('cloud SVG canvases stay transparent and use tight viewBoxes', () => {
+  assert.match(js, /divider-cloud-day-1[^>]*viewBox="2 7 40 19"/);
+  assert.match(js, /divider-cloud-day-2[^>]*viewBox="2 7 40 19"/);
+  assert.match(js, /divider-cloud-night-1[^>]*viewBox="2 8 40 12"/);
+  assert.match(js, /divider-cloud-night-2[^>]*viewBox="2 8 40 12"/);
+  assert.match(css, /#m3ez-divider-clouds-v1 svg\s*\{[^}]*background:\s*transparent[^}]*overflow:\s*visible/s);
+  assert.match(css, /#m3ez-divider-celestial-v1 svg\s*\{[^}]*background:\s*transparent[^}]*overflow:\s*visible/s);
+});
