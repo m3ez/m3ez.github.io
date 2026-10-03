@@ -6,6 +6,7 @@
   const BUTTON_ID = 'm3ez-theme-toggle-v1';
   const CELESTIAL_ID = 'm3ez-divider-celestial-v1';
   const CLOUDS_ID = 'm3ez-divider-clouds-v1';
+  const LIGHT_ID = 'm3ez-divider-light-v1';
   const root = document.documentElement;
   const initialHash = window.location?.hash || '';
   const landingHash =
@@ -16,15 +17,82 @@
     initialHash.startsWith('#method-');
   root.dataset.portfolioExpanded = landingHash ? 'false' : 'true';
   let button;
+  let autoThemeEnabled = true;
+
+  function getLocalHour(date = new Date()) {
+    return date.getHours() + date.getMinutes() / 60 + date.getSeconds() / 3600;
+  }
+
+  function getSkyState(date = new Date()) {
+    const hour = getLocalHour(date);
+    let name;
+    if (hour >= 5 && hour < 7) name = 'sunrise';
+    else if (hour >= 7 && hour < 10) name = 'morning';
+    else if (hour >= 10 && hour < 15) name = 'noon';
+    else if (hour >= 15 && hour < 18) name = 'sunset';
+    else if (hour >= 18 && hour < 21) name = 'evening';
+    else if (hour >= 21 || hour < 1) name = 'midnight';
+    else name = 'late-night';
+
+    const sunVisible = hour >= 5 && hour < 18;
+    const rawProgress = sunVisible
+      ? (hour - 5) / 13
+      : hour >= 18
+        ? (hour - 18) / 11
+        : (hour + 6) / 11;
+    const progress = Math.max(0, Math.min(1, rawProgress));
+    const altitude = Math.sin(progress * Math.PI);
+
+    return {
+      name,
+      sunVisible,
+      autoTheme: hour >= 6 && hour < 18 ? 'light' : 'dark',
+      progress,
+      altitude,
+    };
+  }
 
   function applyTheme(value) {
     const dark = value === 'dark';
     root.dataset.theme = dark ? 'dark' : 'light';
+    root.dataset.themeMode = autoThemeEnabled ? 'auto' : 'manual';
     if (button) {
       const label = dark ? 'Switch to light mode' : 'Switch to dark mode';
       button.setAttribute('aria-label', label);
-      button.title = label;
+      button.title = autoThemeEnabled ? `${label} (manual override)` : label;
     }
+  }
+
+  function updateSky(date = new Date()) {
+    const state = getSkyState(date);
+    root.dataset.sky = state.name;
+    root.dataset.skyPhase = state.sunVisible ? 'sun' : 'moon';
+
+    if (root.style?.setProperty) {
+      const x = 28 + state.progress * 44;
+      const rise = 3 + state.altitude * 22;
+      const mobileRise = 2 + state.altitude * 9;
+      const angle = state.sunVisible
+        ? -12 + state.progress * 24
+        : 10 - state.progress * 20;
+      const lightOpacity = state.sunVisible
+        ? .08 + state.altitude * .12
+        : .035 + state.altitude * .045;
+      const cloudBrightness = state.sunVisible
+        ? .9 + state.altitude * .1
+        : .72 + state.altitude * .08;
+
+      root.style.setProperty('--celestial-x', `${x.toFixed(2)}%`);
+      root.style.setProperty('--celestial-rise', `${rise.toFixed(2)}px`);
+      root.style.setProperty('--celestial-rise-mobile', `${mobileRise.toFixed(2)}px`);
+      root.style.setProperty('--celestial-angle', `${angle.toFixed(2)}deg`);
+      root.style.setProperty('--sky-light-opacity', lightOpacity.toFixed(3));
+      root.style.setProperty('--cloud-brightness', cloudBrightness.toFixed(3));
+      root.style.setProperty('--cloud-shadow-x', `${((.5 - state.progress) * 8).toFixed(2)}px`);
+      root.style.setProperty('--cloud-shadow-y', `${(3 + (1 - state.altitude) * 2).toFixed(2)}px`);
+    }
+
+    if (autoThemeEnabled) applyTheme(state.autoTheme);
   }
 
   let savedTheme;
@@ -33,7 +101,19 @@
   } catch {
     // Storage may be unavailable. The in-page control must still work.
   }
-  applyTheme(savedTheme); // Deliberately default to light, not the OS preference.
+  autoThemeEnabled = savedTheme !== 'light' && savedTheme !== 'dark';
+  if (!autoThemeEnabled) applyTheme(savedTheme);
+  updateSky();
+
+  function mountDividerLight() {
+    const hero = document.getElementById('top');
+    if (!hero || document.getElementById(LIGHT_ID)) return;
+
+    const light = document.createElement('span');
+    light.id = LIGHT_ID;
+    light.setAttribute('aria-hidden', 'true');
+    hero.appendChild(light);
+  }
 
   function mountDividerClouds() {
     const hero = document.getElementById('top');
@@ -62,11 +142,19 @@
     const celestial = document.createElement('span');
     celestial.id = CELESTIAL_ID;
     celestial.setAttribute('aria-hidden', 'true');
-    celestial.innerHTML = '<svg class="divider-celestial-sun" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="3.6" fill="currentColor"/><g fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"><path d="M12 2.5v2.2m0 14.6v2.2M2.5 12h2.2m14.6 0h2.2M5.28 5.28l1.56 1.56m10.32 10.32 1.56 1.56M5.28 18.72l1.56-1.56m10.32-10.32 1.56-1.56"/></g></svg><svg class="divider-celestial-moon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M20.35 15.35A8.45 8.45 0 0 1 8.65 3.65 8.46 8.46 0 1 0 20.35 15.35Z"/></svg>';
+    celestial.innerHTML =
+      '<svg class="divider-celestial-icon divider-celestial-sunrise" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12.5" r="3.4" fill="currentColor"/><g fill="none" stroke="currentColor" stroke-width="1.15" stroke-linecap="round"><path d="M12 4.7v2M5.1 8.6l1.7 1m12.1-1-1.7 1M3.7 14h2.2M18.1 14h2.2"/></g></svg>' +
+      '<svg class="divider-celestial-icon divider-celestial-morning" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="3.6" fill="currentColor"/><g fill="none" stroke="currentColor" stroke-width="1.15" stroke-linecap="round"><path d="M12 3.4v2m0 13.2v2M4.5 7.7l1.7 1m11.6-1 1.7-1M3.5 12h2m13 0h2M6.2 17.3l-1.6 1"/></g></svg>' +
+      '<svg class="divider-celestial-icon divider-celestial-noon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="3.7" fill="currentColor"/><g fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"><path d="M12 2.5v2.2m0 14.6v2.2M2.5 12h2.2m14.6 0h2.2M5.28 5.28l1.56 1.56m10.32 10.32 1.56 1.56M5.28 18.72l1.56-1.56m10.32-10.32 1.56-1.56"/></g></svg>' +
+      '<svg class="divider-celestial-icon divider-celestial-sunset" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="11.5" r="3.5" fill="currentColor"/><g fill="none" stroke="currentColor" stroke-width="1.15" stroke-linecap="round"><path d="M12 3.3v2M4.8 7.3l1.7 1.1m11-1.1 1.7-1.1M3.5 12h2.1m12.8 0h2.1M6.4 16.6l-1.6 1.2m12.8-1.2 1.6 1.2"/></g></svg>' +
+      '<svg class="divider-celestial-icon divider-celestial-evening" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M19.8 15.2A8.15 8.15 0 0 1 8.8 4.2 8.16 8.16 0 1 0 19.8 15.2Z"/><circle cx="18.2" cy="6.1" r=".65" fill="currentColor" opacity=".45"/></svg>' +
+      '<svg class="divider-celestial-icon divider-celestial-midnight" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M20.35 15.35A8.45 8.45 0 0 1 8.65 3.65 8.46 8.46 0 1 0 20.35 15.35Z"/><circle cx="18.3" cy="5.1" r=".62" fill="currentColor" opacity=".5"/><circle cx="20.2" cy="8.2" r=".38" fill="currentColor" opacity=".35"/></svg>' +
+      '<svg class="divider-celestial-icon divider-celestial-late-night" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M19.9 15.6A8.25 8.25 0 0 1 8.4 4.1 8.27 8.27 0 1 0 19.9 15.6Z"/><circle cx="5.2" cy="8.2" r=".55" fill="currentColor" opacity=".4"/></svg>';
     hero.appendChild(celestial);
   }
 
   function mount() {
+    mountDividerLight();
     mountDividerClouds();
     mountDividerCelestial();
     if (document.getElementById(BUTTON_ID)) return;
@@ -76,6 +164,7 @@
     button.innerHTML = '<svg class="theme-icon-moon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M20.9 13.1A9 9 0 0 1 10.9 3.1 9 9 0 1 0 20.9 13.1Z"/></svg><svg class="theme-icon-sun" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42"/></svg>';
     applyTheme(root.dataset.theme);
     button.addEventListener('click', () => {
+      autoThemeEnabled = false;
       applyTheme(root.dataset.theme === 'dark' ? 'light' : 'dark');
       try {
         window.localStorage.setItem(STORAGE_KEY, root.dataset.theme);
@@ -94,8 +183,19 @@
   });
 
   window.addEventListener('storage', event => {
-    if (event.key === STORAGE_KEY || event.key === null) applyTheme(event.newValue);
+    if (event.key !== STORAGE_KEY && event.key !== null) return;
+    if (event.newValue === 'light' || event.newValue === 'dark') {
+      autoThemeEnabled = false;
+      applyTheme(event.newValue);
+      return;
+    }
+    autoThemeEnabled = true;
+    updateSky();
   });
+
+  if (typeof window.setInterval === 'function') {
+    window.setInterval(updateSky, 60_000);
+  }
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', mount, { once: true });
   } else {
