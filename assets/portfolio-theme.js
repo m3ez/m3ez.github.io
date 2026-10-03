@@ -179,7 +179,7 @@
     if (event.key.toLowerCase() !== 'r' || event.repeat || event.altKey || event.ctrlKey || event.metaKey) return;
     const target = event.target;
     if (target instanceof HTMLElement && (target.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(target.tagName))) return;
-    root.dataset.dividerRunner = root.dataset.dividerRunner === 'active' ? 'inactive' : 'active';
+    root.dataset.dividerWalker = root.dataset.dividerWalker === 'active' ? 'inactive' : 'active';
   });
 
   window.addEventListener('storage', event => {
