@@ -413,6 +413,12 @@
 #m3ez-divider-celestial-v1 .divider-celestial-evening,
 #m3ez-divider-celestial-v1 .divider-celestial-midnight,
 #m3ez-divider-celestial-v1 .divider-celestial-late-night {
+  color: #747b88;
+}
+
+:root[data-theme="dark"] #m3ez-divider-celestial-v1 .divider-celestial-evening,
+:root[data-theme="dark"] #m3ez-divider-celestial-v1 .divider-celestial-midnight,
+:root[data-theme="dark"] #m3ez-divider-celestial-v1 .divider-celestial-late-night {
   color: #ededf2;
 }
 
