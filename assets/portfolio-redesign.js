@@ -42,6 +42,29 @@ function element(tag, className, text) {
   return node;
 }
 
+function placeCredentialsBeforeConsulting() {
+  const recognition = document.getElementById('recognition');
+  const credentials = document.getElementById('credentials');
+  const consulting = document.getElementById('consulting');
+  if (!recognition || !credentials || !consulting) return;
+
+  const balanced =
+    recognition.parentElement?.classList.contains('balanced-sections') &&
+    recognition.parentElement.contains(consulting)
+      ? recognition.parentElement
+      : null;
+
+  if (balanced) {
+    balanced.before(recognition, credentials, consulting);
+    balanced.remove();
+    return;
+  }
+
+  if (credentials.nextElementSibling !== consulting) {
+    consulting.before(credentials);
+  }
+}
+
 function setPressed(buttons, activeValue) {
   for (const button of buttons) {
     const active = button.dataset.value === activeValue;
@@ -510,6 +533,7 @@ async function renderResearch() {
 }
 
 function start() {
+  placeCredentialsBeforeConsulting();
   initializeInteractions();
   initializeMethodWorkflow();
   renderHeroProofLinks();
