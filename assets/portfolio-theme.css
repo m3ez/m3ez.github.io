@@ -107,6 +107,10 @@
     m3ez-divider-stride var(--runner-stride) steps(16) infinite;
 }
 
+:root[data-divider-runner="active"] #top.hero:has(+ #method)::after {
+  display: block;
+}
+
 /* Each sprite cell has connected shoulders/elbows and hips/knees, with a
    two-beat bounce. The stride advances independently of travel along the line. */
 @keyframes m3ez-divider-stride {
