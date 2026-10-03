@@ -1,6 +1,11 @@
 /* Reuse the existing palette. No page-wide filter: images and fixed controls
    keep their original rendering, while all shared surfaces switch together. */
 :root {
+  --cyber-grid-line: rgba(0, 0, 0, .032);
+  --cyber-grid-major: rgba(0, 0, 0, .018);
+  --cyber-node: rgba(0, 0, 0, .15);
+  --cyber-trace: rgba(0, 0, 0, .055);
+  --cyber-scan: rgba(0, 0, 0, .07);
   color-scheme: light;
 }
 
@@ -11,6 +16,11 @@
   --muted: #a6a6a6;
   --line: #474747;
   --soft: #191919;
+  --cyber-grid-line: rgba(255, 255, 255, .038);
+  --cyber-grid-major: rgba(255, 255, 255, .02);
+  --cyber-node: rgba(255, 255, 255, .17);
+  --cyber-trace: rgba(255, 255, 255, .065);
+  --cyber-scan: rgba(255, 255, 255, .08);
   color-scheme: dark;
 }
 
@@ -537,6 +547,196 @@
   }
 }
 
+
+
+/* Minimal cyber background language for content sections.
+   Keep the hero sky, credential gallery and contact area visually quiet. */
+#method,
+#research,
+#recognition,
+#consulting {
+  background-color: var(--paper);
+}
+
+/* Technical notebook grid: deliberately faint and limited to Method. */
+#method {
+  background-image:
+    linear-gradient(var(--cyber-grid-major) 1px, transparent 1px),
+    linear-gradient(90deg, var(--cyber-grid-major) 1px, transparent 1px),
+    linear-gradient(var(--cyber-grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--cyber-grid-line) 1px, transparent 1px);
+  background-size:
+    256px 256px,
+    256px 256px,
+    64px 64px,
+    64px 64px;
+  background-position: center top;
+}
+
+/* Research uses only a handful of signal points and short packet-like traces. */
+#research {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background-image:
+    radial-gradient(circle at 13% 16%, var(--cyber-node) 0 1px, transparent 1.6px),
+    radial-gradient(circle at 78% 24%, var(--cyber-node) 0 1px, transparent 1.6px),
+    radial-gradient(circle at 37% 58%, var(--cyber-node) 0 1px, transparent 1.6px),
+    radial-gradient(circle at 88% 74%, var(--cyber-node) 0 1px, transparent 1.6px),
+    radial-gradient(circle at 19% 86%, var(--cyber-node) 0 1px, transparent 1.6px),
+    linear-gradient(90deg, transparent 0 15%, var(--cyber-trace) 15% 26%, transparent 26% 100%),
+    linear-gradient(90deg, transparent 0 64%, var(--cyber-trace) 64% 74%, transparent 74% 100%),
+    linear-gradient(var(--cyber-grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--cyber-grid-line) 1px, transparent 1px);
+  background-size:
+    100% 100%,
+    100% 100%,
+    100% 100%,
+    100% 100%,
+    100% 100%,
+    100% 1px,
+    100% 1px,
+    64px 64px,
+    64px 64px;
+  background-position:
+    0 0,
+    0 0,
+    0 0,
+    0 0,
+    0 0,
+    0 22%,
+    0 67%,
+    0 0,
+    0 0;
+  background-repeat:
+    no-repeat,
+    no-repeat,
+    no-repeat,
+    no-repeat,
+    no-repeat,
+    no-repeat,
+    no-repeat,
+    repeat,
+    repeat;
+}
+
+#research::before {
+  content: "";
+  position: absolute;
+  inset: -18% 0 auto;
+  z-index: 0;
+  height: 18%;
+  pointer-events: none;
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    var(--cyber-scan) 48%,
+    transparent
+  );
+  opacity: .24;
+  transform: translateY(-120%);
+  animation: m3ez-cyber-scan 18s cubic-bezier(.4, 0, .2, 1) infinite;
+}
+
+#research > * {
+  position: relative;
+  z-index: 1;
+}
+
+@keyframes m3ez-cyber-scan {
+  0%, 66% {
+    transform: translateY(-120%);
+    opacity: 0;
+  }
+  70% {
+    opacity: .2;
+  }
+  88% {
+    opacity: .2;
+  }
+  94%, 100% {
+    transform: translateY(720%);
+    opacity: 0;
+  }
+}
+
+/* Recognition stays quieter: sparse intersections only, no animation. */
+#recognition {
+  background-image:
+    radial-gradient(circle at 9% 28%, var(--cyber-node) 0 1px, transparent 1.5px),
+    radial-gradient(circle at 92% 48%, var(--cyber-node) 0 1px, transparent 1.5px),
+    radial-gradient(circle at 31% 84%, var(--cyber-node) 0 1px, transparent 1.5px),
+    linear-gradient(var(--cyber-grid-major) 1px, transparent 1px),
+    linear-gradient(90deg, var(--cyber-grid-major) 1px, transparent 1px);
+  background-size:
+    100% 100%,
+    100% 100%,
+    100% 100%,
+    128px 128px,
+    128px 128px;
+}
+
+/* Consulting gets restrained vertical traces that imply data flow. */
+#consulting {
+  background-image:
+    linear-gradient(90deg, transparent 0 17%, var(--cyber-trace) 17% 17.08%, transparent 17.08% 100%),
+    linear-gradient(90deg, transparent 0 73%, var(--cyber-trace) 73% 73.08%, transparent 73.08% 100%),
+    radial-gradient(circle at 17% 34%, var(--cyber-node) 0 1px, transparent 1.5px),
+    radial-gradient(circle at 73% 68%, var(--cyber-node) 0 1px, transparent 1.5px);
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+}
+
+/* Leave content-heavy credential tiles and the final call-to-action clean. */
+#credentials,
+#contact {
+  background-image: none;
+}
+
+@media (max-width: 760px) {
+  #method {
+    background-size:
+      192px 192px,
+      192px 192px,
+      48px 48px,
+      48px 48px;
+  }
+
+  #research {
+    background-size:
+      100% 100%,
+      100% 100%,
+      100% 100%,
+      100% 100%,
+      100% 100%,
+      100% 1px,
+      100% 1px,
+      48px 48px,
+      48px 48px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #research::before {
+    animation: none;
+    display: none;
+  }
+}
+
+@media print {
+  #method,
+  #research,
+  #recognition,
+  #consulting,
+  #credentials,
+  #contact {
+    background-image: none !important;
+  }
+
+  #research::before {
+    display: none;
+  }
+}
 
 
 /* Landing progressive disclosure: keep Hero + Method visible until a portfolio
