@@ -4,6 +4,7 @@
   'use strict';
   const STORAGE_KEY = 'm3ez-theme';
   const BUTTON_ID = 'm3ez-theme-toggle-v1';
+  const CELESTIAL_ID = 'm3ez-divider-celestial-v1';
   const root = document.documentElement;
   let button;
 
@@ -25,7 +26,19 @@
   }
   applyTheme(savedTheme); // Deliberately default to light, not the OS preference.
 
+  function mountDividerCelestial() {
+    const hero = document.getElementById('top');
+    if (!hero || document.getElementById(CELESTIAL_ID)) return;
+
+    const celestial = document.createElement('span');
+    celestial.id = CELESTIAL_ID;
+    celestial.setAttribute('aria-hidden', 'true');
+    celestial.innerHTML = '<svg class="divider-celestial-sun" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="3.6" fill="currentColor"/><g fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"><path d="M12 2.5v2.2m0 14.6v2.2M2.5 12h2.2m14.6 0h2.2M5.28 5.28l1.56 1.56m10.32 10.32 1.56 1.56M5.28 18.72l1.56-1.56m10.32-10.32 1.56-1.56"/></g></svg><svg class="divider-celestial-moon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M20.35 15.35A8.45 8.45 0 0 1 8.65 3.65 8.46 8.46 0 1 0 20.35 15.35Z"/></svg>';
+    hero.appendChild(celestial);
+  }
+
   function mount() {
+    mountDividerCelestial();
     if (document.getElementById(BUTTON_ID)) return;
     button = document.createElement('button');
     button.id = BUTTON_ID;
