@@ -58,7 +58,7 @@ test('export asset injector restores theme wiring once and remains idempotent', 
     const inject = () => execFileSync(process.execPath, [new URL('automation/inject-redesign-assets.mjs', root).pathname, file]);
     inject();
     const first = await readFile(file, 'utf8');
-    assert.ok(first.includes('<script src="/assets/portfolio-theme.js"></script>'), 'injector must preserve the theme on future exports');
+    assert.ok(first.includes('<script src="/assets/portfolio-theme.js?v=20261003-2"></script>'), 'injector must preserve the theme on future exports');
     assert.ok(first.indexOf('/assets/portfolio-theme.js') < first.indexOf('/base.css'));
     assert.equal(first.split('/assets/portfolio-theme.css').length - 1, 1);
     assert.ok(first.includes('<h1>Keep this page</h1>'));
