@@ -9,11 +9,11 @@ const root = new URL('../', import.meta.url);
 
 test('theme bootstrap runs before styles without waiting for the enhancement module', async () => {
   const html = await readFile(new URL('index.html', root), 'utf8');
-  const tag = '<script src="/assets/portfolio-theme.js?v=20261003-2"></script>';
+  const tag = '<script src="/assets/portfolio-theme.js?v=20261003-3"></script>';
   assert.ok(html.includes(tag), 'homepage must include the standalone theme bootstrap');
   assert.ok(html.indexOf(tag) < html.indexOf('<link rel="stylesheet"'), 'saved theme must apply before styles');
   assert.equal(html.split(tag).length - 1, 1);
-  assert.equal(html.split('href="/assets/portfolio-theme.css?v=20261003-2"').length - 1, 1);
+  assert.equal(html.split('href="/assets/portfolio-theme.css?v=20261003-3"').length - 1, 1);
 });
 
 test('dark palette is the exact grayscale inverse of the existing light palette', async () => {
@@ -58,7 +58,7 @@ test('export asset injector restores theme wiring once and remains idempotent', 
     const inject = () => execFileSync(process.execPath, [new URL('automation/inject-redesign-assets.mjs', root).pathname, file]);
     inject();
     const first = await readFile(file, 'utf8');
-    assert.ok(first.includes('<script src="/assets/portfolio-theme.js?v=20261003-2"></script>'), 'injector must preserve the theme on future exports');
+    assert.ok(first.includes('<script src="/assets/portfolio-theme.js?v=20261003-3"></script>'), 'injector must preserve the theme on future exports');
     assert.ok(first.indexOf('/assets/portfolio-theme.js') < first.indexOf('/base.css'));
     assert.equal(first.split('/assets/portfolio-theme.css').length - 1, 1);
     assert.ok(first.includes('<h1>Keep this page</h1>'));
@@ -71,7 +71,7 @@ test('export asset injector restores theme wiring once and remains idempotent', 
 
 // Execute the real bootstrap in a minimal DOM/storage boundary. These exercise
 // behavior without a browser; the HTTP/browser suite separately covers the DOM.
-async function bootTheme({ saved, readyState = 'complete', denyRead = false, denyWrite = false } = {}) {
+async function bootTheme({ saved, readyState = 'complete', denyRead = false, denyWrite = false, hour = 12 } = {}) {
   const { runInNewContext } = await import('node:vm');
   const source = await readFile(new URL('assets/portfolio-theme.js', root), 'utf8');
   const elements = [];
@@ -99,7 +99,17 @@ async function bootTheme({ saved, readyState = 'complete', denyRead = false, den
       };
     },
   };
-  runInNewContext(source, { document, window });
+  const RealDate = Date;
+  class FixedDate extends RealDate {
+    constructor(...args) {
+      if (args.length) super(...args);
+      else super(2026, 9, 3, hour, 0, 0);
+    }
+    static now() {
+      return new RealDate(2026, 9, 3, hour, 0, 0).getTime();
+    }
+  }
+  runInNewContext(source, { document, window, Date: FixedDate });
   return { document, elements, documentEvents, windowEvents, values };
 }
 
@@ -112,6 +122,21 @@ for (const [saved, expected] of [[undefined, 'light'], ['light', 'light'], ['dar
     assert.equal(app.elements[0].type, 'button');
   });
 }
+
+test('automatic theme follows local time until the user makes a manual choice', async () => {
+  const app = await bootTheme({ hour: 22 });
+  assert.equal(app.document.documentElement.dataset.theme, 'dark');
+  assert.equal(app.document.documentElement.dataset.themeMode, 'auto');
+  const button = app.elements[0];
+  button.events.get('click')();
+  assert.equal(app.document.documentElement.dataset.theme, 'light');
+  assert.equal(app.document.documentElement.dataset.themeMode, 'manual');
+  assert.equal(app.values.get('m3ez-theme'), 'light');
+  const notify = app.windowEvents.get('storage');
+  notify({ key: null, newValue: null });
+  assert.equal(app.document.documentElement.dataset.theme, 'dark');
+  assert.equal(app.document.documentElement.dataset.themeMode, 'auto');
+});
 
 test('real toggle handler updates theme, action label and saved preference both ways', async () => {
   const app = await bootTheme();
