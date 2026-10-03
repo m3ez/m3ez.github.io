@@ -1,3 +1,4 @@
+const HINT_ID = 'm3ez-explore-more-v1';
 const READY_MARKER = 'ready';
 const EXPANDED = 'true';
 const COLLAPSED = 'false';
@@ -64,6 +65,15 @@ export function initializeProgressiveDisclosure() {
     expand({ animate: false });
   } else if (root.dataset.portfolioExpanded !== EXPANDED) {
     root.dataset.portfolioExpanded = COLLAPSED;
+  }
+
+  if (!document.getElementById(HINT_ID)) {
+    const hint = document.createElement('a');
+    hint.id = HINT_ID;
+    hint.href = '#research';
+    hint.setAttribute('aria-label', 'Explore the full portfolio');
+    hint.innerHTML = '<span>Explore more</span><span class="m3ez-explore-arrow" aria-hidden="true">↓</span>';
+    method.appendChild(hint);
   }
 
   document.addEventListener('click', event => {

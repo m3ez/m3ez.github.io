@@ -443,12 +443,13 @@
   position: relative;
 }
 
-:root[data-portfolio-expanded="false"] #method::after {
-  content: "Explore more  ↓";
+#m3ez-explore-more-v1 {
   position: absolute;
   left: 50%;
   bottom: .65rem;
-  display: block;
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
   width: max-content;
   color: var(--muted);
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
@@ -456,9 +457,28 @@
   font-weight: 600;
   letter-spacing: .08em;
   line-height: 1.4;
+  text-decoration: none;
   text-transform: uppercase;
   transform: translateX(-50%);
-  pointer-events: none;
+}
+
+#m3ez-explore-more-v1:hover,
+#m3ez-explore-more-v1:focus-visible {
+  color: var(--ink);
+}
+
+#m3ez-explore-more-v1 .m3ez-explore-arrow {
+  display: inline-block;
+  transition: transform 180ms cubic-bezier(.22, 1, .36, 1);
+}
+
+#m3ez-explore-more-v1:hover .m3ez-explore-arrow,
+#m3ez-explore-more-v1:focus-visible .m3ez-explore-arrow {
+  transform: translateY(2px);
+}
+
+:root[data-portfolio-expanded="true"] #m3ez-explore-more-v1 {
+  display: none;
 }
 
 :root[data-portfolio-reveal="active"] #method ~ *,
@@ -478,6 +498,10 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  #m3ez-explore-more-v1 .m3ez-explore-arrow {
+    transition: none;
+  }
+
   :root[data-portfolio-reveal="active"] #method ~ *,
   :root[data-portfolio-reveal="active"] .site-footer {
     animation: none;
@@ -490,7 +514,7 @@
     display: revert !important;
   }
 
-  :root[data-portfolio-expanded="false"] #method::after {
-    content: none;
+  #m3ez-explore-more-v1 {
+    display: none !important;
   }
 }

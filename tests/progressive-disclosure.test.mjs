@@ -17,8 +17,11 @@ test('landing bootstrap collapses extended content before first paint', () => {
 test('hero and Method remain outside the collapsed selector', () => {
   assert.doesNotMatch(themeCss, /data-portfolio-expanded="false"[^}]*#top/);
   assert.doesNotMatch(themeCss, /data-portfolio-expanded="false"[^}]*#method\s*\{[^}]*display\s*:\s*none/s);
-  assert.match(themeCss, /:root\[data-portfolio-expanded="false"\] #method::after/);
-  assert.match(themeCss, /content:\s*"Explore more\s+↓"/);
+  assert.match(disclosure, /HINT_ID\s*=\s*'m3ez-explore-more-v1'/);
+  assert.match(disclosure, /hint\.href\s*=\s*'#research'/);
+  assert.match(disclosure, /method\.appendChild\(hint\)/);
+  assert.match(themeCss, /#m3ez-explore-more-v1\s*\{/);
+  assert.match(themeCss, /:root\[data-portfolio-expanded="true"\] #m3ez-explore-more-v1/);
 });
 
 test('same-page destinations reveal once without replacing carousel behavior', () => {
