@@ -201,35 +201,36 @@
   width: 100%;
   height: 100%;
   overflow: visible;
+  will-change: transform, opacity, filter;
   transition:
-    opacity 560ms ease,
-    transform 620ms cubic-bezier(.22, .61, .36, 1),
-    filter 560ms ease;
+    opacity 520ms cubic-bezier(.4, 0, .2, 1),
+    transform 760ms cubic-bezier(.22, 1, .36, 1),
+    filter 620ms ease;
 }
 
 #m3ez-divider-celestial-v1 .divider-celestial-sun {
   color: #c8a84f;
   opacity: .58;
-  transform: scale(1) rotate(0deg) translateY(0);
+  transform: translateY(0) scale(1);
   filter: drop-shadow(0 0 5px rgba(200, 168, 79, .18));
 }
 
 #m3ez-divider-celestial-v1 .divider-celestial-moon {
   color: #f1f1f1;
   opacity: 0;
-  transform: scale(.72) rotate(-32deg) translateY(3px);
+  transform: translateY(12px) scale(.9);
   filter: drop-shadow(0 0 0 rgba(255, 255, 255, 0));
 }
 
 :root[data-theme="dark"] #m3ez-divider-celestial-v1 .divider-celestial-sun {
   opacity: 0;
-  transform: scale(.72) rotate(32deg) translateY(3px);
+  transform: translateY(12px) scale(.9);
   filter: drop-shadow(0 0 0 rgba(200, 168, 79, 0));
 }
 
 :root[data-theme="dark"] #m3ez-divider-celestial-v1 .divider-celestial-moon {
   opacity: .78;
-  transform: scale(1) rotate(0deg) translateY(0);
+  transform: translateY(0) scale(1);
   filter: drop-shadow(0 0 5px rgba(255, 255, 255, .15));
 }
 
