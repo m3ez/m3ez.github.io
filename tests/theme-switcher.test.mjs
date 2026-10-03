@@ -13,7 +13,7 @@ test('theme bootstrap runs before styles without waiting for the enhancement mod
   assert.ok(html.includes(tag), 'homepage must include the standalone theme bootstrap');
   assert.ok(html.indexOf(tag) < html.indexOf('<link rel="stylesheet"'), 'saved theme must apply before styles');
   assert.equal(html.split(tag).length - 1, 1);
-  assert.equal(html.split('href="/assets/portfolio-theme.css?v=20261003-4"').length - 1, 1);
+  assert.equal(html.split('href="/assets/portfolio-theme.css?v=20261003-5"').length - 1, 1);
 });
 
 test('dark palette is the exact grayscale inverse of the existing light palette', async () => {
