@@ -10,8 +10,8 @@ import {
   normalizeWordfenceDocument,
 } from '../assets/research-data.js';
 
-test('credentials source contains 14 certifications with flagships first', () => {
-  assert.equal(certs.length, 14);
+test('credentials source contains 15 certifications with flagships first', () => {
+  assert.equal(certs.length, 15);
   assert.deepEqual(CATEGORIES, ['All', 'Offensive', 'Web', 'Identity', 'Mobile', 'Systems', 'Foundational']);
   assert.deepEqual(certs.filter((cert) => cert.flagship).map((cert) => cert.name), ['OSEP', 'OSCP+', 'OSWE', 'eWPTX', 'CRTP']);
   assert.ok(certs.slice(0, 5).every((cert) => cert.flagship));
@@ -20,6 +20,10 @@ test('credentials source contains 14 certifications with flagships first', () =>
   assert.equal(issuerMonogram('TCM Security'), 'TCM');
   assert.equal(issuerMonogram('Altered Security'), 'Altered');
   assert.ok(certs.every((cert) => typeof cert.description === 'string' && cert.description.trim().length > 0));
+  const crta = certs.find((cert) => cert.name === 'Certified Red Team Analyst (CRTA)');
+  assert.equal(crta?.issuer, 'Cyberwarfare Labs');
+  assert.equal(crta?.year, 2025);
+  assert.equal(crta?.verificationUrl, 'https://labs.cyberwarfare.live/credential/achievement/68972d1fbf373ee66a1cdb20');
 });
 
 test('classifier enriches a raw CVE with requested research metadata', () => {
