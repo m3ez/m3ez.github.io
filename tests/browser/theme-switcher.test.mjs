@@ -29,7 +29,20 @@ before(async () => {
 });
 after(async () => { await browser?.close(); if (server) await new Promise(done => server.close(done)); });
 
-async function load(page) {
+async function load(page, { hour = 12 } = {}) {
+  await page.addInitScript(fixedHour => {
+    const RealDate = Date;
+    class FixedDate extends RealDate {
+      constructor(...args) {
+        if (args.length) super(...args);
+        else super(2026, 9, 3, fixedHour, 0, 0);
+      }
+      static now() {
+        return new RealDate(2026, 9, 3, fixedHour, 0, 0).getTime();
+      }
+    }
+    Object.defineProperty(window, 'Date', { value: FixedDate, configurable: true });
+  }, hour);
   await page.goto(origin, { waitUntil: 'networkidle' });
   assert.equal(await page.locator(toggle).count(), 1, 'exactly one floating theme button must be present');
 }
@@ -50,6 +63,19 @@ async function colors(page) {
 async function screenshot(page, name) {
   if (screenshotDir) await page.screenshot({ path: join(screenshotDir, name), animations: 'disabled' });
 }
+
+test('automatic theme follows local browser time until the first manual toggle', async () => {
+  const page = await browser.newPage();
+  try {
+    await load(page, { hour: 22 });
+    assert.equal(await page.locator('html').getAttribute('data-theme'), 'dark');
+    assert.equal(await page.locator('html').getAttribute('data-theme-mode'), 'auto');
+    await page.locator(toggle).click();
+    assert.equal(await page.locator('html').getAttribute('data-theme'), 'light');
+    assert.equal(await page.locator('html').getAttribute('data-theme-mode'), 'manual');
+    assert.equal(await page.evaluate(() => localStorage.getItem('m3ez-theme')), 'light');
+  } finally { await page.close(); }
+});
 
 for (const width of [320, 390, 768, 1440]) {
   test(`theme toggle mirrors back-to-top, swaps the palette and preserves layout at ${width}px`, async () => {
