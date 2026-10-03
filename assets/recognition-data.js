@@ -1,4 +1,5 @@
 export const RECOGNITION_YEARS = ['All', '2026', '2025', '2024', '2023', '2022', '2021', '2020'];
+export const RECOGNITION_FEATURED_LIMIT = 10;
 
 const ZERO_DAY_QUEST_PROOF = 'https://www.linkedin.com/posts/supakiad-satuwan_msrc-zerodayquest-cybersecurity-activity-7439364259903541248-1gac';
 
@@ -7,6 +8,7 @@ export const recognitionItems = [
     year: '2026',
     dateLabel: 'July 2025 – June 2026',
     title: 'Special Mentions | MSRC Researcher Portal',
+    featured: true,
     organization: 'Microsoft Security',
     detail: 'Researcher recognition',
     href: 'https://msrc.microsoft.com/special-mention',
@@ -15,6 +17,7 @@ export const recognitionItems = [
     year: '2026',
     dateLabel: 'Mar 2026',
     title: 'NCSA AI CTF 2026 Final Round · #9 Personal',
+    featured: true,
     organization: 'NCSA',
     detail: 'Final Round',
   },
@@ -22,6 +25,7 @@ export const recognitionItems = [
     year: '2026',
     dateLabel: 'Mar 2026',
     title: 'Microsoft Zero Day Quest 2026 · Invite-only Participant',
+    featured: true,
     organization: 'Microsoft',
     detail: 'Live Hacking Event · Redmond, WA, USA',
     href: ZERO_DAY_QUEST_PROOF,
@@ -45,6 +49,7 @@ export const recognitionItems = [
     year: '2025',
     dateLabel: 'Jul 2025',
     title: 'MSRC Most Valuable Researcher 2025 · #42',
+    featured: true,
     organization: 'Microsoft',
     detail: '100 Most Valuable Researchers 2025',
     href: 'https://www.microsoft.com/en-us/msrc/blog/2025/07/congratulations-to-the-msrc-2025-most-valuable-security-researchers',
@@ -61,6 +66,7 @@ export const recognitionItems = [
     year: '2025',
     dateLabel: 'Apr 2025',
     title: 'Microsoft Zero Day Quest 2025 · Invite-only Participant',
+    featured: true,
     organization: 'Microsoft',
     detail: 'Live Hacking Event · Redmond, WA, USA',
     href: ZERO_DAY_QUEST_PROOF,
@@ -84,6 +90,7 @@ export const recognitionItems = [
     year: '2024',
     dateLabel: 'Oct 2024',
     title: 'Dynamics Researchers 2024 Q3 · #6',
+    featured: true,
     organization: 'Microsoft',
     detail: 'Dynamics Researchers Leaderboard 2024 Q3',
     href: 'https://www.microsoft.com/en-us/msrc/blog/2024/10/congratulations-to-the-top-msrc-2024-q3-security-researchers',
@@ -108,6 +115,7 @@ export const recognitionItems = [
     year: '2023',
     dateLabel: 'Sep 2023',
     title: 'MSRC Most Valuable Researcher 2023 · #68',
+    featured: true,
     organization: 'Microsoft',
     detail: '100 Most Valuable Researchers 2023',
     href: 'https://www.microsoft.com/en-us/msrc/blog/2023/08/congratulations-to-the-msrc-2023-most-valuable-security-researchers',
@@ -116,6 +124,7 @@ export const recognitionItems = [
     year: '2023',
     dateLabel: 'Aug 2023',
     title: 'HITB SECCONF CTF 2023 Attack-Defense · #16',
+    featured: true,
     organization: 'HACK IN THE BOX PTE LTD',
     detail: 'Attack-Defense CTF',
   },
@@ -123,6 +132,7 @@ export const recognitionItems = [
     year: '2023',
     dateLabel: 'Feb 2023',
     title: 'National WhiteHat Challenge, National Coding Day 2023 · Winner',
+    featured: true,
     organization: 'Thai Programmer',
     detail: 'National WhiteHat Challenge',
   },
@@ -172,6 +182,7 @@ export const recognitionItems = [
     year: '2020',
     dateLabel: 'Sep 2020',
     title: 'White Hat Hacking for Security · Winner',
+    featured: true,
     organization: 'DEPA Thailand',
     detail: 'White Hat Hacking for Security',
   },
@@ -179,4 +190,8 @@ export const recognitionItems = [
 
 export function filterRecognition(items, year) {
   return year === 'All' ? items : items.filter((item) => item.year === year);
+}
+
+export function getFeaturedRecognition(items) {
+  return items.filter((item) => item.featured).slice(0, RECOGNITION_FEATURED_LIMIT);
 }
