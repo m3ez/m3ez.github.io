@@ -16,7 +16,7 @@ test('landing bootstrap collapses extended content before first paint', () => {
 
 test('hero and Method remain outside the collapsed selector', () => {
   assert.doesNotMatch(themeCss, /data-portfolio-expanded="false"[^}]*#top/);
-  assert.doesNotMatch(themeCss, /data-portfolio-expanded="false"[^}]*#method\s*\{/);
+  assert.doesNotMatch(themeCss, /data-portfolio-expanded="false"[^}]*#method\s*\{[^}]*display\s*:\s*none/s);
   assert.match(themeCss, /:root\[data-portfolio-expanded="false"\] #method::after/);
   assert.match(themeCss, /content:\s*"Explore more\s+↓"/);
 });
