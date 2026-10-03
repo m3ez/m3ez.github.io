@@ -3,7 +3,12 @@ import { initializeInteractions } from './portfolio-interactions.js';
 import { initializeMethodWorkflow } from './method-workflow.js';
 import { initializeScrollMotion } from './scroll-motion.js';
 import { initializeProgressiveDisclosure } from './progressive-disclosure.js';
-import { RECOGNITION_YEARS, recognitionItems, filterRecognition } from './recognition-data.js';
+import {
+  RECOGNITION_YEARS,
+  recognitionItems,
+  filterRecognition,
+  getFeaturedRecognition,
+} from './recognition-data.js';
 import {
   deriveClassOptions,
   filterAndSort,
@@ -168,24 +173,57 @@ function renderRecognition() {
   if (!recognitionList) return;
 
   recognitionList.classList.add('recognition-list-v2');
+  recognitionList.id = 'recognition-list-v2';
   recognitionList.replaceChildren();
 
   const controls = element('div', 'recognition-filter-row filter-row');
   controls.setAttribute('role', 'group');
   controls.setAttribute('aria-label', 'Filter recognition by year');
 
+  const pagination = element('div', 'recognition-pagination filter-row');
+  pagination.setAttribute('role', 'group');
+  pagination.setAttribute('aria-label', 'Recognition list controls');
+  const toggleButton = element('button', 'filter-button', 'Show more');
+  toggleButton.type = 'button';
+  toggleButton.setAttribute('aria-controls', recognitionList.id);
+  toggleButton.setAttribute('aria-expanded', 'false');
+  pagination.appendChild(toggleButton);
+
   let activeYear = 'All';
+  let expanded = false;
   const refresh = () => {
-    renderRecognitionItems(recognitionList, filterRecognition(recognitionItems, activeYear));
+    const matched = filterRecognition(recognitionItems, activeYear);
+    const featured = getFeaturedRecognition(matched);
+    const visible = activeYear === 'All' && !expanded ? featured : matched;
+    renderRecognitionItems(recognitionList, visible);
+
+    const canToggle = activeYear === 'All' && matched.length > featured.length;
+    pagination.hidden = !canToggle;
+    toggleButton.textContent = expanded ? 'Show less' : 'Show more';
+    toggleButton.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+    toggleButton.setAttribute(
+      'aria-label',
+      expanded
+        ? `Show selected ${featured.length} recognition items`
+        : `Show ${matched.length - featured.length} more recognition items`,
+    );
   };
+
+  toggleButton.addEventListener('click', () => {
+    expanded = !expanded;
+    refresh();
+  });
+
   const buttons = RECOGNITION_YEARS.map((year) => makeFilterButton(year, (value) => {
     activeYear = value;
+    expanded = false;
     setPressed(buttons, activeYear);
     refresh();
   }));
   setPressed(buttons, activeYear);
   controls.append(...buttons);
   recognitionList.before(controls);
+  recognitionList.after(pagination);
   refresh();
 }
 
