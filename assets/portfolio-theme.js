@@ -174,7 +174,7 @@
     svg.style.setProperty('--wf-x', `${randomBetween(sideBias[0], sideBias[1]).toFixed(1)}%`);
     svg.style.setProperty('--wf-y', `${randomBetween(minY, maxY).toFixed(1)}%`);
     svg.style.setProperty('--wf-angle', `${randomBetween(-9, 9).toFixed(2)}deg`);
-    svg.style.setProperty('--wf-opacity', randomBetween(.42, .9).toFixed(3));
+    svg.style.setProperty('--wf-opacity', randomBetween(.034, .072).toFixed(3));
     return svg;
   }
 
