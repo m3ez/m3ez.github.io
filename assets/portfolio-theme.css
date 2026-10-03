@@ -439,11 +439,17 @@
   display: none !important;
 }
 
+:root[data-portfolio-expanded="false"] #method {
+  position: relative;
+}
+
 :root[data-portfolio-expanded="false"] #method::after {
   content: "Explore more  ↓";
+  position: absolute;
+  left: 50%;
+  bottom: .65rem;
   display: block;
   width: max-content;
-  margin: clamp(1.75rem, 4vw, 3rem) auto 0;
   color: var(--muted);
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   font-size: 12px;
@@ -451,6 +457,8 @@
   letter-spacing: .08em;
   line-height: 1.4;
   text-transform: uppercase;
+  transform: translateX(-50%);
+  pointer-events: none;
 }
 
 :root[data-portfolio-reveal="active"] #method ~ *,
