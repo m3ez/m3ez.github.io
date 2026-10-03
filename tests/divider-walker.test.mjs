@@ -20,11 +20,13 @@ test('walker uses the new backpack walking sprite and keeps the R-key toggle', (
   assert.doesNotMatch(css, /stickman-run-cycle\.svg/);
 });
 
-test('walking cadence is slower than the old running animation', () => {
-  assert.match(css, /--walker-crossing:\s*36s/);
-  assert.match(css, /--walker-cycle:\s*1\.2s/);
+test('walking cadence is a relaxed stroll rather than a run', () => {
+  assert.match(css, /--walker-crossing:\s*48s/);
+  assert.match(css, /--walker-cycle:\s*1\.44s/);
   assert.match(css, /m3ez-divider-walk-cross var\(--walker-crossing\) linear infinite/);
   assert.match(css, /m3ez-divider-walk var\(--walker-cycle\) steps\(16\) infinite/);
+  assert.match(css, /--walker-crossing:\s*24s/, 'mobile crossing stays a walk');
+  assert.match(css, /--walker-cycle:\s*1\.36s/, 'mobile cadence stays a walk');
   assert.match(css, /left:\s*calc\(100% - var\(--walker-width\)\)/);
   assert.match(css, /mask-position:\s*calc\(var\(--walker-width\) \* -16\) 0/);
 });
