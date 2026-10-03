@@ -74,7 +74,7 @@
 }
 
 /* Minimal divider walker. The hero's existing bottom border is the path.
-   Heel strike, toe-off, knee flexion, opposing arm swing and a lightly lagging backpack create a calmer side-profile walk. */
+   A 32-frame gait coordinates hip rotation, knee flexion, foot roll, counter-swinging arms, restrained torso motion, and a lightly lagging backpack. */
 #top.hero:has(+ #method) {
   position: relative;
 }
@@ -84,7 +84,7 @@
   --walker-width: 34px;
   --walker-height: 40.8px;
   --walker-crossing: 48s;
-  --walker-cycle: 1.44s;
+  --walker-cycle: 1.52s;
   content: "";
   position: absolute;
   bottom: 0;
@@ -94,17 +94,17 @@
   pointer-events: none;
   background: var(--black);
   opacity: 0;
-  -webkit-mask-image: url("./stickman-walk-cycle.svg");
-  mask-image: url("./stickman-walk-cycle.svg");
+  -webkit-mask-image: url("./stickman-walk-cycle.svg?v=20261003-2");
+  mask-image: url("./stickman-walk-cycle.svg?v=20261003-2");
   -webkit-mask-repeat: no-repeat;
   mask-repeat: no-repeat;
-  -webkit-mask-size: calc(var(--walker-width) * 16) 100%;
-  mask-size: calc(var(--walker-width) * 16) 100%;
+  -webkit-mask-size: calc(var(--walker-width) * 32) 100%;
+  mask-size: calc(var(--walker-width) * 32) 100%;
   -webkit-mask-position: 0 0;
   mask-position: 0 0;
   animation:
     m3ez-divider-walk-cross var(--walker-crossing) linear infinite,
-    m3ez-divider-walk var(--walker-cycle) steps(16) infinite;
+    m3ez-divider-walk var(--walker-cycle) steps(32) infinite;
 }
 
 :root[data-divider-walker="active"] #top.hero:has(+ #method)::after {
@@ -113,8 +113,8 @@
 
 @keyframes m3ez-divider-walk {
   to {
-    -webkit-mask-position: calc(var(--walker-width) * -16) 0;
-    mask-position: calc(var(--walker-width) * -16) 0;
+    -webkit-mask-position: calc(var(--walker-width) * -32) 0;
+    mask-position: calc(var(--walker-width) * -32) 0;
   }
 }
 
@@ -140,7 +140,7 @@
     --walker-width: 26px;
     --walker-height: 31.2px;
     --walker-crossing: 24s;
-    --walker-cycle: 1.36s;
+    --walker-cycle: 1.46s;
   }
 }
 
