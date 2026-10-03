@@ -118,7 +118,7 @@
     const context = canvas.getContext('2d', { alpha: true });
     if (!context) return;
 
-    const labels = ['443', 'TLS', 'GET', 'SSH', 'CVE', 'AUTH', '0x7f'];
+    const labels = ['443', 'TLS', 'GET', 'SSH', 'CVE', 'AUTH', '0x7f', 'RECON', 'ENUM'];
     const reducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)');
     let width = 0;
     let height = 0;
@@ -150,7 +150,7 @@
       canvas.style.height = height + 'px';
       context.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-      const spacing = width <= 680 ? 132 : 172;
+      const spacing = width <= 680 ? 104 : 128;
       const random = seededRandom((width * 73856093) ^ (height * 19349663));
       const columns = Math.ceil(width / spacing) + 2;
       const rows = Math.ceil(height / spacing) + 2;
@@ -158,14 +158,14 @@
 
       for (let row = -1; row < rows; row += 1) {
         for (let column = -1; column < columns; column += 1) {
-          const x = column * spacing + spacing * .5 + (random() - .5) * spacing * .58;
-          const y = row * spacing + spacing * .5 + (random() - .5) * spacing * .58;
+          const x = column * spacing + spacing * .5 + (random() - .5) * spacing * .62;
+          const y = row * spacing + spacing * .5 + (random() - .5) * spacing * .62;
           if (x < -spacing || x > width + spacing || y < -spacing || y > height + spacing) continue;
           nextNodes.push({
             x,
             y,
-            radius: 1 + random() * 1.25,
-            label: random() < .115 ? labels[Math.floor(random() * labels.length)] : '',
+            radius: 1.1 + random() * 1.45,
+            label: random() < .16 ? labels[Math.floor(random() * labels.length)] : '',
           });
         }
       }
@@ -178,11 +178,11 @@
           const dx = nextNodes[i].x - nextNodes[j].x;
           const dy = nextNodes[i].y - nextNodes[j].y;
           const distance = Math.hypot(dx, dy);
-          if (distance <= spacing * 1.34) candidates.push({ j, distance });
+          if (distance <= spacing * 1.48) candidates.push({ j, distance });
         }
         candidates.sort((a, b) => a.distance - b.distance);
-        for (const candidate of candidates.slice(0, 3)) {
-          if (degree[i] >= 2 || degree[candidate.j] >= 2) continue;
+        for (const candidate of candidates.slice(0, 4)) {
+          if (degree[i] >= 3 || degree[candidate.j] >= 3) continue;
           nextEdges.push([i, candidate.j]);
           degree[i] += 1;
           degree[candidate.j] += 1;
@@ -199,32 +199,126 @@
         : `rgba(0,0,0,${alpha})`;
     }
 
+    function accent(alpha) {
+      return root.dataset.theme === 'dark'
+        ? `rgba(126,203,255,${alpha})`
+        : `rgba(29,92,126,${alpha})`;
+    }
+
     function proximity(x, y) {
       if (!pointerActive || reducedMotion?.matches) return 0;
       const distance = Math.hypot(pointerX - x, pointerY - y);
-      return Math.max(0, 1 - distance / 190);
+      return Math.max(0, 1 - distance / 235);
     }
 
-    function drawRadarArcs() {
-      const radius = Math.min(width, height) * .27;
+    function drawDotGrid() {
+      const step = width <= 680 ? 54 : 62;
       context.save();
-      context.setLineDash([4, 10]);
-      context.lineWidth = .7;
-      context.strokeStyle = ink(root.dataset.theme === 'dark' ? .034 : .026);
-      for (const scale of [.55, .78, 1]) {
+      context.fillStyle = ink(root.dataset.theme === 'dark' ? .05 : .035);
+      for (let x = step; x < width; x += step) {
+        for (let y = step; y < height; y += step) {
+          if (((x / step) + (y / step)) % 3 === 0) {
+            context.fillRect(x, y, 1, 1);
+          }
+        }
+      }
+
+      context.strokeStyle = ink(root.dataset.theme === 'dark' ? .026 : .018);
+      context.lineWidth = .6;
+      for (let x = step * 4; x < width; x += step * 4) {
         context.beginPath();
-        context.arc(0, 0, radius * scale, 0, Math.PI * .58);
+        context.moveTo(x, 0);
+        context.lineTo(x, height);
         context.stroke();
+      }
+      for (let y = step * 4; y < height; y += step * 4) {
         context.beginPath();
-        context.arc(width, height, radius * scale, Math.PI, Math.PI * 1.58);
+        context.moveTo(0, y);
+        context.lineTo(width, y);
         context.stroke();
       }
       context.restore();
     }
 
+    function drawCrosshair(x, y, size = 7) {
+      context.save();
+      context.strokeStyle = accent(root.dataset.theme === 'dark' ? .13 : .09);
+      context.lineWidth = .7;
+      context.beginPath();
+      context.moveTo(x - size, y);
+      context.lineTo(x - 2, y);
+      context.moveTo(x + 2, y);
+      context.lineTo(x + size, y);
+      context.moveTo(x, y - size);
+      context.lineTo(x, y - 2);
+      context.moveTo(x, y + 2);
+      context.lineTo(x, y + size);
+      context.stroke();
+      context.restore();
+    }
+
+    function drawRadarArcs(now) {
+      const radius = Math.min(width, height) * .34;
+      context.save();
+      context.setLineDash([5, 10]);
+      context.lineWidth = .8;
+      context.strokeStyle = accent(root.dataset.theme === 'dark' ? .085 : .06);
+      for (const scale of [.46, .68, .9, 1.12]) {
+        context.beginPath();
+        context.arc(0, 0, radius * scale, 0, Math.PI * .64);
+        context.stroke();
+        context.beginPath();
+        context.arc(width, height, radius * scale, Math.PI, Math.PI * 1.64);
+        context.stroke();
+      }
+      context.setLineDash([]);
+
+      if (!reducedMotion?.matches) {
+        const angle = ((now - startedAt) / 19000) * Math.PI * 2;
+        context.strokeStyle = accent(root.dataset.theme === 'dark' ? .12 : .075);
+        context.beginPath();
+        context.moveTo(0, 0);
+        context.lineTo(Math.cos(angle) * radius, Math.sin(angle) * radius);
+        context.stroke();
+      }
+      context.restore();
+    }
+
+    function drawInterfaceMarks() {
+      drawCrosshair(width * .12, height * .2);
+      drawCrosshair(width * .64, height * .15, 6);
+      drawCrosshair(width * .83, height * .66, 8);
+      drawCrosshair(width * .31, height * .82, 6);
+
+      context.save();
+      context.font = '10px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace';
+      context.fillStyle = ink(root.dataset.theme === 'dark' ? .13 : .09);
+      context.fillText('[ surface ]', Math.max(18, width * .035), height * .38);
+      context.fillText('route://trust-boundary', Math.max(18, width * .035), height * .38 + 16);
+      context.fillText('scan  443/TCP', Math.max(18, width * .035), height * .38 + 32);
+      context.fillText('0x' + Math.round(width + height).toString(16), width - Math.min(150, width * .3), Math.max(32, height * .12));
+      context.restore();
+    }
+
+    function drawRoute(edge, alpha) {
+      if (!edge) return;
+      const from = nodes[edge[0]];
+      const to = nodes[edge[1]];
+      context.save();
+      context.strokeStyle = accent(alpha);
+      context.lineWidth = 1;
+      context.beginPath();
+      context.moveTo(from.x, from.y);
+      context.lineTo(to.x, to.y);
+      context.stroke();
+      context.restore();
+    }
+
     function draw(now = performance.now()) {
       context.clearRect(0, 0, width, height);
-      drawRadarArcs();
+      drawDotGrid();
+      drawRadarArcs(now);
+      drawInterfaceMarks();
 
       for (const [fromIndex, toIndex] of edges) {
         const from = nodes[fromIndex];
@@ -232,25 +326,31 @@
         const midpointX = (from.x + to.x) / 2;
         const midpointY = (from.y + to.y) / 2;
         const reveal = proximity(midpointX, midpointY);
-        const baseAlpha = root.dataset.theme === 'dark' ? .038 : .027;
-        context.strokeStyle = ink(baseAlpha + reveal * .055);
-        context.lineWidth = .65 + reveal * .25;
+        const baseAlpha = root.dataset.theme === 'dark' ? .078 : .055;
+        context.strokeStyle = ink(baseAlpha + reveal * .105);
+        context.lineWidth = .7 + reveal * .35;
         context.beginPath();
         context.moveTo(from.x, from.y);
         context.lineTo(to.x, to.y);
         context.stroke();
       }
 
+      if (edges.length) {
+        const routeIndex = Math.floor((now - startedAt) / 8500);
+        drawRoute(edges[(routeIndex * 5) % edges.length], root.dataset.theme === 'dark' ? .16 : .105);
+        drawRoute(edges[(routeIndex * 5 + 11) % edges.length], root.dataset.theme === 'dark' ? .11 : .075);
+      }
+
       for (const node of nodes) {
         const reveal = proximity(node.x, node.y);
-        const nodeAlpha = (root.dataset.theme === 'dark' ? .072 : .052) + reveal * .085;
+        const nodeAlpha = (root.dataset.theme === 'dark' ? .145 : .105) + reveal * .13;
         context.fillStyle = ink(nodeAlpha);
         context.beginPath();
-        context.arc(node.x, node.y, node.radius + reveal * .45, 0, Math.PI * 2);
+        context.arc(node.x, node.y, node.radius + reveal * .55, 0, Math.PI * 2);
         context.fill();
 
         if (node.label) {
-          context.fillStyle = ink((root.dataset.theme === 'dark' ? .09 : .068) + reveal * .07);
+          context.fillStyle = ink((root.dataset.theme === 'dark' ? .17 : .125) + reveal * .095);
           context.font = '10px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace';
           context.fillText(node.label, node.x + 8, node.y - 7);
         }
@@ -258,7 +358,7 @@
 
       if (!reducedMotion?.matches && edges.length) {
         const elapsed = now - startedAt;
-        const cycle = 11000;
+        const cycle = 7200;
         const cycleIndex = Math.floor(elapsed / cycle);
         const phase = (elapsed % cycle) / cycle;
         const edge = edges[(cycleIndex * 7) % edges.length];
@@ -266,9 +366,15 @@
         const to = nodes[edge[1]];
         const x = from.x + (to.x - from.x) * phase;
         const y = from.y + (to.y - from.y) * phase;
-        context.fillStyle = ink(root.dataset.theme === 'dark' ? .28 : .2);
+
+        context.fillStyle = accent(root.dataset.theme === 'dark' ? .12 : .08);
         context.beginPath();
-        context.arc(x, y, 1.65, 0, Math.PI * 2);
+        context.arc(x, y, 5.5, 0, Math.PI * 2);
+        context.fill();
+
+        context.fillStyle = accent(root.dataset.theme === 'dark' ? .72 : .5);
+        context.beginPath();
+        context.arc(x, y, 1.9, 0, Math.PI * 2);
         context.fill();
       }
     }
