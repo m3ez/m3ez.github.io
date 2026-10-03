@@ -21,13 +21,13 @@ test('sun is centered by default and moon becomes visible in dark mode', () => {
   assert.match(scene, /left:\s*50%/);
   assert.match(scene, /transform:\s*translateX\(-50%\)/);
   assert.match(css, /#m3ez-divider-celestial-v1 \.divider-celestial-sun\s*\{[^}]*opacity:\s*\.58/s);
-  assert.match(css, /#m3ez-divider-celestial-v1 \.divider-celestial-moon\s*\{[^}]*opacity:\s*0/s);
-  assert.match(css, /:root\[data-theme="dark"\] #m3ez-divider-celestial-v1 \.divider-celestial-sun\s*\{[^}]*opacity:\s*0/s);
+  assert.match(css, /#m3ez-divider-celestial-v1 \.divider-celestial-moon\s*\{[^}]*opacity:\s*0[^}]*translateY\(12px\)/s);
+  assert.match(css, /:root\[data-theme="dark"\] #m3ez-divider-celestial-v1 \.divider-celestial-sun\s*\{[^}]*opacity:\s*0[^}]*translateY\(12px\)/s);
   assert.match(css, /:root\[data-theme="dark"\] #m3ez-divider-celestial-v1 \.divider-celestial-moon\s*\{[^}]*opacity:\s*\.78/s);
 });
 
 test('theme switch animates the celestial icons but honors reduced motion', () => {
-  assert.match(css, /transition:\s*\n\s*opacity 560ms ease,\s*\n\s*transform 620ms cubic-bezier\(\.22, \.61, \.36, 1\),\s*\n\s*filter 560ms ease/s);
+  assert.match(css, /transition:\s*\n\s*opacity 520ms cubic-bezier\(\.4, 0, \.2, 1\),\s*\n\s*transform 760ms cubic-bezier\(\.22, 1, \.36, 1\),\s*\n\s*filter 620ms ease/s);
   assert.match(css, /@media \(prefers-reduced-motion: reduce\)[\s\S]*?#m3ez-divider-celestial-v1 svg\s*\{\s*transition:\s*none;/);
   assert.match(css, /@media \(max-width: 760px\)[\s\S]*?#m3ez-divider-celestial-v1\s*\{[^}]*width:\s*18px[^}]*height:\s*18px/s);
   assert.match(css, /@media print[\s\S]*?#m3ez-divider-celestial-v1\s*\{\s*display:\s*none;/);
