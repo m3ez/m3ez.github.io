@@ -429,3 +429,68 @@
     content: none;
   }
 }
+
+
+
+/* Landing progressive disclosure: keep Hero + Method visible until a portfolio
+   destination is chosen. The head bootstrap sets the state before first paint. */
+:root[data-portfolio-expanded="false"] #method ~ *,
+:root[data-portfolio-expanded="false"] .site-footer {
+  display: none !important;
+}
+
+:root[data-portfolio-expanded="false"] #method {
+  position: relative;
+}
+
+:root[data-portfolio-expanded="false"] #method::after {
+  content: "Explore more  ↓";
+  position: absolute;
+  left: 50%;
+  bottom: .65rem;
+  display: block;
+  width: max-content;
+  color: var(--muted);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: .08em;
+  line-height: 1.4;
+  text-transform: uppercase;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+:root[data-portfolio-reveal="active"] #method ~ *,
+:root[data-portfolio-reveal="active"] .site-footer {
+  animation: m3ez-extended-content-reveal 520ms cubic-bezier(.22, 1, .36, 1) both;
+}
+
+@keyframes m3ez-extended-content-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root[data-portfolio-reveal="active"] #method ~ *,
+  :root[data-portfolio-reveal="active"] .site-footer {
+    animation: none;
+  }
+}
+
+@media print {
+  :root[data-portfolio-expanded="false"] #method ~ *,
+  :root[data-portfolio-expanded="false"] .site-footer {
+    display: revert !important;
+  }
+
+  :root[data-portfolio-expanded="false"] #method::after {
+    content: none;
+  }
+}

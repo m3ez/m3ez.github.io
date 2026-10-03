@@ -2,6 +2,7 @@ import { CATEGORIES, certs, issuerMonogram } from './certs.js';
 import { initializeInteractions } from './portfolio-interactions.js';
 import { initializeMethodWorkflow } from './method-workflow.js';
 import { initializeScrollMotion } from './scroll-motion.js';
+import { initializeProgressiveDisclosure } from './progressive-disclosure.js';
 import { RECOGNITION_YEARS, recognitionItems, filterRecognition } from './recognition-data.js';
 import {
   deriveClassOptions,
@@ -512,6 +513,7 @@ function start() {
   initializeInteractions();
   initializeMethodWorkflow();
   renderHeroProofLinks();
+  initializeProgressiveDisclosure();
   renderReferences();
   renderRecognition();
   renderCredentials();

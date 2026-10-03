@@ -45,7 +45,7 @@ async function withPage(width, action, options = {}) {
   const errors = [];
   page.on('pageerror', error => errors.push(error.message));
   try {
-    await page.goto(origin, { waitUntil: 'networkidle' });
+    await page.goto(`${origin}/#research`, { waitUntil: 'networkidle' });
     await page.waitForFunction(() => document.querySelectorAll('.cve-row-v2').length === 10);
     const controls = page.locator('.research-controls');
     assert.equal(await controls.getByRole('button', { name: 'Type: All', exact: true }).count(), 1);

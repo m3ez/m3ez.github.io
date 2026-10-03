@@ -66,7 +66,7 @@ async function withPage(width, theme, run, reducedMotion = 'reduce') {
     await page.addScriptTag({ content: themeScript });
     await page.addScriptTag({ type: 'module', content: `import '${entryModule}';` });
     await page.waitForSelector('#top .hero-actions');
-    await page.waitForSelector('.cve-row-v2');
+    await page.waitForSelector('.cve-row-v2', { state: 'attached' });
     if (theme === 'dark') await page.locator('#m3ez-theme-toggle-v1').click();
     await page.mouse.move(0, 0);
     await run(page);
@@ -131,6 +131,10 @@ for (const width of [320, 360, 390, 560, 768, 880, 900, 1024, 1440]) {
         }
         // Hero-only overrides must not shrink the existing bottom Contact buttons.
         if (width <= 560) {
+          await page.evaluate(() => {
+            document.documentElement.dataset.portfolioExpanded = 'true';
+            document.documentElement.dataset.portfolioReveal = 'complete';
+          });
           const bottom = page.locator('#contact .contact-actions .primary-action').first();
           const dimensions = await bottom.evaluate(node => ({ width: node.getBoundingClientRect().width, parent: node.parentElement.getBoundingClientRect().width }));
           assert.ok(Math.abs(dimensions.width - dimensions.parent) <= 1);

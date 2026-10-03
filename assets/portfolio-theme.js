@@ -7,6 +7,14 @@
   const CELESTIAL_ID = 'm3ez-divider-celestial-v1';
   const CLOUDS_ID = 'm3ez-divider-clouds-v1';
   const root = document.documentElement;
+  const initialHash = window.location?.hash || '';
+  const landingHash =
+    !initialHash ||
+    initialHash === '#top' ||
+    initialHash === '#content' ||
+    initialHash === '#method' ||
+    initialHash.startsWith('#method-');
+  root.dataset.portfolioExpanded = landingHash ? 'false' : 'true';
   let button;
 
   function applyTheme(value) {
