@@ -31,6 +31,25 @@ test('walking cadence is a relaxed stroll rather than a run', () => {
   assert.match(css, /mask-position:\s*calc\(var\(--walker-width\) \* -16\) 0/);
 });
 
+test('stance leg straightens during contact and passing instead of crouching', () => {
+  const svg = readFileSync(spriteUrl, 'utf8');
+  const frame = n => svg.match(new RegExp(`<g data-frame="${n}"[^>]*>([\\s\\S]*?)<\\/g>`))?.[1] ?? '';
+  const points = path => [...path.matchAll(/-?\\d+(?:\\.\\d+)?/g)].map(match => Number(match[0]));
+  const kneeAngle = values => {
+    const [hx,hy,kx,ky,ax,ay] = values;
+    const a = [hx-kx, hy-ky];
+    const b = [ax-kx, ay-ky];
+    const dot = a[0]*b[0] + a[1]*b[1];
+    return Math.acos(dot / (Math.hypot(...a) * Math.hypot(...b))) * 180 / Math.PI;
+  };
+  for (const n of [0, 4, 6]) {
+    const d = frame(n).match(/<path data-limb="near-leg"[^>]*d="([^"]+)"/)?.[1] ?? '';
+    assert.ok(kneeAngle(points(d)) > 168, `frame ${n} keeps the stance knee close to straight`);
+  }
+  const swing = frame(10).match(/<path data-limb="near-leg"[^>]*d="([^"]+)"/)?.[1] ?? '';
+  assert.ok(kneeAngle(points(swing)) < 165, 'knee flexion is concentrated in swing');
+});
+
 test('motion preference and printing remove the walker', () => {
   for (const query of ['prefers-reduced-motion: reduce', 'print']) {
     const start = css.indexOf(`@media ${query === 'print' ? query : `(${query})`}`, css.indexOf('/* Minimal divider walker'));
