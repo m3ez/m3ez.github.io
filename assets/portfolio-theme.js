@@ -4,6 +4,8 @@
   'use strict';
   const STORAGE_KEY = 'm3ez-theme';
   const BUTTON_ID = 'm3ez-theme-toggle-v1';
+  const CELESTIAL_ID = 'm3ez-divider-celestial-v1';
+  const CLOUDS_ID = 'm3ez-divider-clouds-v1';
   const root = document.documentElement;
   let button;
 
@@ -25,7 +27,40 @@
   }
   applyTheme(savedTheme); // Deliberately default to light, not the OS preference.
 
+  function mountDividerClouds() {
+    const hero = document.getElementById('top');
+    if (!hero || document.getElementById(CLOUDS_ID)) return;
+
+    const clouds = document.createElement('span');
+    clouds.id = CLOUDS_ID;
+    clouds.setAttribute('aria-hidden', 'true');
+
+    const dayCloud = '<g class="divider-cloud-drift"><path fill="currentColor" d="M3 18.5c0-3.04 2.46-5.5 5.5-5.5.63 0 1.23.11 1.79.3A8 8 0 0 1 25.2 10.4a6.25 6.25 0 0 1 10.05 4.98A4.8 4.8 0 1 1 36.2 25H7.8A6.8 6.8 0 0 1 3 18.5Z"/></g>';
+    const nightCloud = '<g class="divider-cloud-drift" fill="none" stroke="currentColor" stroke-width="1.15" stroke-linecap="round"><path d="M3 14.5c4.7-3.5 9.5-3.7 14.1-1.3 3.6-4.4 11.2-4 14.1 1 3.7-1.6 7.2-1.2 9.8 1.2"/><path opacity=".55" d="M9 18c5.3-2.3 10.4-2.2 15.1.2 3-2.4 7.1-2.6 10.9-.7"/></g>';
+
+    clouds.innerHTML =
+      '<svg class="divider-cloud divider-cloud-day divider-cloud-day-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 44 28" aria-hidden="true" focusable="false">' + dayCloud + '</svg>' +
+      '<svg class="divider-cloud divider-cloud-day divider-cloud-day-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 44 28" aria-hidden="true" focusable="false">' + dayCloud + '</svg>' +
+      '<svg class="divider-cloud divider-cloud-night divider-cloud-night-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 44 24" aria-hidden="true" focusable="false">' + nightCloud + '</svg>' +
+      '<svg class="divider-cloud divider-cloud-night divider-cloud-night-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 44 24" aria-hidden="true" focusable="false">' + nightCloud + '</svg>';
+
+    hero.appendChild(clouds);
+  }
+
+  function mountDividerCelestial() {
+    const hero = document.getElementById('top');
+    if (!hero || document.getElementById(CELESTIAL_ID)) return;
+
+    const celestial = document.createElement('span');
+    celestial.id = CELESTIAL_ID;
+    celestial.setAttribute('aria-hidden', 'true');
+    celestial.innerHTML = '<svg class="divider-celestial-sun" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="3.6" fill="currentColor"/><g fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"><path d="M12 2.5v2.2m0 14.6v2.2M2.5 12h2.2m14.6 0h2.2M5.28 5.28l1.56 1.56m10.32 10.32 1.56 1.56M5.28 18.72l1.56-1.56m10.32-10.32 1.56-1.56"/></g></svg><svg class="divider-celestial-moon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M20.35 15.35A8.45 8.45 0 0 1 8.65 3.65 8.46 8.46 0 1 0 20.35 15.35Z"/></svg>';
+    hero.appendChild(celestial);
+  }
+
   function mount() {
+    mountDividerClouds();
+    mountDividerCelestial();
     if (document.getElementById(BUTTON_ID)) return;
     button = document.createElement('button');
     button.id = BUTTON_ID;
