@@ -60,9 +60,17 @@ async function showMethod(page) {
   await page.locator('#method').evaluate(node => node.scrollIntoView({ behavior: 'instant', block: 'center' }));
 }
 
+async function expandPortfolio(page) {
+  await page.evaluate(() => {
+    document.documentElement.dataset.portfolioExpanded = 'true';
+    document.documentElement.dataset.portfolioReveal = 'complete';
+  });
+}
+
 // Research is off the Method viewport both before and after the approved move.
 // Do not assume the top of the page is offscreen now that Method follows the hero.
 async function hideMethod(page) {
+  await expandPortfolio(page);
   await page.locator('#research').evaluate(node => window.scrollTo({
     top: node.getBoundingClientRect().top + window.scrollY + 100,
     behavior: 'instant',
@@ -70,6 +78,7 @@ async function hideMethod(page) {
 }
 
 async function assertMethodPlacement(page, width) {
+  await expandPortfolio(page);
   const layout = await page.evaluate(() => {
     const method = document.getElementById('method');
     const style = getComputedStyle(method);
