@@ -5,6 +5,7 @@
   const STORAGE_KEY = 'm3ez-theme';
   const BUTTON_ID = 'm3ez-theme-toggle-v1';
   const CELESTIAL_ID = 'm3ez-divider-celestial-v1';
+  const CLOUDS_ID = 'm3ez-divider-clouds-v1';
   const root = document.documentElement;
   let button;
 
@@ -26,6 +27,18 @@
   }
   applyTheme(savedTheme); // Deliberately default to light, not the OS preference.
 
+  function mountDividerClouds() {
+    const hero = document.getElementById('top');
+    if (!hero || document.getElementById(CLOUDS_ID)) return;
+
+    const clouds = document.createElement('span');
+    clouds.id = CLOUDS_ID;
+    clouds.setAttribute('aria-hidden', 'true');
+    const cloudPath = '<path fill="currentColor" d="M3 18.5c0-3.04 2.46-5.5 5.5-5.5.63 0 1.23.11 1.79.3A8 8 0 0 1 25.2 10.4a6.25 6.25 0 0 1 10.05 4.98A4.8 4.8 0 1 1 36.2 25H7.8A6.8 6.8 0 0 1 3 18.5Z"/>';
+    clouds.innerHTML = '<svg class="divider-cloud-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 44 28" aria-hidden="true" focusable="false">' + cloudPath + '</svg><svg class="divider-cloud-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 44 28" aria-hidden="true" focusable="false">' + cloudPath + '</svg><svg class="divider-cloud-3" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 44 28" aria-hidden="true" focusable="false">' + cloudPath + '</svg>';
+    hero.appendChild(clouds);
+  }
+
   function mountDividerCelestial() {
     const hero = document.getElementById('top');
     if (!hero || document.getElementById(CELESTIAL_ID)) return;
@@ -38,6 +51,7 @@
   }
 
   function mount() {
+    mountDividerClouds();
     mountDividerCelestial();
     if (document.getElementById(BUTTON_ID)) return;
     button = document.createElement('button');
