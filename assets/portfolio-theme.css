@@ -181,8 +181,8 @@
   mask-position: center bottom;
 }
 
-/* A few soft clouds drift only a few pixels so the divider feels alive without
-   competing with the content or the sun/moon transition. */
+/* Day and night use different cloud silhouettes. Theme changes cross-fade and
+   gently slide the weather layer while each cloud keeps a slow independent drift. */
 #m3ez-divider-clouds-v1 {
   position: absolute;
   left: 0;
@@ -198,54 +198,98 @@
   position: absolute;
   display: block;
   color: var(--black);
+  will-change: transform, opacity;
+  transform-origin: center;
+  transition:
+    opacity 680ms cubic-bezier(.4, 0, .2, 1),
+    transform 820ms cubic-bezier(.22, 1, .36, 1);
+}
+
+#m3ez-divider-clouds-v1 .divider-cloud-drift {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+/* Day: two soft, rounded clouds close to the sun. */
+#m3ez-divider-clouds-v1 .divider-cloud-day {
   opacity: .055;
-  will-change: transform;
-  transition: opacity 520ms ease;
+  transform: translate3d(0, 0, 0) scale(1);
 }
 
-:root[data-theme="dark"] #m3ez-divider-clouds-v1 svg {
-  opacity: .085;
-}
-
-#m3ez-divider-clouds-v1 .divider-cloud-1 {
+#m3ez-divider-clouds-v1 .divider-cloud-day-1 {
   left: 44%;
   bottom: 24px;
   width: 44px;
-  animation: m3ez-cloud-drift-a 11s ease-in-out infinite alternate;
 }
 
-#m3ez-divider-clouds-v1 .divider-cloud-2 {
+#m3ez-divider-clouds-v1 .divider-cloud-day-2 {
   left: 53%;
   bottom: 31px;
-  width: 50px;
-  animation: m3ez-cloud-drift-b 14s ease-in-out -4s infinite alternate;
+  width: 49px;
 }
 
-#m3ez-divider-clouds-v1 .divider-cloud-3 {
-  left: 58%;
-  bottom: 16px;
-  width: 34px;
-  opacity: .038;
-  animation: m3ez-cloud-drift-c 9s ease-in-out -2s infinite alternate;
+#m3ez-divider-clouds-v1 .divider-cloud-day-1 .divider-cloud-drift {
+  animation: m3ez-cloud-day-a 12s ease-in-out infinite alternate;
 }
 
-:root[data-theme="dark"] #m3ez-divider-clouds-v1 .divider-cloud-3 {
-  opacity: .06;
+#m3ez-divider-clouds-v1 .divider-cloud-day-2 .divider-cloud-drift {
+  animation: m3ez-cloud-day-b 15s ease-in-out -5s infinite alternate;
 }
 
-@keyframes m3ez-cloud-drift-a {
-  from { transform: translate3d(-6px, 0, 0); }
-  to { transform: translate3d(10px, -1px, 0); }
+/* Night: fewer, thinner wisps sit slightly lower around the moon. */
+#m3ez-divider-clouds-v1 .divider-cloud-night {
+  opacity: 0;
+  transform: translate3d(5px, 4px, 0) scale(.96);
 }
 
-@keyframes m3ez-cloud-drift-b {
-  from { transform: translate3d(7px, 0, 0); }
-  to { transform: translate3d(-9px, 1px, 0); }
+#m3ez-divider-clouds-v1 .divider-cloud-night-1 {
+  left: 45.5%;
+  bottom: 27px;
+  width: 48px;
 }
 
-@keyframes m3ez-cloud-drift-c {
-  from { transform: translate3d(-4px, 0, 0); }
-  to { transform: translate3d(6px, -1px, 0); }
+#m3ez-divider-clouds-v1 .divider-cloud-night-2 {
+  left: 54%;
+  bottom: 19px;
+  width: 42px;
+}
+
+#m3ez-divider-clouds-v1 .divider-cloud-night-1 .divider-cloud-drift {
+  animation: m3ez-cloud-night-a 16s ease-in-out -3s infinite alternate;
+}
+
+#m3ez-divider-clouds-v1 .divider-cloud-night-2 .divider-cloud-drift {
+  animation: m3ez-cloud-night-b 13s ease-in-out -7s infinite alternate;
+}
+
+:root[data-theme="dark"] #m3ez-divider-clouds-v1 .divider-cloud-day {
+  opacity: 0;
+  transform: translate3d(-5px, 4px, 0) scale(.97);
+}
+
+:root[data-theme="dark"] #m3ez-divider-clouds-v1 .divider-cloud-night {
+  opacity: .11;
+  transform: translate3d(0, 0, 0) scale(1);
+}
+
+@keyframes m3ez-cloud-day-a {
+  from { transform: translate3d(-5px, 0, 0); }
+  to { transform: translate3d(7px, -1px, 0); }
+}
+
+@keyframes m3ez-cloud-day-b {
+  from { transform: translate3d(6px, 0, 0); }
+  to { transform: translate3d(-8px, 1px, 0); }
+}
+
+@keyframes m3ez-cloud-night-a {
+  from { transform: translate3d(4px, 0, 0); }
+  to { transform: translate3d(-6px, -.5px, 0); }
+}
+
+@keyframes m3ez-cloud-night-b {
+  from { transform: translate3d(-3px, 0, 0); }
+  to { transform: translate3d(6px, .5px, 0); }
 }
 
 @media (max-width: 760px) {
@@ -253,25 +297,37 @@
     height: 36px;
   }
 
-  #m3ez-divider-clouds-v1 .divider-cloud-1 {
+  #m3ez-divider-clouds-v1 .divider-cloud-day-1 {
     left: 40%;
     bottom: 12px;
     width: 30px;
   }
 
-  #m3ez-divider-clouds-v1 .divider-cloud-2 {
+  #m3ez-divider-clouds-v1 .divider-cloud-day-2 {
     left: 54%;
     bottom: 17px;
-    width: 36px;
+    width: 35px;
   }
 
-  #m3ez-divider-clouds-v1 .divider-cloud-3 {
-    display: none;
+  #m3ez-divider-clouds-v1 .divider-cloud-night-1 {
+    left: 42%;
+    bottom: 14px;
+    width: 33px;
+  }
+
+  #m3ez-divider-clouds-v1 .divider-cloud-night-2 {
+    left: 56%;
+    bottom: 10px;
+    width: 29px;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
   #m3ez-divider-clouds-v1 svg {
+    transition: none;
+  }
+
+  #m3ez-divider-clouds-v1 .divider-cloud-drift {
     animation: none;
     transform: none;
   }
@@ -284,7 +340,7 @@
 }
 
 /* Theme-aware celestial mark centered above the divider scenery.
-   Both icons stay mounted so light/dark switches can cross-fade and rotate smoothly. */
+   Both icons stay mounted so light/dark switches can cross-fade and slide vertically. */
 #m3ez-divider-celestial-v1 {
   position: absolute;
   left: 50%;
