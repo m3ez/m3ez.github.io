@@ -21,7 +21,11 @@ test('page content stays above the background without changing the hero scene', 
 test('background is sparse, interactive only visually, and motion-safe', () => {
   assert.match(js, /const labels = \['443', 'TLS', 'GET', 'SSH', 'CVE', 'AUTH', '0x7f'\]/);
   assert.match(js, /pointerActive/);
-  assert.match(js, /const cycle = 11000/);
+  assert.match(js, /function drawDotGrid/);
+  assert.match(js, /function drawCrosshair/);
+  assert.match(js, /function accent/);
+  assert.match(js, /route:\/\/trust-boundary/);
+  assert.match(js, /const cycle = 7200/);
   assert.match(js, /prefers-reduced-motion: reduce/);
   assert.match(css, /@media print\s*\{\s*#m3ez-cyber-background-v1\s*\{\s*display:\s*none/s);
 });
