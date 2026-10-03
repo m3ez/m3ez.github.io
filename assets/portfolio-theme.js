@@ -7,6 +7,7 @@
   const CELESTIAL_ID = 'm3ez-divider-celestial-v1';
   const CLOUDS_ID = 'm3ez-divider-clouds-v1';
   const LIGHT_ID = 'm3ez-divider-light-v1';
+  const WIREFRAME_ID = 'm3ez-wireframe-gutters-v1';
   const root = document.documentElement;
   const initialHash = window.location?.hash || '';
   const landingHash =
@@ -135,6 +136,71 @@
     hero.appendChild(clouds);
   }
 
+
+  function randomBetween(min, max) {
+    return min + Math.random() * (max - min);
+  }
+
+  function createWireframeObject(role, side, bandIndex) {
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.classList.add('m3ez-wireframe-object', `is-${role}`);
+    svg.setAttribute('viewBox', '0 0 120 120');
+    svg.setAttribute('aria-hidden', 'true');
+    svg.setAttribute('focusable', 'false');
+
+    const variants = [
+      '<path d="M18 38 58 16l44 24-42 22L18 38Zm40-22v46m44-22v42L60 104V62M18 38v42l42 24M18 80l40-18 44 20"/>',
+      '<path d="M8 46 52 20l56 30-48 26L8 46Zm44-26v56m56-26v40l-48 26V76M8 46v38l52 32M8 84l44-20 56 26"/>',
+      '<path d="M24 30 70 8l38 26-44 22-40-26Zm46-22v48m38-22v46L64 106V56M24 30v48l40 28M24 78l46-22 38 24"/>',
+      '<path d="M4 54 48 24l64 28-50 30L4 54Zm44-30v58m64-30v40l-50 26V82M4 54v36l58 28M4 90l44-24 64 26"/>',
+    ];
+    svg.innerHTML = variants[Math.floor(Math.random() * variants.length)];
+
+    const sizeRanges = {
+      dominant: [105, 152],
+      medium: [68, 98],
+      fragment: [38, 62],
+    };
+    const yBands = [
+      [2, 24],
+      [34, 58],
+      [68, 88],
+    ];
+    const [minSize, maxSize] = sizeRanges[role];
+    const [minY, maxY] = yBands[bandIndex];
+    const sideBias = side === 'left' ? [-34, 18] : [-18, 34];
+
+    svg.style.setProperty('--wf-size', `${randomBetween(minSize, maxSize).toFixed(1)}%`);
+    svg.style.setProperty('--wf-x', `${randomBetween(sideBias[0], sideBias[1]).toFixed(1)}%`);
+    svg.style.setProperty('--wf-y', `${randomBetween(minY, maxY).toFixed(1)}%`);
+    svg.style.setProperty('--wf-angle', `${randomBetween(-9, 9).toFixed(2)}deg`);
+    svg.style.setProperty('--wf-opacity', randomBetween(.42, .9).toFixed(3));
+    return svg;
+  }
+
+  function mountWireframeGutters() {
+    if (!document.body || document.getElementById(WIREFRAME_ID)) return;
+
+    const root = document.createElement('div');
+    root.id = WIREFRAME_ID;
+    root.setAttribute('aria-hidden', 'true');
+
+    const roles = ['dominant', 'medium', 'fragment'];
+    for (const side of ['left', 'right']) {
+      const gutter = document.createElement('div');
+      gutter.className = `m3ez-wireframe-gutter is-${side}`;
+
+      const bands = [0, 1, 2].sort(() => Math.random() - .5);
+      roles.forEach((role, index) => {
+        gutter.appendChild(createWireframeObject(role, side, bands[index]));
+      });
+
+      root.appendChild(gutter);
+    }
+
+    document.body.appendChild(root);
+  }
+
   function mountDividerCelestial() {
     const hero = document.getElementById('top');
     if (!hero || document.getElementById(CELESTIAL_ID)) return;
@@ -157,6 +223,7 @@
     mountDividerLight();
     mountDividerClouds();
     mountDividerCelestial();
+    mountWireframeGutters();
     if (document.getElementById(BUTTON_ID)) return;
     button = document.createElement('button');
     button.id = BUTTON_ID;
