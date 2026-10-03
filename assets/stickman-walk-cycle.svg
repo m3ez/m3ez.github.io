@@ -1,164 +1,325 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 48" width="640" height="48" fill="none" stroke="black" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
-  <!-- Natural 16-frame side-view walk based on classic contact/down/passing/up poses.
-       Stance legs stay almost straight; knee flexion is reserved for toe-off and swing. -->
-  <g data-frame="0" transform="translate(0 0)">
-    <path data-backpack="true" opacity=".78" fill="black" stroke="none" d="M19.10 16.64 Q15.60 15.89 13.95 19.09 L13.20 25.14 Q13.10 27.29 15.15 27.56 L19.05 26.59 Z"/>
-    <path data-strap="true" opacity=".70" d="M20.80 17.65 Q17.05 19.40 16.90 25.80"/>
-    <path data-limb="far-leg" opacity=".44" d="M19.20 27.10 L16.20 34.50 L12.80 41.00 L16.00 45.90"/>
-    <path data-limb="far-arm" opacity=".44" d="M21.25 17.45 L23.40 23.60 L25.90 29.90"/>
-    <path data-limb="near-leg" opacity="1" d="M19.20 27.10 L23.10 35.60 L28.40 44.70 L31.10 46.00"/>
-    <path data-limb="near-arm" opacity="1" d="M21.25 17.45 L19.10 23.60 L16.60 29.40"/>
-    <path data-body="true" d="M22.00 13.75 L21.25 17.45 L19.20 27.10"/>
-    <circle data-head="true" cx="23.30" cy="8.55" r="5.05"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 48" width="1280" height="48" fill="none" stroke="black" stroke-width="2.05" stroke-linecap="round" stroke-linejoin="round">
+  <!-- 32-frame coordinated walk cycle.
+       Hip/knee/foot phases drive the legs; arms counter-swing from the matching hip phase.
+       Pelvis, shoulders, head, and backpack share the same gait phase with reduced amplitude. -->
+  <g data-frame="0" data-phase="0.00" transform="translate(0 0)">
+    <path data-backpack="true" opacity=".78" fill="black" stroke="none" d="M19.10 16.60 Q15.55 15.85 13.90 19.05 L13.15 25.10 Q13.05 27.20 15.10 27.47 L19.05 26.50 Z"/>
+    <path data-strap="true" opacity=".70" d="M20.85 17.64 Q17.00 19.39 16.85 25.42"/>
+    <path data-limb="far-leg" data-thigh-angle="-17.56" data-knee-flex="33.39" opacity=".44" d="M19.05 26.67 L15.90 36.63 L8.25 42.84 L11.14 43.95"/>
+    <path data-limb="far-arm" data-arm-angle="12.64" opacity=".44" d="M21.35 17.44 L22.71 23.49 L25.80 28.51"/>
+    <path data-limb="near-leg" data-thigh-angle="22.00" data-knee-flex="6.00" opacity="1" d="M19.05 26.67 L22.96 36.36 L25.68 45.83 L28.73 45.29"/>
+    <path data-limb="near-arm" data-arm-angle="-15.84" opacity="1" d="M21.35 17.44 L19.66 23.40 L16.90 28.62"/>
+    <path data-body="true" d="M22.05 13.75 L21.35 17.44 L19.05 26.67"/>
+    <circle data-head="true" cx="23.35" cy="8.58" r="5.02"/>
   </g>
-  <g data-frame="1" transform="translate(40 0)">
-    <path data-backpack="true" opacity=".78" fill="black" stroke="none" d="M19.02 16.85 Q15.52 16.10 13.87 19.30 L13.12 25.35 Q13.02 27.50 15.07 27.77 L18.97 26.80 Z"/>
-    <path data-strap="true" opacity=".70" d="M20.80 17.79 Q16.97 19.54 16.82 26.00"/>
-    <path data-limb="far-leg" opacity=".44" d="M19.20 27.30 L17.20 33.95 L13.55 40.00 L16.55 43.55"/>
-    <path data-limb="far-arm" opacity=".44" d="M21.29 17.59 L23.27 23.74 L25.58 30.02"/>
-    <path data-limb="near-leg" opacity="1" d="M19.20 27.30 L22.35 35.85 L26.70 44.90 L29.65 46.20"/>
-    <path data-limb="near-arm" opacity="1" d="M21.29 17.59 L19.30 23.74 L16.99 29.56"/>
-    <path data-body="true" d="M22.00 13.84 L21.29 17.59 L19.20 27.30"/>
-    <circle data-head="true" cx="23.30" cy="8.61" r="5.05"/>
+  <g data-frame="1" data-phase="0.03" transform="translate(40 0)">
+    <path data-backpack="true" opacity=".78" fill="black" stroke="none" d="M19.05 16.68 Q15.50 15.93 13.85 19.13 L13.10 25.18 Q13.00 27.28 15.05 27.55 L19.00 26.58 Z"/>
+    <path data-strap="true" opacity=".70" d="M20.85 17.68 Q16.95 19.43 16.80 25.48"/>
+    <path data-limb="far-leg" data-thigh-angle="-17.56" data-knee-flex="35.57" opacity=".44" d="M19.02 26.73 L15.87 36.70 L7.99 42.61 L10.87 43.74"/>
+    <path data-limb="far-arm" data-arm-angle="12.64" opacity=".44" d="M21.40 17.48 L22.75 23.53 L25.84 28.56"/>
+    <path data-limb="near-leg" data-thigh-angle="19.97" data-knee-flex="9.05" opacity="1" d="M19.02 26.73 L22.59 36.55 L24.45 46.23 L27.53 45.87"/>
+    <path data-limb="near-arm" data-arm-angle="-14.38" opacity="1" d="M21.40 17.48 L19.86 23.49 L17.23 28.77"/>
+    <path data-body="true" d="M22.07 13.78 L21.40 17.48 L19.02 26.73"/>
+    <circle data-head="true" cx="23.36" cy="8.59" r="5.02"/>
   </g>
-  <g data-frame="2" transform="translate(80 0)">
-    <path data-backpack="true" opacity=".78" fill="black" stroke="none" d="M18.96 17.05 Q15.46 16.30 13.81 19.50 L13.06 25.55 Q12.96 27.70 15.01 27.97 L18.91 27.00 Z"/>
-    <path data-strap="true" opacity=".70" d="M20.80 17.94 Q16.91 19.69 16.76 26.20"/>
-    <path data-limb="far-leg" opacity=".44" d="M19.20 27.50 L18.20 33.40 L14.30 39.00 L17.10 41.20"/>
-    <path data-limb="far-arm" opacity=".44" d="M21.32 17.74 L22.84 23.89 L24.61 30.11"/>
-    <path data-limb="near-leg" opacity="1" d="M19.20 27.50 L21.60 36.10 L25.00 45.10 L28.20 46.40"/>
-    <path data-limb="near-arm" opacity="1" d="M21.32 17.74 L19.80 23.89 L18.03 29.76"/>
-    <path data-body="true" d="M22.00 13.93 L21.32 17.74 L19.20 27.50"/>
-    <circle data-head="true" cx="23.30" cy="8.66" r="5.05"/>
+  <g data-frame="2" data-phase="0.06" transform="translate(80 0)">
+    <path data-backpack="true" opacity=".78" fill="black" stroke="none" d="M19.00 16.79 Q15.45 16.04 13.80 19.24 L13.05 25.29 Q12.95 27.39 15.00 27.66 L18.95 26.69 Z"/>
+    <path data-strap="true" opacity=".70" d="M20.85 17.75 Q16.90 19.50 16.75 25.58"/>
+    <path data-limb="far-leg" data-thigh-angle="-12.83" data-knee-flex="41.61" opacity=".44" d="M18.99 26.83 L16.67 37.02 L8.66 42.75 L11.65 43.56"/>
+    <path data-limb="far-arm" data-arm-angle="9.23" opacity=".44" d="M21.44 17.55 L22.44 23.67 L25.20 28.88"/>
+    <path data-limb="near-leg" data-thigh-angle="16.74" data-knee-flex="13.90" opacity="1" d="M18.99 26.83 L22.00 36.84 L22.49 46.68 L25.59 46.61"/>
+    <path data-limb="near-arm" data-arm-angle="-12.05" opacity="1" d="M21.44 17.55 L20.15 23.62 L17.72 28.99"/>
+    <path data-body="true" d="M22.08 13.82 L21.44 17.55 L18.99 26.83"/>
+    <circle data-head="true" cx="23.37" cy="8.62" r="5.02"/>
   </g>
-  <g data-frame="3" transform="translate(120 0)">
-    <path data-backpack="true" opacity=".78" fill="black" stroke="none" d="M18.92 16.90 Q15.42 16.15 13.77 19.35 L13.02 25.40 Q12.92 27.55 14.97 27.82 L18.87 26.85 Z"/>
-    <path data-strap="true" opacity=".70" d="M20.80 17.76 Q16.87 19.51 16.72 25.95"/>
-    <path data-limb="far-leg" opacity=".44" d="M19.20 27.25 L20.15 33.55 L16.85 39.25 L19.75 41.30"/>
-    <path data-limb="far-arm" opacity=".44" d="M21.34 17.56 L22.17 23.71 L23.12 29.85"/>
-    <path data-limb="near-leg" opacity="1" d="M19.20 27.25 L20.45 36.15 L22.45 45.15 L25.65 46.42"/>
-    <path data-limb="near-arm" opacity="1" d="M21.34 17.56 L20.52 23.71 L19.56 29.66"/>
-    <path data-body="true" d="M22.00 13.82 L21.34 17.56 L19.20 27.25"/>
-    <circle data-head="true" cx="23.30" cy="8.59" r="5.05"/>
+  <g data-frame="3" data-phase="0.09" transform="translate(120 0)">
+    <path data-backpack="true" opacity=".78" fill="black" stroke="none" d="M18.96 16.85 Q15.41 16.10 13.76 19.30 L13.01 25.35 Q12.91 27.45 14.96 27.72 L18.91 26.75 Z"/>
+    <path data-strap="true" opacity=".70" d="M20.85 17.78 Q16.86 19.53 16.71 25.62"/>
+    <path data-limb="far-leg" data-thigh-angle="-5.96" data-knee-flex="50.38" opacity=".44" d="M18.96 26.87 L17.88 37.27 L9.68 42.72 L12.76 43.05"/>
+    <path data-limb="far-arm" data-arm-angle="4.29" opacity=".44" d="M21.48 17.58 L21.95 23.76 L24.22 29.21"/>
+    <path data-limb="near-leg" data-thigh-angle="15.64" data-knee-flex="14.75" opacity="1" d="M18.96 26.87 L21.78 36.94 L21.93 46.78 L25.03 46.78"/>
+    <path data-limb="near-arm" data-arm-angle="-11.26" opacity="1" d="M21.48 17.58 L20.27 23.66 L17.89 29.06"/>
+    <path data-body="true" d="M22.09 13.84 L21.48 17.58 L18.96 26.87"/>
+    <circle data-head="true" cx="23.38" cy="8.63" r="5.02"/>
   </g>
-  <g data-frame="4" transform="translate(160 0)">
-    <path data-backpack="true" opacity=".78" fill="black" stroke="none" d="M18.90 16.69 Q15.40 15.94 13.75 19.14 L13.00 25.19 Q12.90 27.34 14.95 27.61 L18.85 26.64 Z"/>
-    <path data-strap="true" opacity=".70" d="M20.80 17.58 Q16.85 19.33 16.70 25.70"/>
-    <path data-limb="far-leg" opacity=".44" d="M19.20 27.00 L22.10 33.70 L19.40 39.50 L22.40 41.40"/>
-    <path data-limb="far-arm" opacity=".44" d="M21.35 17.38 L21.35 23.53 L21.35 29.58"/>
-    <path data-limb="near-leg" opacity="1" d="M19.20 27.00 L19.30 36.20 L19.90 45.20 L23.10 46.45"/>
-    <path data-limb="near-arm" opacity="1" d="M21.35 17.38 L21.35 23.53 L21.35 29.58"/>
-    <path data-body="true" d="M22.00 13.71 L21.35 17.38 L19.20 27.00"/>
-    <circle data-head="true" cx="23.30" cy="8.52" r="5.05"/>
+  <g data-frame="4" data-phase="0.13" transform="translate(160 0)">
+    <path data-backpack="true" opacity=".78" fill="black" stroke="none" d="M18.92 16.88 Q15.37 16.13 13.72 19.33 L12.97 25.38 Q12.87 27.48 14.92 27.75 L18.87 26.78 Z"/>
+    <path data-strap="true" opacity=".70" d="M20.85 17.77 Q16.82 19.52 16.67 25.60"/>
+    <path data-limb="far-leg" data-thigh-angle="-0.77" data-knee-flex="57.01" opacity=".44" d="M18.94 26.85 L18.80 37.30 L10.46 42.55 L13.56 42.50"/>
+    <path data-limb="far-arm" data-arm-angle="0.56" opacity=".44" d="M21.52 17.57 L21.58 23.76 L23.46 29.36"/>
+    <path data-limb="near-leg" data-thigh-angle="12.84" data-knee-flex="12.79" opacity="1" d="M18.94 26.85 L21.26 37.04 L21.27 46.89 L24.37 46.89"/>
+    <path data-limb="near-arm" data-arm-angle="-9.24" opacity="1" d="M21.52 17.57 L20.52 23.68 L18.29 29.14"/>
+    <path data-body="true" d="M22.11 13.83 L21.52 17.57 L18.94 26.85"/>
+    <circle data-head="true" cx="23.39" cy="8.62" r="5.02"/>
   </g>
-  <g data-frame="5" transform="translate(200 0)">
-    <path data-backpack="true" opacity=".78" fill="black" stroke="none" d="M18.92 16.55 Q15.42 15.80 13.77 19.00 L13.02 25.05 Q12.92 27.20 14.97 27.47 L18.87 26.50 Z"/>
-    <path data-strap="true" opacity=".70" d="M20.80 17.51 Q16.87 19.26 16.72 25.61"/>
-    <path data-limb="far-leg" opacity=".44" d="M19.20 26.91 L23.15 34.40 L23.15 41.10 L26.15 42.85"/>
-    <path data-limb="far-arm" opacity=".44" d="M21.34 17.31 L20.52 23.46 L19.56 29.42"/>
-    <path data-limb="near-leg" opacity="1" d="M19.20 26.91 L18.55 36.00 L17.45 45.00 L20.80 46.42"/>
-    <path data-limb="near-arm" opacity="1" d="M21.34 17.31 L22.17 23.46 L23.12 29.61"/>
-    <path data-body="true" d="M22.00 13.66 L21.34 17.31 L19.20 26.91"/>
-    <circle data-head="true" cx="23.30" cy="8.50" r="5.05"/>
+  <g data-frame="5" data-phase="0.16" transform="translate(200 0)">
+    <path data-backpack="true" opacity=".78" fill="black" stroke="none" d="M18.88 16.86 Q15.33 16.11 13.68 19.31 L12.93 25.36 Q12.83 27.46 14.88 27.73 L18.83 26.76 Z"/>
+    <path data-strap="true" opacity=".70" d="M20.85 17.72 Q16.78 19.47 16.63 25.54"/>
+    <path data-limb="far-leg" data-thigh-angle="0.63" data-knee-flex="57.31" opacity=".44" d="M18.92 26.79 L19.03 37.24 L10.80 42.65 L13.90 42.55"/>
+    <path data-limb="far-arm" data-arm-angle="-0.46" opacity=".44" d="M21.55 17.52 L21.50 23.72 L19.69 29.34"/>
+    <path data-limb="near-leg" data-thigh-angle="9.02" data-knee-flex="10.11" opacity="1" d="M18.92 26.79 L20.56 37.11 L20.37 46.96 L23.47 46.96"/>
+    <path data-limb="near-arm" data-arm-angle="-6.49" opacity="1" d="M21.55 17.52 L20.85 23.68 L18.83 29.23"/>
+    <path data-body="true" d="M22.12 13.80 L21.55 17.52 L18.92 26.79"/>
+    <circle data-head="true" cx="23.39" cy="8.61" r="5.02"/>
   </g>
-  <g data-frame="6" transform="translate(240 0)">
-    <path data-backpack="true" opacity=".78" fill="black" stroke="none" d="M18.96 16.43 Q15.46 15.68 13.81 18.88 L13.06 24.93 Q12.96 27.08 15.01 27.35 L18.91 26.38 Z"/>
-    <path data-strap="true" opacity=".70" d="M20.80 17.45 Q16.91 19.20 16.76 25.52"/>
-    <path data-limb="far-leg" opacity=".44" d="M19.20 26.82 L24.20 35.10 L26.90 42.70 L29.90 44.30"/>
-    <path data-limb="far-arm" opacity=".44" d="M21.32 17.25 L19.80 23.40 L18.03 29.27"/>
-    <path data-limb="near-leg" opacity="1" d="M19.20 26.82 L17.80 35.80 L15.00 44.80 L18.50 46.40"/>
-    <path data-limb="near-arm" opacity="1" d="M21.32 17.25 L22.84 23.40 L24.61 29.63"/>
-    <path data-body="true" d="M22.00 13.62 L21.32 17.25 L19.20 26.82"/>
-    <circle data-head="true" cx="23.30" cy="8.47" r="5.05"/>
+  <g data-frame="6" data-phase="0.19" transform="translate(240 0)">
+    <path data-backpack="true" opacity=".78" fill="black" stroke="none" d="M18.86 16.83 Q15.31 16.08 13.66 19.28 L12.91 25.33 Q12.81 27.43 14.86 27.70 L18.81 26.73 Z"/>
+    <path data-strap="true" opacity=".70" d="M20.85 17.68 Q16.76 19.43 16.61 25.47"/>
+    <path data-limb="far-leg" data-thigh-angle="4.67" data-knee-flex="52.91" opacity=".44" d="M18.90 26.72 L19.75 37.14 L12.40 43.70 L15.50 43.61"/>
+    <path data-limb="far-arm" data-arm-angle="-3.36" opacity=".44" d="M21.57 17.48 L21.21 23.66 L19.17 29.20"/>
+    <path data-limb="near-leg" data-thigh-angle="6.30" data-knee-flex="8.21" opacity="1" d="M18.90 26.72 L20.05 37.11 L19.72 46.96 L22.82 46.96"/>
+    <path data-limb="near-arm" data-arm-angle="-4.54" opacity="1" d="M21.57 17.48 L21.08 23.66 L19.19 29.24"/>
+    <path data-body="true" d="M22.12 13.77 L21.57 17.48 L18.90 26.72"/>
+    <circle data-head="true" cx="23.40" cy="8.59" r="5.02"/>
   </g>
-  <g data-frame="7" transform="translate(280 0)">
-    <path data-backpack="true" opacity=".78" fill="black" stroke="none" d="M19.02 16.53 Q15.52 15.78 13.87 18.98 L13.12 25.03 Q13.02 27.18 15.07 27.45 L18.97 26.48 Z"/>
-    <path data-strap="true" opacity=".70" d="M20.80 17.58 Q16.97 19.33 16.82 25.70"/>
-    <path data-limb="far-leg" opacity=".44" d="M19.20 27.00 L23.65 35.35 L27.65 43.70 L30.50 45.15"/>
-    <path data-limb="far-arm" opacity=".44" d="M21.29 17.38 L19.30 23.53 L16.99 29.35"/>
-    <path data-limb="near-leg" opacity="1" d="M19.20 27.00 L17.00 35.15 L13.90 42.90 L17.25 46.15"/>
-    <path data-limb="near-arm" opacity="1" d="M21.29 17.38 L23.27 23.53 L25.58 29.81"/>
-    <path data-body="true" d="M22.00 13.71 L21.29 17.38 L19.20 27.00"/>
-    <circle data-head="true" cx="23.30" cy="8.52" r="5.05"/>
+  <g data-frame="7" data-phase="0.22" transform="translate(280 0)">
+    <path data-backpack="true" opacity=".78" fill="black" stroke="none" d="M18.84 16.79 Q15.29 16.04 13.64 19.24 L12.89 25.29 Q12.79 27.39 14.84 27.66 L18.79 26.69 Z"/>
+    <path data-strap="true" opacity=".70" d="M20.85 17.64 Q16.74 19.39 16.59 25.43"/>
+    <path data-limb="far-leg" data-thigh-angle="10.74" data-knee-flex="46.28" opacity=".44" d="M18.89 26.68 L20.84 36.95 L15.12 44.96 L18.21 44.91"/>
+    <path data-limb="far-arm" data-arm-angle="-7.73" opacity=".44" d="M21.59 17.44 L20.75 23.59 L18.36 28.98"/>
+    <path data-limb="near-leg" data-thigh-angle="5.52" data-knee-flex="7.94" opacity="1" d="M18.89 26.68 L19.90 37.08 L19.48 46.92 L22.58 46.93"/>
+    <path data-limb="near-arm" data-arm-angle="-3.97" opacity="1" d="M21.59 17.44 L21.16 23.63 L19.26 29.22"/>
+    <path data-body="true" d="M22.13 13.76 L21.59 17.44 L18.89 26.68"/>
+    <circle data-head="true" cx="23.40" cy="8.58" r="5.02"/>
   </g>
-  <g data-frame="8" transform="translate(320 0)">
-    <path data-backpack="true" opacity=".78" fill="black" stroke="none" d="M19.10 16.70 Q15.60 15.95 13.95 19.15 L13.20 25.20 Q13.10 27.35 15.15 27.62 L19.05 26.65 Z"/>
-    <path data-strap="true" opacity=".70" d="M20.80 17.71 Q17.05 19.46 16.90 25.88"/>
-    <path data-limb="far-leg" opacity=".44" d="M19.20 27.18 L23.10 35.60 L28.40 44.70 L31.10 46.00"/>
-    <path data-limb="far-arm" opacity=".44" d="M21.25 17.51 L19.10 23.66 L16.60 29.46"/>
-    <path data-limb="near-leg" opacity="1" d="M19.20 27.18 L16.20 34.50 L12.80 41.00 L16.00 45.90"/>
-    <path data-limb="near-arm" opacity="1" d="M21.25 17.51 L23.40 23.66 L25.90 29.96"/>
-    <path data-body="true" d="M22.00 13.79 L21.25 17.51 L19.20 27.18"/>
-    <circle data-head="true" cx="23.30" cy="8.57" r="5.05"/>
+  <g data-frame="8" data-phase="0.25" transform="translate(320 0)">
+    <path data-backpack="true" opacity=".78" fill="black" stroke="none" d="M18.84 16.73 Q15.29 15.98 13.64 19.18 L12.89 25.23 Q12.79 27.33 14.84 27.60 L18.79 26.63 Z"/>
+    <path data-strap="true" opacity=".70" d="M20.85 17.61 Q16.74 19.36 16.59 25.38"/>
+    <path data-limb="far-leg" data-thigh-angle="16.90" data-knee-flex="39.57" opacity=".44" d="M18.89 26.63 L21.93 36.63 L18.13 45.72 L21.23 45.70"/>
+    <path data-limb="far-arm" data-arm-angle="-12.17" opacity=".44" d="M21.59 17.41 L20.28 23.47 L17.54 28.70"/>
+    <path data-limb="near-leg" data-thigh-angle="2.98" data-knee-flex="7.62" opacity="1" d="M18.89 26.63 L19.43 37.07 L18.64 46.89 L21.74 46.93"/>
+    <path data-limb="near-arm" data-arm-angle="-2.15" opacity="1" d="M21.59 17.41 L21.36 23.61 L19.57 29.23"/>
+    <path data-body="true" d="M22.13 13.74 L21.59 17.41 L18.89 26.63"/>
+    <circle data-head="true" cx="23.40" cy="8.57" r="5.02"/>
   </g>
-  <g data-frame="9" transform="translate(360 0)">
-    <path data-backpack="true" opacity=".78" fill="black" stroke="none" d="M19.18 16.85 Q15.68 16.10 14.03 19.30 L13.28 25.35 Q13.18 27.50 15.23 27.77 L19.13 26.80 Z"/>
-    <path data-strap="true" opacity=".70" d="M20.80 17.79 Q17.13 19.54 16.98 26.00"/>
-    <path data-limb="far-leg" opacity=".44" d="M19.20 27.30 L22.35 35.85 L26.70 44.90 L29.65 46.20"/>
-    <path data-limb="far-arm" opacity=".44" d="M21.21 17.59 L19.23 23.74 L16.92 29.56"/>
-    <path data-limb="near-leg" opacity="1" d="M19.20 27.30 L17.20 33.95 L13.55 40.00 L16.55 43.55"/>
-    <path data-limb="near-arm" opacity="1" d="M21.21 17.59 L23.20 23.74 L25.51 30.02"/>
-    <path data-body="true" d="M22.00 13.84 L21.21 17.59 L19.20 27.30"/>
-    <circle data-head="true" cx="23.30" cy="8.61" r="5.05"/>
+  <g data-frame="9" data-phase="0.28" transform="translate(360 0)">
+    <path data-backpack="true" opacity=".78" fill="black" stroke="none" d="M18.84 16.66 Q15.29 15.91 13.64 19.11 L12.89 25.16 Q12.79 27.26 14.84 27.53 L18.79 26.56 Z"/>
+    <path data-strap="true" opacity=".70" d="M20.85 17.58 Q16.74 19.33 16.59 25.34"/>
+    <path data-limb="far-leg" data-thigh-angle="21.16" data-knee-flex="34.91" opacity=".44" d="M18.89 26.59 L22.67 36.34 L20.33 45.90 L23.43 45.90"/>
+    <path data-limb="far-arm" data-arm-angle="-15.24" opacity=".44" d="M21.59 17.38 L19.96 23.36 L17.00 28.47"/>
+    <path data-limb="near-leg" data-thigh-angle="-0.84" data-knee-flex="7.15" opacity="1" d="M18.89 26.59 L18.74 37.04 L17.37 46.79 L20.47 46.89"/>
+    <path data-limb="near-arm" data-arm-angle="0.60" opacity="1" d="M21.59 17.38 L21.65 23.58 L23.35 29.23"/>
+    <path data-body="true" d="M22.13 13.72 L21.59 17.38 L18.89 26.59"/>
+    <circle data-head="true" cx="23.40" cy="8.56" r="5.02"/>
   </g>
-  <g data-frame="10" transform="translate(400 0)">
-    <path data-backpack="true" opacity=".78" fill="black" stroke="none" d="M19.24 17.00 Q15.74 16.25 14.09 19.45 L13.34 25.50 Q13.24 27.65 15.29 27.92 L19.19 26.95 Z"/>
-    <path data-strap="true" opacity=".70" d="M20.80 17.88 Q17.19 19.63 17.04 26.12"/>
-    <path data-limb="far-leg" opacity=".44" d="M19.20 27.42 L21.60 36.10 L25.00 45.10 L28.20 46.40"/>
-    <path data-limb="far-arm" opacity=".44" d="M21.18 17.68 L19.66 23.83 L17.89 29.70"/>
-    <path data-limb="near-leg" opacity="1" d="M19.20 27.42 L18.20 33.40 L14.30 39.00 L17.10 41.20"/>
-    <path data-limb="near-arm" opacity="1" d="M21.18 17.68 L22.70 23.83 L24.47 30.06"/>
-    <path data-body="true" d="M22.00 13.89 L21.18 17.68 L19.20 27.42"/>
-    <circle data-head="true" cx="23.30" cy="8.64" r="5.05"/>
+  <g data-frame="10" data-phase="0.31" transform="translate(400 0)">
+    <path data-backpack="true" opacity=".78" fill="black" stroke="none" d="M18.86 16.60 Q15.31 15.85 13.66 19.05 L12.91 25.10 Q12.81 27.20 14.86 27.47 L18.81 26.50 Z"/>
+    <path data-strap="true" opacity=".70" d="M20.85 17.56 Q16.76 19.31 16.61 25.32"/>
+    <path data-limb="far-leg" data-thigh-angle="22.15" data-knee-flex="33.36" opacity=".44" d="M18.90 26.57 L22.84 36.24 L20.93 45.91 L24.03 45.90"/>
+    <path data-limb="far-arm" data-arm-angle="-15.95" opacity=".44" d="M21.57 17.36 L19.87 23.32 L16.91 28.43"/>
+    <path data-limb="near-leg" data-thigh-angle="-4.94" data-knee-flex="6.63" opacity="1" d="M18.90 26.57 L18.00 36.98 L16.03 46.63 L19.12 46.77"/>
+    <path data-limb="near-arm" data-arm-angle="3.55" opacity="1" d="M21.57 17.36 L21.96 23.55 L24.01 29.08"/>
+    <path data-body="true" d="M22.12 13.71 L21.57 17.36 L18.90 26.57"/>
+    <circle data-head="true" cx="23.40" cy="8.55" r="5.02"/>
   </g>
-  <g data-frame="11" transform="translate(440 0)">
-    <path data-backpack="true" opacity=".78" fill="black" stroke="none" d="M19.28 16.88 Q15.78 16.13 14.13 19.33 L13.38 25.38 Q13.28 27.53 15.33 27.80 L19.23 26.83 Z"/>
-    <path data-strap="true" opacity=".70" d="M20.80 17.74 Q17.23 19.49 17.08 25.92"/>
-    <path data-limb="far-leg" opacity=".44" d="M19.20 27.22 L20.45 36.15 L22.45 45.15 L25.65 46.42"/>
-    <path data-limb="far-arm" opacity=".44" d="M21.16 17.54 L20.33 23.69 L19.38 29.64"/>
-    <path data-limb="near-leg" opacity="1" d="M19.20 27.22 L20.15 33.55 L16.85 39.25 L19.75 41.30"/>
-    <path data-limb="near-arm" opacity="1" d="M21.16 17.54 L21.98 23.69 L22.94 29.83"/>
-    <path data-body="true" d="M22.00 13.80 L21.16 17.54 L19.20 27.22"/>
-    <circle data-head="true" cx="23.30" cy="8.58" r="5.05"/>
+  <g data-frame="11" data-phase="0.34" transform="translate(440 0)">
+    <path data-backpack="true" opacity=".78" fill="black" stroke="none" d="M18.88 16.54 Q15.33 15.79 13.68 18.99 L12.93 25.04 Q12.83 27.14 14.88 27.41 L18.83 26.44 Z"/>
+    <path data-strap="true" opacity=".70" d="M20.85 17.54 Q16.78 19.29 16.63 25.29"/>
+    <path data-limb="far-leg" data-thigh-angle="23.51" data-knee-flex="27.66" opacity=".44" d="M18.92 26.54 L23.09 36.12 L22.37 45.94 L25.47 45.86"/>
+    <path data-limb="far-arm" data-arm-angle="-16.93" opacity=".44" d="M21.55 17.34 L19.74 23.27 L16.75 28.36"/>
+    <path data-limb="near-leg" data-thigh-angle="-8.31" data-knee-flex="6.21" opacity="1" d="M18.92 26.54 L17.41 36.88 L14.94 46.41 L18.03 46.60"/>
+    <path data-limb="near-arm" data-arm-angle="5.99" opacity="1" d="M21.55 17.34 L22.20 23.51 L24.54 28.92"/>
+    <path data-body="true" d="M22.12 13.69 L21.55 17.34 L18.92 26.54"/>
+    <circle data-head="true" cx="23.39" cy="8.55" r="5.02"/>
   </g>
-  <g data-frame="12" transform="translate(480 0)">
-    <path data-backpack="true" opacity=".78" fill="black" stroke="none" d="M19.30 16.70 Q15.80 15.95 14.15 19.15 L13.40 25.20 Q13.30 27.35 15.35 27.62 L19.25 26.65 Z"/>
-    <path data-strap="true" opacity=".70" d="M20.80 17.59 Q17.25 19.34 17.10 25.72"/>
-    <path data-limb="far-leg" opacity=".44" d="M19.20 27.02 L19.30 36.20 L19.90 45.20 L23.10 46.45"/>
-    <path data-limb="far-arm" opacity=".44" d="M21.15 17.39 L21.15 23.54 L21.15 29.59"/>
-    <path data-limb="near-leg" opacity="1" d="M19.20 27.02 L22.10 33.70 L19.40 39.50 L22.40 41.40"/>
-    <path data-limb="near-arm" opacity="1" d="M21.15 17.39 L21.15 23.54 L21.15 29.59"/>
-    <path data-body="true" d="M22.00 13.71 L21.15 17.39 L19.20 27.02"/>
-    <circle data-head="true" cx="23.30" cy="8.53" r="5.05"/>
+  <g data-frame="12" data-phase="0.38" transform="translate(480 0)">
+    <path data-backpack="true" opacity=".78" fill="black" stroke="none" d="M18.92 16.48 Q15.37 15.73 13.72 18.93 L12.97 24.98 Q12.87 27.08 14.92 27.35 L18.87 26.38 Z"/>
+    <path data-strap="true" opacity=".70" d="M20.85 17.52 Q16.82 19.27 16.67 25.26"/>
+    <path data-limb="far-leg" data-thigh-angle="25.42" data-knee-flex="19.64" opacity=".44" d="M18.94 26.51 L23.42 35.95 L24.41 45.75 L27.51 45.56"/>
+    <path data-limb="far-arm" data-arm-angle="-18.30" opacity=".44" d="M21.52 17.32 L19.57 23.21 L16.51 28.25"/>
+    <path data-limb="near-leg" data-thigh-angle="-9.96" data-knee-flex="6.00" opacity="1" d="M18.94 26.51 L17.13 36.80 L14.42 46.27 L17.51 46.49"/>
+    <path data-limb="near-arm" data-arm-angle="7.17" opacity="1" d="M21.52 17.32 L22.29 23.47 L24.80 28.81"/>
+    <path data-body="true" d="M22.11 13.68 L21.52 17.32 L18.94 26.51"/>
+    <circle data-head="true" cx="23.39" cy="8.54" r="5.02"/>
   </g>
-  <g data-frame="13" transform="translate(520 0)">
-    <path data-backpack="true" opacity=".78" fill="black" stroke="none" d="M19.28 16.58 Q15.78 15.83 14.13 19.03 L13.38 25.08 Q13.28 27.23 15.33 27.50 L19.23 26.53 Z"/>
-    <path data-strap="true" opacity=".70" d="M20.80 17.54 Q17.23 19.29 17.08 25.65"/>
-    <path data-limb="far-leg" opacity=".44" d="M19.20 26.95 L18.55 36.00 L17.45 45.00 L20.80 46.42"/>
-    <path data-limb="far-arm" opacity=".44" d="M21.16 17.34 L21.98 23.49 L22.94 29.64"/>
-    <path data-limb="near-leg" opacity="1" d="M19.20 26.95 L23.15 34.40 L23.15 41.10 L26.15 42.85"/>
-    <path data-limb="near-arm" opacity="1" d="M21.16 17.34 L20.33 23.49 L19.38 29.45"/>
-    <path data-body="true" d="M22.00 13.68 L21.16 17.34 L19.20 26.95"/>
-    <circle data-head="true" cx="23.30" cy="8.51" r="5.05"/>
+  <g data-frame="13" data-phase="0.41" transform="translate(520 0)">
+    <path data-backpack="true" opacity=".78" fill="black" stroke="none" d="M18.96 16.46 Q15.41 15.71 13.76 18.91 L13.01 24.96 Q12.91 27.06 14.96 27.33 L18.91 26.36 Z"/>
+    <path data-strap="true" opacity=".70" d="M20.85 17.52 Q16.86 19.27 16.71 25.26"/>
+    <path data-limb="far-leg" data-thigh-angle="26.82" data-knee-flex="13.76" opacity=".44" d="M18.96 26.51 L23.68 35.83 L25.90 45.43 L28.99 45.17"/>
+    <path data-limb="far-arm" data-arm-angle="-19.31" opacity=".44" d="M21.48 17.32 L19.43 23.17 L16.32 28.18"/>
+    <path data-limb="near-leg" data-thigh-angle="-10.74" data-knee-flex="8.68" opacity="1" d="M18.96 26.51 L17.01 36.77 L13.74 46.06 L16.82 46.37"/>
+    <path data-limb="near-arm" data-arm-angle="7.73" opacity="1" d="M21.48 17.32 L22.32 23.46 L24.92 28.76"/>
+    <path data-body="true" d="M22.09 13.68 L21.48 17.32 L18.96 26.51"/>
+    <circle data-head="true" cx="23.38" cy="8.54" r="5.02"/>
   </g>
-  <g data-frame="14" transform="translate(560 0)">
-    <path data-backpack="true" opacity=".78" fill="black" stroke="none" d="M19.24 16.47 Q15.74 15.72 14.09 18.92 L13.34 24.97 Q13.24 27.12 15.29 27.39 L19.19 26.42 Z"/>
-    <path data-strap="true" opacity=".70" d="M20.80 17.49 Q17.19 19.24 17.04 25.58"/>
-    <path data-limb="far-leg" opacity=".44" d="M19.20 26.88 L17.80 35.80 L15.00 44.80 L18.50 46.40"/>
-    <path data-limb="far-arm" opacity=".44" d="M21.18 17.29 L22.70 23.44 L24.47 29.67"/>
-    <path data-limb="near-leg" opacity="1" d="M19.20 26.88 L24.20 35.10 L26.90 42.70 L29.90 44.30"/>
-    <path data-limb="near-arm" opacity="1" d="M21.18 17.29 L19.66 23.44 L17.89 29.31"/>
-    <path data-body="true" d="M22.00 13.65 L21.18 17.29 L19.20 26.88"/>
-    <circle data-head="true" cx="23.30" cy="8.49" r="5.05"/>
+  <g data-frame="14" data-phase="0.44" transform="translate(560 0)">
+    <path data-backpack="true" opacity=".78" fill="black" stroke="none" d="M19.00 16.48 Q15.45 15.73 13.80 18.93 L13.05 24.98 Q12.95 27.08 15.00 27.35 L18.95 26.38 Z"/>
+    <path data-strap="true" opacity=".70" d="M20.85 17.55 Q16.90 19.30 16.75 25.30"/>
+    <path data-limb="far-leg" data-thigh-angle="26.39" data-knee-flex="12.14" opacity=".44" d="M18.99 26.55 L23.63 35.91 L26.06 45.46 L29.14 45.15"/>
+    <path data-limb="far-arm" data-arm-angle="-19.00" opacity=".44" d="M21.44 17.35 L19.42 23.21 L16.36 28.25"/>
+    <path data-limb="near-leg" data-thigh-angle="-12.94" data-knee-flex="16.66" opacity="1" d="M18.99 26.55 L16.65 36.73 L11.78 45.30 L14.83 45.87"/>
+    <path data-limb="near-arm" data-arm-angle="9.32" opacity="1" d="M21.44 17.35 L22.45 23.47 L25.22 28.67"/>
+    <path data-body="true" d="M22.08 13.70 L21.44 17.35 L18.99 26.55"/>
+    <circle data-head="true" cx="23.37" cy="8.55" r="5.02"/>
   </g>
-  <g data-frame="15" transform="translate(600 0)">
-    <path data-backpack="true" opacity=".78" fill="black" stroke="none" d="M19.18 16.53 Q15.68 15.78 14.03 18.98 L13.28 25.03 Q13.18 27.18 15.23 27.45 L19.13 26.48 Z"/>
-    <path data-strap="true" opacity=".70" d="M20.80 17.57 Q17.13 19.32 16.98 25.69"/>
-    <path data-limb="far-leg" opacity=".44" d="M19.20 26.99 L17.00 35.15 L13.90 42.90 L17.25 46.15"/>
-    <path data-limb="far-arm" opacity=".44" d="M21.21 17.37 L23.20 23.52 L25.51 29.80"/>
-    <path data-limb="near-leg" opacity="1" d="M19.20 26.99 L23.65 35.35 L27.65 43.70 L30.50 45.15"/>
-    <path data-limb="near-arm" opacity="1" d="M21.21 17.37 L19.23 23.52 L16.92 29.34"/>
-    <path data-body="true" d="M22.00 13.70 L21.21 17.37 L19.20 26.99"/>
-    <circle data-head="true" cx="23.30" cy="8.52" r="5.05"/>
+  <g data-frame="15" data-phase="0.47" transform="translate(600 0)">
+    <path data-backpack="true" opacity=".78" fill="black" stroke="none" d="M19.05 16.54 Q15.50 15.79 13.85 18.99 L13.10 25.04 Q13.00 27.14 15.05 27.41 L19.00 26.44 Z"/>
+    <path data-strap="true" opacity=".70" d="M20.85 17.60 Q16.95 19.35 16.80 25.37"/>
+    <path data-limb="far-leg" data-thigh-angle="23.69" data-knee-flex="8.37" opacity=".44" d="M19.02 26.62 L23.22 36.19 L25.82 45.69 L28.89 45.24"/>
+    <path data-limb="far-arm" data-arm-angle="-17.06" opacity=".44" d="M21.40 17.40 L19.58 23.33 L16.71 28.48"/>
+    <path data-limb="near-leg" data-thigh-angle="-15.57" data-knee-flex="26.19" opacity="1" d="M19.02 26.62 L16.21 36.69 L9.65 44.04 L12.63 44.92"/>
+    <path data-limb="near-arm" data-arm-angle="11.21" opacity="1" d="M21.40 17.40 L22.60 23.48 L25.56 28.58"/>
+    <path data-body="true" d="M22.07 13.73 L21.40 17.40 L19.02 26.62"/>
+    <circle data-head="true" cx="23.36" cy="8.57" r="5.02"/>
+  </g>
+  <g data-frame="16" data-phase="0.50" transform="translate(640 0)">
+    <path data-backpack="true" opacity=".78" fill="black" stroke="none" d="M19.10 16.60 Q15.55 15.85 13.90 19.05 L13.15 25.10 Q13.05 27.20 15.10 27.47 L19.05 26.50 Z"/>
+    <path data-strap="true" opacity=".70" d="M20.85 17.64 Q17.00 19.39 16.85 25.42"/>
+    <path data-limb="far-leg" data-thigh-angle="22.00" data-knee-flex="6.00" opacity=".44" d="M19.05 26.67 L22.96 36.36 L25.68 45.83 L28.73 45.29"/>
+    <path data-limb="far-arm" data-arm-angle="-15.84" opacity=".44" d="M21.35 17.44 L19.66 23.40 L16.90 28.62"/>
+    <path data-limb="near-leg" data-thigh-angle="-17.56" data-knee-flex="33.39" opacity="1" d="M19.05 26.67 L15.90 36.63 L8.25 42.84 L11.14 43.95"/>
+    <path data-limb="near-arm" data-arm-angle="12.64" opacity="1" d="M21.35 17.44 L22.71 23.49 L25.80 28.51"/>
+    <path data-body="true" d="M22.05 13.75 L21.35 17.44 L19.05 26.67"/>
+    <circle data-head="true" cx="23.35" cy="8.58" r="5.02"/>
+  </g>
+  <g data-frame="17" data-phase="0.53" transform="translate(680 0)">
+    <path data-backpack="true" opacity=".78" fill="black" stroke="none" d="M19.15 16.68 Q15.60 15.93 13.95 19.13 L13.20 25.18 Q13.10 27.28 15.15 27.55 L19.10 26.58 Z"/>
+    <path data-strap="true" opacity=".70" d="M20.85 17.68 Q17.05 19.43 16.90 25.48"/>
+    <path data-limb="far-leg" data-thigh-angle="19.97" data-knee-flex="9.05" opacity=".44" d="M19.08 26.73 L22.65 36.55 L24.52 46.23 L27.60 45.87"/>
+    <path data-limb="far-arm" data-arm-angle="-14.38" opacity=".44" d="M21.30 17.48 L19.76 23.49 L17.14 28.77"/>
+    <path data-limb="near-leg" data-thigh-angle="-17.56" data-knee-flex="35.57" opacity="1" d="M19.08 26.73 L15.93 36.70 L8.05 42.61 L10.94 43.74"/>
+    <path data-limb="near-arm" data-arm-angle="12.64" opacity="1" d="M21.30 17.48 L22.66 23.53 L25.75 28.56"/>
+    <path data-body="true" d="M22.03 13.78 L21.30 17.48 L19.08 26.73"/>
+    <circle data-head="true" cx="23.34" cy="8.59" r="5.02"/>
+  </g>
+  <g data-frame="18" data-phase="0.56" transform="translate(720 0)">
+    <path data-backpack="true" opacity=".78" fill="black" stroke="none" d="M19.20 16.79 Q15.65 16.04 14.00 19.24 L13.25 25.29 Q13.15 27.39 15.20 27.66 L19.15 26.69 Z"/>
+    <path data-strap="true" opacity=".70" d="M20.85 17.75 Q17.10 19.50 16.95 25.58"/>
+    <path data-limb="far-leg" data-thigh-angle="16.74" data-knee-flex="13.90" opacity=".44" d="M19.11 26.83 L22.12 36.84 L22.61 46.68 L25.71 46.61"/>
+    <path data-limb="far-arm" data-arm-angle="-12.05" opacity=".44" d="M21.26 17.55 L19.96 23.62 L17.53 28.99"/>
+    <path data-limb="near-leg" data-thigh-angle="-12.83" data-knee-flex="41.61" opacity="1" d="M19.11 26.83 L16.79 37.02 L8.78 42.75 L11.77 43.56"/>
+    <path data-limb="near-arm" data-arm-angle="9.23" opacity="1" d="M21.26 17.55 L22.25 23.67 L25.02 28.88"/>
+    <path data-body="true" d="M22.02 13.82 L21.26 17.55 L19.11 26.83"/>
+    <circle data-head="true" cx="23.33" cy="8.62" r="5.02"/>
+  </g>
+  <g data-frame="19" data-phase="0.59" transform="translate(760 0)">
+    <path data-backpack="true" opacity=".78" fill="black" stroke="none" d="M19.24 16.85 Q15.69 16.10 14.04 19.30 L13.29 25.35 Q13.19 27.45 15.24 27.72 L19.19 26.75 Z"/>
+    <path data-strap="true" opacity=".70" d="M20.85 17.78 Q17.14 19.53 16.99 25.62"/>
+    <path data-limb="far-leg" data-thigh-angle="15.64" data-knee-flex="14.75" opacity=".44" d="M19.14 26.87 L21.96 36.94 L22.11 46.78 L25.21 46.78"/>
+    <path data-limb="far-arm" data-arm-angle="-11.26" opacity=".44" d="M21.22 17.58 L20.01 23.66 L17.62 29.06"/>
+    <path data-limb="near-leg" data-thigh-angle="-5.96" data-knee-flex="50.38" opacity="1" d="M19.14 26.87 L18.05 37.27 L9.85 42.72 L12.94 43.05"/>
+    <path data-limb="near-arm" data-arm-angle="4.29" opacity="1" d="M21.22 17.58 L21.68 23.76 L23.96 29.21"/>
+    <path data-body="true" d="M22.01 13.84 L21.22 17.58 L19.14 26.87"/>
+    <circle data-head="true" cx="23.32" cy="8.63" r="5.02"/>
+  </g>
+  <g data-frame="20" data-phase="0.63" transform="translate(800 0)">
+    <path data-backpack="true" opacity=".78" fill="black" stroke="none" d="M19.28 16.88 Q15.73 16.13 14.08 19.33 L13.33 25.38 Q13.23 27.48 15.28 27.75 L19.23 26.78 Z"/>
+    <path data-strap="true" opacity=".70" d="M20.85 17.77 Q17.18 19.52 17.03 25.60"/>
+    <path data-limb="far-leg" data-thigh-angle="12.84" data-knee-flex="12.79" opacity=".44" d="M19.16 26.85 L21.48 37.04 L21.49 46.89 L24.59 46.89"/>
+    <path data-limb="far-arm" data-arm-angle="-9.24" opacity=".44" d="M21.18 17.57 L20.18 23.68 L17.95 29.14"/>
+    <path data-limb="near-leg" data-thigh-angle="-0.77" data-knee-flex="57.01" opacity="1" d="M19.16 26.85 L19.02 37.30 L10.69 42.55 L13.79 42.50"/>
+    <path data-limb="near-arm" data-arm-angle="0.56" opacity="1" d="M21.18 17.57 L21.24 23.76 L23.12 29.36"/>
+    <path data-body="true" d="M21.99 13.83 L21.18 17.57 L19.16 26.85"/>
+    <circle data-head="true" cx="23.31" cy="8.62" r="5.02"/>
+  </g>
+  <g data-frame="21" data-phase="0.66" transform="translate(840 0)">
+    <path data-backpack="true" opacity=".78" fill="black" stroke="none" d="M19.32 16.86 Q15.77 16.11 14.12 19.31 L13.37 25.36 Q13.27 27.46 15.32 27.73 L19.27 26.76 Z"/>
+    <path data-strap="true" opacity=".70" d="M20.85 17.72 Q17.22 19.47 17.07 25.54"/>
+    <path data-limb="far-leg" data-thigh-angle="9.02" data-knee-flex="10.11" opacity=".44" d="M19.18 26.79 L20.82 37.11 L20.63 46.96 L23.73 46.96"/>
+    <path data-limb="far-arm" data-arm-angle="-6.49" opacity=".44" d="M21.15 17.52 L20.45 23.68 L18.43 29.23"/>
+    <path data-limb="near-leg" data-thigh-angle="0.63" data-knee-flex="57.31" opacity="1" d="M19.18 26.79 L19.30 37.24 L11.07 42.65 L14.17 42.55"/>
+    <path data-limb="near-arm" data-arm-angle="-0.46" opacity="1" d="M21.15 17.52 L21.10 23.72 L19.29 29.34"/>
+    <path data-body="true" d="M21.98 13.80 L21.15 17.52 L19.18 26.79"/>
+    <circle data-head="true" cx="23.31" cy="8.61" r="5.02"/>
+  </g>
+  <g data-frame="22" data-phase="0.69" transform="translate(880 0)">
+    <path data-backpack="true" opacity=".78" fill="black" stroke="none" d="M19.34 16.83 Q15.79 16.08 14.14 19.28 L13.39 25.33 Q13.29 27.43 15.34 27.70 L19.29 26.73 Z"/>
+    <path data-strap="true" opacity=".70" d="M20.85 17.68 Q17.24 19.43 17.09 25.47"/>
+    <path data-limb="far-leg" data-thigh-angle="6.30" data-knee-flex="8.21" opacity=".44" d="M19.20 26.72 L20.35 37.11 L20.02 46.96 L23.12 46.96"/>
+    <path data-limb="far-arm" data-arm-angle="-4.54" opacity=".44" d="M21.13 17.48 L20.64 23.66 L18.75 29.24"/>
+    <path data-limb="near-leg" data-thigh-angle="4.67" data-knee-flex="52.91" opacity="1" d="M19.20 26.72 L20.05 37.14 L12.70 43.70 L15.80 43.61"/>
+    <path data-limb="near-arm" data-arm-angle="-3.36" opacity="1" d="M21.13 17.48 L20.76 23.66 L18.73 29.20"/>
+    <path data-body="true" d="M21.98 13.77 L21.13 17.48 L19.20 26.72"/>
+    <circle data-head="true" cx="23.30" cy="8.59" r="5.02"/>
+  </g>
+  <g data-frame="23" data-phase="0.72" transform="translate(920 0)">
+    <path data-backpack="true" opacity=".78" fill="black" stroke="none" d="M19.36 16.79 Q15.81 16.04 14.16 19.24 L13.41 25.29 Q13.31 27.39 15.36 27.66 L19.31 26.69 Z"/>
+    <path data-strap="true" opacity=".70" d="M20.85 17.64 Q17.26 19.39 17.11 25.43"/>
+    <path data-limb="far-leg" data-thigh-angle="5.52" data-knee-flex="7.94" opacity=".44" d="M19.21 26.68 L20.21 37.08 L19.79 46.92 L22.89 46.93"/>
+    <path data-limb="far-arm" data-arm-angle="-3.97" opacity=".44" d="M21.11 17.44 L20.69 23.63 L18.79 29.22"/>
+    <path data-limb="near-leg" data-thigh-angle="10.74" data-knee-flex="46.28" opacity="1" d="M19.21 26.68 L21.15 36.95 L15.43 44.96 L18.53 44.91"/>
+    <path data-limb="near-arm" data-arm-angle="-7.73" opacity="1" d="M21.11 17.44 L20.28 23.59 L17.89 28.98"/>
+    <path data-body="true" d="M21.97 13.76 L21.11 17.44 L19.21 26.68"/>
+    <circle data-head="true" cx="23.30" cy="8.58" r="5.02"/>
+  </g>
+  <g data-frame="24" data-phase="0.75" transform="translate(960 0)">
+    <path data-backpack="true" opacity=".78" fill="black" stroke="none" d="M19.36 16.73 Q15.81 15.98 14.16 19.18 L13.41 25.23 Q13.31 27.33 15.36 27.60 L19.31 26.63 Z"/>
+    <path data-strap="true" opacity=".70" d="M20.85 17.61 Q17.26 19.36 17.11 25.38"/>
+    <path data-limb="far-leg" data-thigh-angle="2.98" data-knee-flex="7.62" opacity=".44" d="M19.21 26.63 L19.75 37.07 L18.96 46.89 L22.06 46.93"/>
+    <path data-limb="far-arm" data-arm-angle="-2.15" opacity=".44" d="M21.11 17.41 L20.88 23.61 L19.09 29.23"/>
+    <path data-limb="near-leg" data-thigh-angle="16.90" data-knee-flex="39.57" opacity="1" d="M19.21 26.63 L22.25 36.63 L18.45 45.72 L21.55 45.70"/>
+    <path data-limb="near-arm" data-arm-angle="-12.17" opacity="1" d="M21.11 17.41 L19.80 23.47 L17.06 28.70"/>
+    <path data-body="true" d="M21.97 13.74 L21.11 17.41 L19.21 26.63"/>
+    <circle data-head="true" cx="23.30" cy="8.57" r="5.02"/>
+  </g>
+  <g data-frame="25" data-phase="0.78" transform="translate(1000 0)">
+    <path data-backpack="true" opacity=".78" fill="black" stroke="none" d="M19.36 16.66 Q15.81 15.91 14.16 19.11 L13.41 25.16 Q13.31 27.26 15.36 27.53 L19.31 26.56 Z"/>
+    <path data-strap="true" opacity=".70" d="M20.85 17.58 Q17.26 19.33 17.11 25.34"/>
+    <path data-limb="far-leg" data-thigh-angle="-0.84" data-knee-flex="7.15" opacity=".44" d="M19.21 26.59 L19.05 37.04 L17.69 46.79 L20.79 46.89"/>
+    <path data-limb="far-arm" data-arm-angle="0.60" opacity=".44" d="M21.11 17.38 L21.18 23.58 L22.88 29.23"/>
+    <path data-limb="near-leg" data-thigh-angle="21.16" data-knee-flex="34.91" opacity="1" d="M19.21 26.59 L22.98 36.34 L20.64 45.90 L23.74 45.90"/>
+    <path data-limb="near-arm" data-arm-angle="-15.24" opacity="1" d="M21.11 17.38 L19.49 23.36 L16.53 28.47"/>
+    <path data-body="true" d="M21.97 13.72 L21.11 17.38 L19.21 26.59"/>
+    <circle data-head="true" cx="23.30" cy="8.56" r="5.02"/>
+  </g>
+  <g data-frame="26" data-phase="0.81" transform="translate(1040 0)">
+    <path data-backpack="true" opacity=".78" fill="black" stroke="none" d="M19.34 16.60 Q15.79 15.85 14.14 19.05 L13.39 25.10 Q13.29 27.20 15.34 27.47 L19.29 26.50 Z"/>
+    <path data-strap="true" opacity=".70" d="M20.85 17.56 Q17.24 19.31 17.09 25.32"/>
+    <path data-limb="far-leg" data-thigh-angle="-4.94" data-knee-flex="6.63" opacity=".44" d="M19.20 26.57 L18.30 36.98 L16.32 46.63 L19.42 46.77"/>
+    <path data-limb="far-arm" data-arm-angle="3.55" opacity=".44" d="M21.13 17.36 L21.51 23.55 L23.57 29.08"/>
+    <path data-limb="near-leg" data-thigh-angle="22.15" data-knee-flex="33.36" opacity="1" d="M19.20 26.57 L23.14 36.24 L21.22 45.91 L24.32 45.90"/>
+    <path data-limb="near-arm" data-arm-angle="-15.95" opacity="1" d="M21.13 17.36 L19.42 23.32 L16.46 28.43"/>
+    <path data-body="true" d="M21.98 13.71 L21.13 17.36 L19.20 26.57"/>
+    <circle data-head="true" cx="23.30" cy="8.55" r="5.02"/>
+  </g>
+  <g data-frame="27" data-phase="0.84" transform="translate(1080 0)">
+    <path data-backpack="true" opacity=".78" fill="black" stroke="none" d="M19.32 16.54 Q15.77 15.79 14.12 18.99 L13.37 25.04 Q13.27 27.14 15.32 27.41 L19.27 26.44 Z"/>
+    <path data-strap="true" opacity=".70" d="M20.85 17.54 Q17.22 19.29 17.07 25.29"/>
+    <path data-limb="far-leg" data-thigh-angle="-8.31" data-knee-flex="6.21" opacity=".44" d="M19.18 26.54 L17.67 36.88 L15.20 46.41 L18.30 46.60"/>
+    <path data-limb="far-arm" data-arm-angle="5.99" opacity=".44" d="M21.15 17.34 L21.80 23.51 L24.14 28.92"/>
+    <path data-limb="near-leg" data-thigh-angle="23.51" data-knee-flex="27.66" opacity="1" d="M19.18 26.54 L23.35 36.12 L22.64 45.94 L25.74 45.86"/>
+    <path data-limb="near-arm" data-arm-angle="-16.93" opacity="1" d="M21.15 17.34 L19.35 23.27 L16.35 28.36"/>
+    <path data-body="true" d="M21.98 13.69 L21.15 17.34 L19.18 26.54"/>
+    <circle data-head="true" cx="23.31" cy="8.55" r="5.02"/>
+  </g>
+  <g data-frame="28" data-phase="0.88" transform="translate(1120 0)">
+    <path data-backpack="true" opacity=".78" fill="black" stroke="none" d="M19.28 16.48 Q15.73 15.73 14.08 18.93 L13.33 24.98 Q13.23 27.08 15.28 27.35 L19.23 26.38 Z"/>
+    <path data-strap="true" opacity=".70" d="M20.85 17.52 Q17.18 19.27 17.03 25.26"/>
+    <path data-limb="far-leg" data-thigh-angle="-9.96" data-knee-flex="6.00" opacity=".44" d="M19.16 26.51 L17.36 36.80 L14.65 46.27 L17.74 46.49"/>
+    <path data-limb="far-arm" data-arm-angle="7.17" opacity=".44" d="M21.18 17.32 L21.95 23.47 L24.46 28.81"/>
+    <path data-limb="near-leg" data-thigh-angle="25.42" data-knee-flex="19.64" opacity="1" d="M19.16 26.51 L23.65 35.95 L24.64 45.75 L27.73 45.56"/>
+    <path data-limb="near-arm" data-arm-angle="-18.30" opacity="1" d="M21.18 17.32 L19.23 23.21 L16.17 28.25"/>
+    <path data-body="true" d="M21.99 13.68 L21.18 17.32 L19.16 26.51"/>
+    <circle data-head="true" cx="23.31" cy="8.54" r="5.02"/>
+  </g>
+  <g data-frame="29" data-phase="0.91" transform="translate(1160 0)">
+    <path data-backpack="true" opacity=".78" fill="black" stroke="none" d="M19.24 16.46 Q15.69 15.71 14.04 18.91 L13.29 24.96 Q13.19 27.06 15.24 27.33 L19.19 26.36 Z"/>
+    <path data-strap="true" opacity=".70" d="M20.85 17.52 Q17.14 19.27 16.99 25.26"/>
+    <path data-limb="far-leg" data-thigh-angle="-10.74" data-knee-flex="8.68" opacity=".44" d="M19.14 26.51 L17.19 36.77 L13.92 46.06 L17.00 46.37"/>
+    <path data-limb="far-arm" data-arm-angle="7.73" opacity=".44" d="M21.22 17.32 L22.05 23.46 L24.65 28.76"/>
+    <path data-limb="near-leg" data-thigh-angle="26.82" data-knee-flex="13.76" opacity="1" d="M19.14 26.51 L23.85 35.83 L26.08 45.43 L29.17 45.17"/>
+    <path data-limb="near-arm" data-arm-angle="-19.31" opacity="1" d="M21.22 17.32 L19.17 23.17 L16.05 28.18"/>
+    <path data-body="true" d="M22.01 13.68 L21.22 17.32 L19.14 26.51"/>
+    <circle data-head="true" cx="23.32" cy="8.54" r="5.02"/>
+  </g>
+  <g data-frame="30" data-phase="0.94" transform="translate(1200 0)">
+    <path data-backpack="true" opacity=".78" fill="black" stroke="none" d="M19.20 16.48 Q15.65 15.73 14.00 18.93 L13.25 24.98 Q13.15 27.08 15.20 27.35 L19.15 26.38 Z"/>
+    <path data-strap="true" opacity=".70" d="M20.85 17.55 Q17.10 19.30 16.95 25.30"/>
+    <path data-limb="far-leg" data-thigh-angle="-12.94" data-knee-flex="16.66" opacity=".44" d="M19.11 26.55 L16.77 36.73 L11.91 45.30 L14.95 45.87"/>
+    <path data-limb="far-arm" data-arm-angle="9.32" opacity=".44" d="M21.26 17.35 L22.26 23.47 L25.04 28.67"/>
+    <path data-limb="near-leg" data-thigh-angle="26.39" data-knee-flex="12.14" opacity="1" d="M19.11 26.55 L23.76 35.91 L26.18 45.46 L29.26 45.15"/>
+    <path data-limb="near-arm" data-arm-angle="-19.00" opacity="1" d="M21.26 17.35 L19.24 23.21 L16.18 28.25"/>
+    <path data-body="true" d="M22.02 13.70 L21.26 17.35 L19.11 26.55"/>
+    <circle data-head="true" cx="23.33" cy="8.55" r="5.02"/>
+  </g>
+  <g data-frame="31" data-phase="0.97" transform="translate(1240 0)">
+    <path data-backpack="true" opacity=".78" fill="black" stroke="none" d="M19.15 16.54 Q15.60 15.79 13.95 18.99 L13.20 25.04 Q13.10 27.14 15.15 27.41 L19.10 26.44 Z"/>
+    <path data-strap="true" opacity=".70" d="M20.85 17.60 Q17.05 19.35 16.90 25.37"/>
+    <path data-limb="far-leg" data-thigh-angle="-15.57" data-knee-flex="26.19" opacity=".44" d="M19.08 26.62 L16.28 36.69 L9.72 44.04 L12.69 44.92"/>
+    <path data-limb="far-arm" data-arm-angle="11.21" opacity=".44" d="M21.30 17.40 L22.51 23.48 L25.47 28.58"/>
+    <path data-limb="near-leg" data-thigh-angle="23.69" data-knee-flex="8.37" opacity="1" d="M19.08 26.62 L23.28 36.19 L25.88 45.69 L28.95 45.24"/>
+    <path data-limb="near-arm" data-arm-angle="-17.06" opacity="1" d="M21.30 17.40 L19.48 23.33 L16.61 28.48"/>
+    <path data-body="true" d="M22.03 13.73 L21.30 17.40 L19.08 26.62"/>
+    <circle data-head="true" cx="23.34" cy="8.57" r="5.02"/>
   </g>
 </svg>
