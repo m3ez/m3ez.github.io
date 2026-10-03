@@ -7,9 +7,31 @@ const dataUrl = new URL('../assets/recognition-data.js', import.meta.url);
 test('recognition data covers approved achievements from 2020 through 2026', async () => {
   assert.equal(existsSync(dataUrl), true, 'assets/recognition-data.js must exist');
 
-  const { RECOGNITION_YEARS, recognitionItems, filterRecognition } = await import(dataUrl);
+  const {
+    RECOGNITION_YEARS,
+    RECOGNITION_FEATURED_LIMIT,
+    recognitionItems,
+    filterRecognition,
+    getFeaturedRecognition,
+  } = await import(dataUrl);
   assert.deepEqual(RECOGNITION_YEARS, ['All', '2026', '2025', '2024', '2023', '2022', '2021', '2020']);
   assert.equal(recognitionItems.length, 23);
+  assert.equal(RECOGNITION_FEATURED_LIMIT, 10);
+
+  const featured = getFeaturedRecognition(recognitionItems);
+  assert.equal(featured.length, 10);
+  assert.deepEqual(featured.map((item) => item.title), [
+    'Special Mentions | MSRC Researcher Portal',
+    'NCSA AI CTF 2026 Final Round · #9 Personal',
+    'Microsoft Zero Day Quest 2026 · Invite-only Participant',
+    'MSRC Most Valuable Researcher 2025 · #42',
+    'Microsoft Zero Day Quest 2025 · Invite-only Participant',
+    'Dynamics Researchers 2024 Q3 · #6',
+    'MSRC Most Valuable Researcher 2023 · #68',
+    'HITB SECCONF CTF 2023 Attack-Defense · #16',
+    'National WhiteHat Challenge, National Coding Day 2023 · Winner',
+    'White Hat Hacking for Security · Winner',
+  ]);
 
   const counts = Object.fromEntries(
     RECOGNITION_YEARS.slice(1).map((year) => [year, recognitionItems.filter((item) => item.year === year).length]),
