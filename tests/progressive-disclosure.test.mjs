@@ -10,15 +10,15 @@ const disclosure = readFileSync(new URL('../assets/progressive-disclosure.js', i
 test('landing bootstrap collapses extended content before first paint', () => {
   assert.match(themeJs, /root\.dataset\.portfolioExpanded\s*=\s*landingHash \? 'false' : 'true'/);
   assert.match(themeJs, /initialHash\.startsWith\('#method-'\)/);
-  assert.match(themeCss, /:root\[data-portfolio-expanded="false"\] #method ~ \*:not\(#m3ez-explore-more-v1\)/);
+  assert.match(themeCss, /:root\[data-portfolio-expanded="false"\] #method ~ \*/);
   assert.match(themeCss, /:root\[data-portfolio-expanded="false"\] \.site-footer/);
 });
 
 test('hero and Method remain outside the collapsed selector', () => {
   assert.doesNotMatch(themeCss, /data-portfolio-expanded="false"[^}]*#top/);
   assert.doesNotMatch(themeCss, /data-portfolio-expanded="false"[^}]*#method\s*\{/);
-  assert.match(themeCss, /#m3ez-explore-more-v1\s*\{/);
-  assert.match(themeCss, /:root\[data-portfolio-expanded="true"\] #m3ez-explore-more-v1/);
+  assert.match(themeCss, /:root\[data-portfolio-expanded="false"\] #method::after/);
+  assert.match(themeCss, /content:\s*"Explore more\s+↓"/);
 });
 
 test('same-page destinations reveal once without replacing carousel behavior', () => {
