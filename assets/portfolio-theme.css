@@ -419,6 +419,84 @@
   }
 }
 
+/* Quiet night-only watcher: a tiny seated stick figure rests on the left ridge
+   and faces the centered moon. The parent handles theme transitions while the
+   inner pose gets a barely-visible breathing sway. */
+#m3ez-divider-watcher-v1 {
+  position: absolute;
+  left: 27.65%;
+  bottom: 18px;
+  z-index: 1;
+  width: 34px;
+  height: 40.8px;
+  pointer-events: none;
+  opacity: 0;
+  transform: translate3d(-50%, 4px, 0) scale(.96);
+  transform-origin: 50% 100%;
+  transition:
+    opacity 620ms cubic-bezier(.4, 0, .2, 1),
+    transform 760ms cubic-bezier(.22, 1, .36, 1);
+}
+
+#m3ez-divider-watcher-v1 .divider-watcher-pose {
+  position: absolute;
+  inset: 0;
+  display: block;
+  background: var(--black);
+  opacity: .92;
+  transform-origin: 50% 100%;
+  -webkit-mask-image: url("./stickman-sitting.svg");
+  mask-image: url("./stickman-sitting.svg");
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+}
+
+:root[data-theme="dark"] #m3ez-divider-watcher-v1 {
+  opacity: .36;
+  transform: translate3d(-50%, 0, 0) scale(1);
+}
+
+:root[data-theme="dark"] #m3ez-divider-watcher-v1 .divider-watcher-pose {
+  animation: m3ez-watcher-breathe 5.4s ease-in-out 1s infinite alternate;
+}
+
+@keyframes m3ez-watcher-breathe {
+  from {
+    transform: translateY(0) rotate(-.2deg);
+  }
+  to {
+    transform: translateY(-1px) rotate(.35deg);
+  }
+}
+
+@media (max-width: 760px) {
+  #m3ez-divider-watcher-v1 {
+    bottom: 7px;
+    width: 24px;
+    height: 28.8px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #m3ez-divider-watcher-v1 {
+    transition: none;
+  }
+
+  :root[data-theme="dark"] #m3ez-divider-watcher-v1 .divider-watcher-pose {
+    animation: none;
+  }
+}
+
+@media print {
+  #m3ez-divider-watcher-v1 {
+    display: none;
+  }
+}
+
 /* Stay within the smaller hero bottom padding on phones and small tablets. */
 @media (max-width: 760px) {
   #top.hero:has(+ #method)::before {
