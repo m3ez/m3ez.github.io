@@ -6,6 +6,7 @@
   const BUTTON_ID = 'm3ez-theme-toggle-v1';
   const CELESTIAL_ID = 'm3ez-divider-celestial-v1';
   const CLOUDS_ID = 'm3ez-divider-clouds-v1';
+  const WATCHER_ID = 'm3ez-divider-watcher-v1';
   const root = document.documentElement;
   const initialHash = window.location?.hash || '';
   const landingHash =
@@ -66,9 +67,21 @@
     hero.appendChild(celestial);
   }
 
+  function mountDividerWatcher() {
+    const hero = document.getElementById('top');
+    if (!hero || document.getElementById(WATCHER_ID)) return;
+
+    const watcher = document.createElement('span');
+    watcher.id = WATCHER_ID;
+    watcher.setAttribute('aria-hidden', 'true');
+    watcher.innerHTML = '<span class="divider-watcher-pose"></span>';
+    hero.appendChild(watcher);
+  }
+
   function mount() {
     mountDividerClouds();
     mountDividerCelestial();
+    mountDividerWatcher();
     if (document.getElementById(BUTTON_ID)) return;
     button = document.createElement('button');
     button.id = BUTTON_ID;
