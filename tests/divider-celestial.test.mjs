@@ -32,3 +32,30 @@ test('theme switch animates the celestial icons but honors reduced motion', () =
   assert.match(css, /@media \(max-width: 760px\)[\s\S]*?#m3ez-divider-celestial-v1\s*\{[^}]*width:\s*18px[^}]*height:\s*18px/s);
   assert.match(css, /@media print[\s\S]*?#m3ez-divider-celestial-v1\s*\{\s*display:\s*none;/);
 });
+
+
+test('three decorative clouds stay local to the divider and drift subtly', () => {
+  assert.match(js, /CLOUDS_ID\s*=\s*'m3ez-divider-clouds-v1'/);
+  assert.match(js, /divider-cloud-1/);
+  assert.match(js, /divider-cloud-2/);
+  assert.match(js, /divider-cloud-3/);
+  assert.match(js, /clouds\.setAttribute\('aria-hidden',\s*'true'\)/);
+  assert.match(js, /hero\.appendChild\(clouds\)/);
+
+  const layer = css.match(/#m3ez-divider-clouds-v1\s*\{([^}]+)\}/)?.[1] ?? '';
+  assert.match(layer, /position:\s*absolute/);
+  assert.match(layer, /bottom:\s*0/);
+  assert.match(layer, /height:\s*64px/);
+  assert.match(layer, /pointer-events:\s*none/);
+  assert.match(css, /m3ez-cloud-drift-a 11s ease-in-out infinite alternate/);
+  assert.match(css, /m3ez-cloud-drift-b 14s ease-in-out -4s infinite alternate/);
+  assert.match(css, /m3ez-cloud-drift-c 9s ease-in-out -2s infinite alternate/);
+  assert.match(css, /translate3d\(-6px, 0, 0\)/);
+  assert.match(css, /translate3d\(10px, -1px, 0\)/);
+});
+
+test('cloud motion respects reduced-motion and mobile keeps the scene sparse', () => {
+  assert.match(css, /@media \(prefers-reduced-motion: reduce\)[\s\S]*?#m3ez-divider-clouds-v1 svg\s*\{[^}]*animation:\s*none[^}]*transform:\s*none/s);
+  assert.match(css, /@media \(max-width: 760px\)[\s\S]*?#m3ez-divider-clouds-v1 \.divider-cloud-3\s*\{\s*display:\s*none;/s);
+  assert.match(css, /@media print[\s\S]*?#m3ez-divider-clouds-v1\s*\{\s*display:\s*none;/s);
+});
