@@ -627,28 +627,28 @@
 }
 
 
-/* Wide-screen technical gutter rails.
-   Sparse PCB-style traces use only the empty page margins and inherit the
-   active light/dark palette through a mask rather than a hard-coded color. */
+/* Wide-screen scanning brackets.
+   Sparse target/alignment marks live only in the empty page gutters and inherit
+   the active light/dark palette through a mask. */
 @media (min-width: 1180px) {
   body::before,
   body::after {
     content: "";
     position: fixed;
-    top: 72px;
-    bottom: 28px;
+    top: 74px;
+    bottom: 32px;
     z-index: 0;
-    width: clamp(54px, calc((100vw - 1040px) / 2 - 20px), 150px);
-    min-width: 54px;
+    width: clamp(58px, calc((100vw - 1040px) / 2 - 18px), 148px);
+    min-width: 58px;
     pointer-events: none;
     background: var(--black);
-    opacity: .05;
-    -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 160 900'%3E%3Cg fill='none' stroke='black' stroke-width='1'%3E%3Cpath d='M8 42h54v46h46v82h34'/%3E%3Cpath d='M20 246h34v-38h76v72h22'/%3E%3Cpath d='M0 392h70v52h48v86h34'/%3E%3Cpath d='M18 624h46v-58h64v92h24'/%3E%3Cpath d='M0 778h52v-44h58v78h42'/%3E%3Cpath d='M92 88v66h-32v68'/%3E%3Cpath d='M110 530v54h-34v92'/%3E%3C/g%3E%3Cg fill='black'%3E%3Ccircle cx='62' cy='42' r='3'/%3E%3Ccircle cx='108' cy='170' r='3'/%3E%3Ccircle cx='54' cy='246' r='3'/%3E%3Ccircle cx='70' cy='392' r='3'/%3E%3Ccircle cx='118' cy='530' r='3'/%3E%3Ccircle cx='64' cy='624' r='3'/%3E%3Ccircle cx='110' cy='812' r='3'/%3E%3Cpath d='M6 118h10v10H6zM126 320h8v8h-8zM24 704h10v10H24z'/%3E%3C/g%3E%3C/svg%3E");
-    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 160 900'%3E%3Cg fill='none' stroke='black' stroke-width='1'%3E%3Cpath d='M8 42h54v46h46v82h34'/%3E%3Cpath d='M20 246h34v-38h76v72h22'/%3E%3Cpath d='M0 392h70v52h48v86h34'/%3E%3Cpath d='M18 624h46v-58h64v92h24'/%3E%3Cpath d='M0 778h52v-44h58v78h42'/%3E%3Cpath d='M92 88v66h-32v68'/%3E%3Cpath d='M110 530v54h-34v92'/%3E%3C/g%3E%3Cg fill='black'%3E%3Ccircle cx='62' cy='42' r='3'/%3E%3Ccircle cx='108' cy='170' r='3'/%3E%3Ccircle cx='54' cy='246' r='3'/%3E%3Ccircle cx='70' cy='392' r='3'/%3E%3Ccircle cx='118' cy='530' r='3'/%3E%3Ccircle cx='64' cy='624' r='3'/%3E%3Ccircle cx='110' cy='812' r='3'/%3E%3Cpath d='M6 118h10v10H6zM126 320h8v8h-8zM24 704h10v10H24z'/%3E%3C/g%3E%3C/svg%3E");
-    -webkit-mask-repeat: repeat-y;
-    mask-repeat: repeat-y;
-    -webkit-mask-size: 100% auto;
-    mask-size: 100% auto;
+    opacity: .07;
+    -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 160 900'%3E%3Cg fill='none' stroke='black' stroke-width='1'%3E%3Cpath d='M18 82V24h58M18 818v58h58'/%3E%3Cpath d='M112 24h30v30M112 876h30v-30'/%3E%3Cpath d='M38 146v610' stroke-dasharray='2 10'/%3E%3Cpath d='M24 220h28M38 206v28M24 450h28M38 436v28M24 680h28M38 666v28'/%3E%3Cpath d='M92 154h42M92 446h42M92 738h42'/%3E%3Cpath d='M124 144v20M114 154h20M124 436v20M114 446h20M124 728v20M114 738h20'/%3E%3C/g%3E%3Cg fill='black'%3E%3Ccircle cx='38' cy='220' r='2.5'/%3E%3Ccircle cx='38' cy='450' r='2.5'/%3E%3Ccircle cx='38' cy='680' r='2.5'/%3E%3Ccircle cx='124' cy='154' r='2'/%3E%3Ccircle cx='124' cy='446' r='2'/%3E%3Ccircle cx='124' cy='738' r='2'/%3E%3C/g%3E%3C/svg%3E");
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 160 900'%3E%3Cg fill='none' stroke='black' stroke-width='1'%3E%3Cpath d='M18 82V24h58M18 818v58h58'/%3E%3Cpath d='M112 24h30v30M112 876h30v-30'/%3E%3Cpath d='M38 146v610' stroke-dasharray='2 10'/%3E%3Cpath d='M24 220h28M38 206v28M24 450h28M38 436v28M24 680h28M38 666v28'/%3E%3Cpath d='M92 154h42M92 446h42M92 738h42'/%3E%3Cpath d='M124 144v20M114 154h20M124 436v20M114 446h20M124 728v20M114 738h20'/%3E%3C/g%3E%3Cg fill='black'%3E%3Ccircle cx='38' cy='220' r='2.5'/%3E%3Ccircle cx='38' cy='450' r='2.5'/%3E%3Ccircle cx='38' cy='680' r='2.5'/%3E%3Ccircle cx='124' cy='154' r='2'/%3E%3Ccircle cx='124' cy='446' r='2'/%3E%3Ccircle cx='124' cy='738' r='2'/%3E%3C/g%3E%3C/svg%3E");
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-size: 100% 100%;
+    mask-size: 100% 100%;
   }
 
   body::before {
@@ -664,7 +664,7 @@
 @media (min-width: 1600px) {
   body::before,
   body::after {
-    opacity: .06;
+    opacity: .085;
   }
 }
 
