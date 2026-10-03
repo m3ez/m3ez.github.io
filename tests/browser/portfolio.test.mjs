@@ -5,6 +5,7 @@ import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { resolve, extname, sep } from 'node:path';
 import { chromium } from 'playwright';
+import { certs } from '../../assets/certs.js';
 
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const types = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.ico': 'image/x-icon' };
@@ -41,11 +42,18 @@ after(async () => {
 });
 
 async function ready(page) {
-  await page.waitForFunction(() =>
-    document.querySelectorAll('.credential-grid-item').length === 14 &&
+  await page.waitForFunction(expectedCredentials =>
+    document.querySelectorAll('.credential-grid-item').length === expectedCredentials &&
     document.querySelectorAll('.cve-row-v2').length === 10 &&
     document.querySelector('#m3ez-credential-carousel-v1') &&
-    document.querySelector('.mobile-nav-toggle'), null, { timeout: 8000 });
+    document.querySelector('.mobile-nav-toggle'), certs.length, { timeout: 8000 });
+}
+
+async function expandPortfolio(page) {
+  await page.evaluate(() => {
+    document.documentElement.dataset.portfolioExpanded = 'true';
+    document.documentElement.dataset.portfolioReveal = 'complete';
+  });
 }
 
 test('cold loads preserve the redesigned content without hydration errors', async () => {
@@ -60,8 +68,8 @@ test('cold loads preserve the redesigned content without hydration errors', asyn
       await ready(page);
       assert.deepEqual(errors, []);
       assert.equal(await page.locator('#top .proof-links a').count(), 7);
-      assert.equal(await page.locator('.credential-grid-item').count(), 14);
-      assert.equal(await page.locator('.credential-carousel-card').count(), 14);
+      assert.equal(await page.locator('.credential-grid-item').count(), certs.length);
+      assert.equal(await page.locator('.credential-carousel-card').count(), certs.length);
     } finally {
       await page.close();
     }
@@ -73,6 +81,7 @@ test('enhanced layout fits phones and keeps year filters scrollable', async () =
   try {
     await page.goto(origin, { waitUntil: 'networkidle' });
     await ready(page);
+    await expandPortfolio(page);
     for (const width of [320, 375, 768, 1440]) {
       await page.setViewportSize({ width, height: 900 });
       const dimensions = await page.evaluate(() => ({
@@ -97,6 +106,7 @@ test('CVE controls, carousel, mobile navigation and back-to-top remain usable', 
   try {
     await page.goto(origin, { waitUntil: 'networkidle' });
     await ready(page);
+    await expandPortfolio(page);
     await page.getByRole('button', { name: 'Show more CVEs', exact: true }).click();
     assert.equal(await page.locator('.cve-row-v2').count(), 20);
     await page.getByRole('button', { name: 'Show less', exact: true }).click();
@@ -146,13 +156,14 @@ test('a failed CVE refresh preserves the exported research and other interaction
   try {
     await page.route('**/data/wordfence-cves.json', route => route.fulfill({ status: 503, body: '' }));
     await page.goto(origin, { waitUntil: 'networkidle' });
-    await page.locator('.credential-grid-v2').waitFor();
+    await page.locator('.credential-grid-v2').waitFor({ state: 'attached' });
+    await expandPortfolio(page);
     const fallback = page.locator('section[aria-labelledby="wordpress-cves-title"]');
     assert.ok(await fallback.isVisible());
     assert.ok(await fallback.locator('a').count() > 0);
     assert.equal(await page.locator('.research-index-v2').count(), 0);
-    assert.equal(await page.locator('.credential-grid-item').count(), 14);
-    assert.equal(await page.locator('.credential-carousel-card').count(), 14);
+    assert.equal(await page.locator('.credential-grid-item').count(), certs.length);
+    assert.equal(await page.locator('.credential-carousel-card').count(), certs.length);
     assert.ok(await page.locator('#m3ez-credential-carousel-v1').isVisible());
   } finally {
     await page.close();
@@ -165,6 +176,7 @@ test('visible reveal motion keeps sections static and animates small elements', 
   try {
     await page.goto(origin, { waitUntil: 'networkidle' });
     await ready(page);
+    await expandPortfolio(page);
 
     const contact = page.locator('#contact');
     const sectionStyle = await contact.evaluate(node => ({
@@ -228,6 +240,7 @@ test('visible reveal motion keeps sections static and animates small elements', 
   try {
     await reduced.goto(origin, { waitUntil: 'networkidle' });
     await ready(reduced);
+    await expandPortfolio(reduced);
     const target = reduced.locator('#contact > .section-heading');
     assert.equal(await target.evaluate(node => getComputedStyle(node).opacity), '1');
     assert.equal(await target.evaluate(node => getComputedStyle(node).transform), 'none');
@@ -243,6 +256,7 @@ test('desktop wheel input glides through real inertial scrolling while reduced m
   try {
     await page.goto(origin, { waitUntil: 'networkidle' });
     await ready(page);
+    await expandPortfolio(page);
     assert.equal(
       await page.evaluate(() => matchMedia('(pointer: fine) and (hover: hover)').matches),
       true,
@@ -286,6 +300,7 @@ test('desktop wheel input glides through real inertial scrolling while reduced m
   try {
     await reduced.goto(origin, { waitUntil: 'networkidle' });
     await ready(reduced);
+    await expandPortfolio(reduced);
     const sample = await reduced.evaluate(() => {
       const event = new WheelEvent('wheel', {
         deltaY: 600,
@@ -311,6 +326,7 @@ test('active navigation follows scrolling and controls provide tactile press fee
   try {
     await page.goto(origin, { waitUntil: 'networkidle' });
     await ready(page);
+    await expandPortfolio(page);
 
     const credentialsLink = page.locator('.site-header nav > a[href="#credentials"]');
     const consultingLink = page.locator('.site-header nav > a[href="#consulting"]');
@@ -345,6 +361,7 @@ test('active navigation follows scrolling and controls provide tactile press fee
   try {
     await reduced.goto(origin, { waitUntil: 'networkidle' });
     await ready(reduced);
+    await expandPortfolio(reduced);
     const button = reduced.getByRole('button', { name: 'Show more CVEs', exact: true });
     await button.scrollIntoViewIfNeeded();
     await button.hover();
