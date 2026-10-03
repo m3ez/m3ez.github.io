@@ -2,9 +2,9 @@ import { readFile, writeFile } from 'node:fs/promises';
 
 const path = process.argv[2] ?? 'index.html';
 const stylesheet = '<link rel="stylesheet" href="/assets/research-credentials.css"/>';
-const script = '<script type="module" src="/assets/portfolio-redesign.js"></script>';
-const themeScript = '<script src="/assets/portfolio-theme.js"></script>';
-const themeStylesheet = '<link rel="stylesheet" href="/assets/portfolio-theme.css"/>';
+const script = '<script type="module" src="/assets/portfolio-redesign.js?v=20261003-2"></script>';
+const themeScript = '<script src="/assets/portfolio-theme.js?v=20261003-2"></script>';
+const themeStylesheet = '<link rel="stylesheet" href="/assets/portfolio-theme.css?v=20261003-2"/>';
 
 let html = await readFile(path, 'utf8');
 // The exported homepage is enhanced by our modules. Hydrating the same DOM with
