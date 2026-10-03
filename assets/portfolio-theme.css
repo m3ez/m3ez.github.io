@@ -627,24 +627,17 @@
 }
 
 
-/* Wide-screen wireframe geometry.
-   Large cropped perspective forms sit only in the empty page gutters and inherit
-   the active light/dark palette through a mask. */
+/* Wide-screen asymmetric wireframe geometry.
+   Left and right gutters intentionally use different perspective compositions so
+   the background feels scattered rather than mirrored or tiled. */
 @media (min-width: 1180px) {
   body::before,
   body::after {
     content: "";
     position: fixed;
-    top: 72px;
-    bottom: 28px;
     z-index: 0;
-    width: clamp(72px, calc((100vw - 1040px) / 2 - 12px), 180px);
-    min-width: 72px;
     pointer-events: none;
     background: var(--black);
-    opacity: .055;
-    -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 900'%3E%3Cg fill='none' stroke='black' stroke-width='1'%3E%3Cpath d='M-26 54 54 18l78 45-80 38zM54 18v83M132 63v80L52 182v-81M-26 54v80l78 48M-26 134l80-38 78 47'/%3E%3Cpath d='M18 282 96 244l70 40-78 39zM96 244v80M166 284v72l-78 40v-73M18 282v74l70 40M18 356l78-38 70 38'/%3E%3Cpath d='M-38 514 42 474l84 48-82 40zM42 474v88M126 522v86l-82 40v-86M-38 514v86l82 48M-38 600l80-40 84 48'/%3E%3Cpath d='M24 734 102 696l82 46-80 40zM102 696v86M184 742v78l-80 40v-78M24 734v78l80 48M24 812l78-38 82 46'/%3E%3Cpath d='M-12 224 152 142M-18 442 166 352M-22 698 164 606' stroke-dasharray='3 9'/%3E%3C/g%3E%3Cg fill='black'%3E%3Ccircle cx='54' cy='18' r='2'/%3E%3Ccircle cx='132' cy='63' r='2'/%3E%3Ccircle cx='96' cy='244' r='2'/%3E%3Ccircle cx='166' cy='284' r='2'/%3E%3Ccircle cx='42' cy='474' r='2'/%3E%3Ccircle cx='126' cy='522' r='2'/%3E%3Ccircle cx='102' cy='696' r='2'/%3E%3C/g%3E%3C/svg%3E");
-    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 900'%3E%3Cg fill='none' stroke='black' stroke-width='1'%3E%3Cpath d='M-26 54 54 18l78 45-80 38zM54 18v83M132 63v80L52 182v-81M-26 54v80l78 48M-26 134l80-38 78 47'/%3E%3Cpath d='M18 282 96 244l70 40-78 39zM96 244v80M166 284v72l-78 40v-73M18 282v74l70 40M18 356l78-38 70 38'/%3E%3Cpath d='M-38 514 42 474l84 48-82 40zM42 474v88M126 522v86l-82 40v-86M-38 514v86l82 48M-38 600l80-40 84 48'/%3E%3Cpath d='M24 734 102 696l82 46-80 40zM102 696v86M184 742v78l-80 40v-78M24 734v78l80 48M24 812l78-38 82 46'/%3E%3Cpath d='M-12 224 152 142M-18 442 166 352M-22 698 164 606' stroke-dasharray='3 9'/%3E%3C/g%3E%3Cg fill='black'%3E%3Ccircle cx='54' cy='18' r='2'/%3E%3Ccircle cx='132' cy='63' r='2'/%3E%3Ccircle cx='96' cy='244' r='2'/%3E%3Ccircle cx='166' cy='284' r='2'/%3E%3Ccircle cx='42' cy='474' r='2'/%3E%3Ccircle cx='126' cy='522' r='2'/%3E%3Ccircle cx='102' cy='696' r='2'/%3E%3C/g%3E%3C/svg%3E");
     -webkit-mask-repeat: no-repeat;
     mask-repeat: no-repeat;
     -webkit-mask-size: 100% 100%;
@@ -652,19 +645,33 @@
   }
 
   body::before {
+    top: 86px;
+    bottom: 18px;
     left: max(0px, env(safe-area-inset-left));
+    width: clamp(74px, calc((100vw - 1040px) / 2 - 8px), 188px);
+    opacity: .05;
+    -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 188 900'%3E%3Cg fill='none' stroke='black' stroke-width='1'%3E%3Cpath d='M-42 52 46 10l92 50-90 44zM46 10v96M138 60v94l-90 44v-94M-42 52v94l90 52M-42 146l88-40 92 48'/%3E%3Cpath d='M14 438 82 402l72 40-70 36zM82 402v74M154 442v70l-70 38v-72M14 438v72l70 40M14 510l68-34 72 36'/%3E%3Cpath d='M-24 714 38 680l58 32-62 32zM38 680v64M96 712v62l-62 32v-62M-24 714v62l58 30'/%3E%3Cpath d='M2 274 146 204M-18 628 118 562' stroke-dasharray='3 11'/%3E%3C/g%3E%3Cg fill='black'%3E%3Ccircle cx='46' cy='10' r='2'/%3E%3Ccircle cx='138' cy='60' r='2'/%3E%3Ccircle cx='82' cy='402' r='2'/%3E%3Ccircle cx='154' cy='442' r='2'/%3E%3Ccircle cx='38' cy='680' r='2'/%3E%3C/g%3E%3C/svg%3E");
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 188 900'%3E%3Cg fill='none' stroke='black' stroke-width='1'%3E%3Cpath d='M-42 52 46 10l92 50-90 44zM46 10v96M138 60v94l-90 44v-94M-42 52v94l90 52M-42 146l88-40 92 48'/%3E%3Cpath d='M14 438 82 402l72 40-70 36zM82 402v74M154 442v70l-70 38v-72M14 438v72l70 40M14 510l68-34 72 36'/%3E%3Cpath d='M-24 714 38 680l58 32-62 32zM38 680v64M96 712v62l-62 32v-62M-24 714v62l58 30'/%3E%3Cpath d='M2 274 146 204M-18 628 118 562' stroke-dasharray='3 11'/%3E%3C/g%3E%3Cg fill='black'%3E%3Ccircle cx='46' cy='10' r='2'/%3E%3Ccircle cx='138' cy='60' r='2'/%3E%3Ccircle cx='82' cy='402' r='2'/%3E%3Ccircle cx='154' cy='442' r='2'/%3E%3Ccircle cx='38' cy='680' r='2'/%3E%3C/g%3E%3C/svg%3E");
   }
 
   body::after {
+    top: 128px;
+    bottom: -26px;
     right: max(0px, env(safe-area-inset-right));
-    transform: scaleX(-1) translateY(34px);
+    width: clamp(82px, calc((100vw - 1040px) / 2 + 2px), 202px);
+    opacity: .062;
+    -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 202 900'%3E%3Cg fill='none' stroke='black' stroke-width='1'%3E%3Cpath d='M72 72 144 34l76 44-72 38zM144 34v82M220 78v82l-72 38v-82M72 72v82l76 44'/%3E%3Cpath d='M-38 300 54 254l102 56-94 48zM54 254v102M156 310v98l-94 50v-100M-38 300v104l100 54M-38 404l92-48 102 52'/%3E%3Cpath d='M46 602 106 570l66 38-58 30zM106 570v70M172 608v66l-58 32v-68M46 602v66l68 38'/%3E%3Cpath d='M-16 806 36 780l48 28-50 24zM36 780v54M84 808v50'/%3E%3Cpath d='M26 202 188 126M2 532 186 448M62 748 190 688' stroke-dasharray='2 13'/%3E%3C/g%3E%3Cg fill='black'%3E%3Ccircle cx='144' cy='34' r='2'/%3E%3Ccircle cx='54' cy='254' r='2.4'/%3E%3Ccircle cx='156' cy='310' r='2'/%3E%3Ccircle cx='106' cy='570' r='2'/%3E%3Ccircle cx='36' cy='780' r='2'/%3E%3C/g%3E%3C/svg%3E");
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 202 900'%3E%3Cg fill='none' stroke='black' stroke-width='1'%3E%3Cpath d='M72 72 144 34l76 44-72 38zM144 34v82M220 78v82l-72 38v-82M72 72v82l76 44'/%3E%3Cpath d='M-38 300 54 254l102 56-94 48zM54 254v102M156 310v98l-94 50v-100M-38 300v104l100 54M-38 404l92-48 102 52'/%3E%3Cpath d='M46 602 106 570l66 38-58 30zM106 570v70M172 608v66l-58 32v-68M46 602v66l68 38'/%3E%3Cpath d='M-16 806 36 780l48 28-50 24zM36 780v54M84 808v50'/%3E%3Cpath d='M26 202 188 126M2 532 186 448M62 748 190 688' stroke-dasharray='2 13'/%3E%3C/g%3E%3Cg fill='black'%3E%3Ccircle cx='144' cy='34' r='2'/%3E%3Ccircle cx='54' cy='254' r='2.4'/%3E%3Ccircle cx='156' cy='310' r='2'/%3E%3Ccircle cx='106' cy='570' r='2'/%3E%3Ccircle cx='36' cy='780' r='2'/%3E%3C/g%3E%3C/svg%3E");
   }
 }
 
 @media (min-width: 1600px) {
-  body::before,
+  body::before {
+    opacity: .06;
+  }
+
   body::after {
-    opacity: .07;
+    opacity: .075;
   }
 }
 
