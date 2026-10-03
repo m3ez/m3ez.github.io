@@ -34,8 +34,16 @@
     const clouds = document.createElement('span');
     clouds.id = CLOUDS_ID;
     clouds.setAttribute('aria-hidden', 'true');
-    const cloudPath = '<path fill="currentColor" d="M3 18.5c0-3.04 2.46-5.5 5.5-5.5.63 0 1.23.11 1.79.3A8 8 0 0 1 25.2 10.4a6.25 6.25 0 0 1 10.05 4.98A4.8 4.8 0 1 1 36.2 25H7.8A6.8 6.8 0 0 1 3 18.5Z"/>';
-    clouds.innerHTML = '<svg class="divider-cloud-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 44 28" aria-hidden="true" focusable="false">' + cloudPath + '</svg><svg class="divider-cloud-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 44 28" aria-hidden="true" focusable="false">' + cloudPath + '</svg><svg class="divider-cloud-3" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 44 28" aria-hidden="true" focusable="false">' + cloudPath + '</svg>';
+
+    const dayCloud = '<g class="divider-cloud-drift"><path fill="currentColor" d="M3 18.5c0-3.04 2.46-5.5 5.5-5.5.63 0 1.23.11 1.79.3A8 8 0 0 1 25.2 10.4a6.25 6.25 0 0 1 10.05 4.98A4.8 4.8 0 1 1 36.2 25H7.8A6.8 6.8 0 0 1 3 18.5Z"/></g>';
+    const nightCloud = '<g class="divider-cloud-drift" fill="none" stroke="currentColor" stroke-width="1.15" stroke-linecap="round"><path d="M3 14.5c4.7-3.5 9.5-3.7 14.1-1.3 3.6-4.4 11.2-4 14.1 1 3.7-1.6 7.2-1.2 9.8 1.2"/><path opacity=".55" d="M9 18c5.3-2.3 10.4-2.2 15.1.2 3-2.4 7.1-2.6 10.9-.7"/></g>';
+
+    clouds.innerHTML =
+      '<svg class="divider-cloud divider-cloud-day divider-cloud-day-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 44 28" aria-hidden="true" focusable="false">' + dayCloud + '</svg>' +
+      '<svg class="divider-cloud divider-cloud-day divider-cloud-day-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 44 28" aria-hidden="true" focusable="false">' + dayCloud + '</svg>' +
+      '<svg class="divider-cloud divider-cloud-night divider-cloud-night-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 44 24" aria-hidden="true" focusable="false">' + nightCloud + '</svg>' +
+      '<svg class="divider-cloud divider-cloud-night divider-cloud-night-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 44 24" aria-hidden="true" focusable="false">' + nightCloud + '</svg>';
+
     hero.appendChild(clouds);
   }
 
