@@ -14,6 +14,46 @@
   color-scheme: dark;
 }
 
+
+/* Sparse cyber page background. It is a viewport-level decorative layer only:
+   existing hero/divider art and all content remain in their own foreground stack. */
+body {
+  isolation: isolate;
+}
+
+#m3ez-cyber-background-v1 {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  display: block;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  user-select: none;
+}
+
+main,
+.site-footer {
+  position: relative;
+  z-index: 1;
+}
+
+.site-header {
+  z-index: 20;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #m3ez-cyber-background-v1 {
+    transform: none;
+  }
+}
+
+@media print {
+  #m3ez-cyber-background-v1 {
+    display: none;
+  }
+}
+
 /* Keep the back-to-top hit area and spacing, with only the theme icon visible. */
 #m3ez-theme-toggle-v1 {
   position: fixed;
