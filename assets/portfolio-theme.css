@@ -625,3 +625,74 @@
     display: none !important;
   }
 }
+
+
+/* Wide-screen refresh-randomized wireframe geometry.
+   Independent objects are randomized once per page load and clipped to the
+   real free gutter space, so they never overlap the portfolio content. */
+#m3ez-wireframe-gutters-v1 {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.m3ez-wireframe-gutter {
+  --m3ez-content-width: min(var(--max), calc(100vw - 2 * var(--gutter)));
+  --m3ez-side-space: calc((100vw - var(--m3ez-content-width)) / 2);
+  position: absolute;
+  top: 56px;
+  bottom: 0;
+  width: var(--m3ez-side-space);
+  overflow: hidden;
+  color: var(--black);
+  pointer-events: none;
+}
+
+.m3ez-wireframe-gutter.is-left {
+  left: 0;
+}
+
+.m3ez-wireframe-gutter.is-right {
+  right: 0;
+}
+
+.m3ez-wireframe-object {
+  position: absolute;
+  left: var(--wf-x);
+  top: var(--wf-y);
+  display: block;
+  width: var(--wf-size);
+  height: auto;
+  overflow: visible;
+  opacity: var(--wf-opacity);
+  transform: rotate(var(--wf-angle));
+  transform-origin: center;
+}
+
+.m3ez-wireframe-object path {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: .8;
+  vector-effect: non-scaling-stroke;
+}
+
+.m3ez-wireframe-object.is-medium path {
+  stroke-width: .72;
+}
+
+.m3ez-wireframe-object.is-fragment path {
+  stroke-width: .66;
+}
+
+@media (max-width: 1179px) {
+  #m3ez-wireframe-gutters-v1 {
+    display: none;
+  }
+}
+
+@media print {
+  #m3ez-wireframe-gutters-v1 {
+    display: none !important;
+  }
+}
