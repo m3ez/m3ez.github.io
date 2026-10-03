@@ -43,6 +43,13 @@
     document.body.appendChild(button);
   }
 
+  window.addEventListener('keydown', event => {
+    if (event.key.toLowerCase() !== 'r' || event.repeat || event.altKey || event.ctrlKey || event.metaKey) return;
+    const target = event.target;
+    if (target instanceof HTMLElement && (target.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(target.tagName))) return;
+    root.dataset.dividerRunner = root.dataset.dividerRunner === 'active' ? 'inactive' : 'active';
+  });
+
   window.addEventListener('storage', event => {
     if (event.key === STORAGE_KEY || event.key === null) applyTheme(event.newValue);
   });
