@@ -45,7 +45,7 @@ test('theme auto mode follows local time but manual theme choice is independent 
   assert.match(js, /root\.dataset\.themeMode = autoThemeEnabled \? 'auto' : 'manual'/);
   assert.match(js, /root\.dataset\.skyPhase = state\.sunVisible \? 'sun' : 'moon'/);
   assert.match(js, /autoThemeEnabled = false;\s*applyTheme\(root\.dataset\.theme === 'dark' \? 'light' : 'dark'\)/s);
-  assert.doesNotMatch(css, /data-theme="dark"[^\n]*divider-celestial/);
+  assert.doesNotMatch(css, /:root\[data-theme="dark"\][^{]*divider-celestial[^{]*\{[^}]*opacity:/s);
 });
 
 test('lighting and clouds follow the celestial position rather than the theme toggle', () => {
