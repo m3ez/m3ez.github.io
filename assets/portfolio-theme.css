@@ -627,62 +627,76 @@
 }
 
 
-/* Wide-screen asymmetric wireframe geometry.
-   Each gutter uses a different composition with deliberately unequal object
-   scales: one dominant form, one secondary form, and one cropped fragment. */
-@media (min-width: 1180px) {
-  body::before,
-  body::after {
-    --m3ez-content-width: min(var(--max), calc(100vw - 2 * var(--gutter)));
-    --m3ez-side-space: calc((100vw - var(--m3ez-content-width)) / 2);
-    content: "";
-    position: fixed;
-    z-index: 0;
-    width: var(--m3ez-side-space);
-    pointer-events: none;
-    background: var(--black);
-    -webkit-mask-repeat: no-repeat;
-    mask-repeat: no-repeat;
-    -webkit-mask-position: center;
-    mask-position: center;
-  }
-
-  body::before {
-    top: 70px;
-    bottom: 10px;
-    left: max(0px, env(safe-area-inset-left));
-    opacity: .052;
-    -webkit-mask-size: min(88%, 280px) auto;
-    mask-size: min(88%, 280px) auto;
-    -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 222 920'%3E%3Cg fill='none' stroke='black' stroke-width='1'%3E%3Cpath d='M-72 76 56 14l146 78-136 68zM56 14v146M202 92v136L66 296V160M-72 76v144l138 76M-72 220l128-60 146 68'/%3E%3Cpath d='M44 434 118 396l68 38-76 38zM118 396v76M186 434v70l-76 38v-70M44 434v72l66 36'/%3E%3Cpath d='M-42 770 12 742l46 24-52 28zM12 742v52M58 766v46L6 840v-46'/%3E%3Cpath d='M-6 340 178 252M26 650 204 566' stroke-dasharray='3 14'/%3E%3C/g%3E%3Cg fill='black'%3E%3Ccircle cx='56' cy='14' r='2.5'/%3E%3Ccircle cx='202' cy='92' r='2'/%3E%3Ccircle cx='118' cy='396' r='2'/%3E%3Ccircle cx='12' cy='742' r='1.8'/%3E%3C/g%3E%3C/svg%3E");
-    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 222 920'%3E%3Cg fill='none' stroke='black' stroke-width='1'%3E%3Cpath d='M-72 76 56 14l146 78-136 68zM56 14v146M202 92v136L66 296V160M-72 76v144l138 76M-72 220l128-60 146 68'/%3E%3Cpath d='M44 434 118 396l68 38-76 38zM118 396v76M186 434v70l-76 38v-70M44 434v72l66 36'/%3E%3Cpath d='M-42 770 12 742l46 24-52 28zM12 742v52M58 766v46L6 840v-46'/%3E%3Cpath d='M-6 340 178 252M26 650 204 566' stroke-dasharray='3 14'/%3E%3C/g%3E%3Cg fill='black'%3E%3Ccircle cx='56' cy='14' r='2.5'/%3E%3Ccircle cx='202' cy='92' r='2'/%3E%3Ccircle cx='118' cy='396' r='2'/%3E%3Ccircle cx='12' cy='742' r='1.8'/%3E%3C/g%3E%3C/svg%3E");
-  }
-
-  body::after {
-    top: 118px;
-    bottom: -38px;
-    right: max(0px, env(safe-area-inset-right));
-    opacity: .064;
-    -webkit-mask-size: min(92%, 310px) auto;
-    mask-size: min(92%, 310px) auto;
-    -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 236 920'%3E%3Cg fill='none' stroke='black' stroke-width='1'%3E%3Cpath d='M86 82 158 44l66 36-70 38zM158 44v76M224 80v70l-70 38v-70M86 82v70l68 36'/%3E%3Cpath d='M-68 350 72 280l154 84-146 72zM72 280v156M226 364v150L80 588V436M-68 350v154l148 84M-68 504l140-68 154 78'/%3E%3Cpath d='M62 744 108 720l40 22-46 24zM108 720v48M148 742v42l-46 24v-42'/%3E%3Cpath d='M38 224 216 140M-18 676 208 568M80 858 224 790' stroke-dasharray='2 15'/%3E%3C/g%3E%3Cg fill='black'%3E%3Ccircle cx='158' cy='44' r='1.8'/%3E%3Ccircle cx='72' cy='280' r='2.6'/%3E%3Ccircle cx='226' cy='364' r='2.2'/%3E%3Ccircle cx='108' cy='720' r='1.6'/%3E%3C/g%3E%3C/svg%3E");
-    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 236 920'%3E%3Cg fill='none' stroke='black' stroke-width='1'%3E%3Cpath d='M86 82 158 44l66 36-70 38zM158 44v76M224 80v70l-70 38v-70M86 82v70l68 36'/%3E%3Cpath d='M-68 350 72 280l154 84-146 72zM72 280v156M226 364v150L80 588V436M-68 350v154l148 84M-68 504l140-68 154 78'/%3E%3Cpath d='M62 744 108 720l40 22-46 24zM108 720v48M148 742v42l-46 24v-42'/%3E%3Cpath d='M38 224 216 140M-18 676 208 568M80 858 224 790' stroke-dasharray='2 15'/%3E%3C/g%3E%3Cg fill='black'%3E%3Ccircle cx='158' cy='44' r='1.8'/%3E%3Ccircle cx='72' cy='280' r='2.6'/%3E%3Ccircle cx='226' cy='364' r='2.2'/%3E%3Ccircle cx='108' cy='720' r='1.6'/%3E%3C/g%3E%3C/svg%3E");
-  }
+/* Wide-screen refresh-randomized wireframe geometry.
+   Independent objects are randomized once per page load and clipped to the
+   real free gutter space, so they never overlap the portfolio content. */
+#m3ez-wireframe-gutters-v1 {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
 }
 
-@media (min-width: 1600px) {
-  body::before {
-    opacity: .062;
-  }
+.m3ez-wireframe-gutter {
+  --m3ez-content-width: min(var(--max), calc(100vw - 2 * var(--gutter)));
+  --m3ez-side-space: calc((100vw - var(--m3ez-content-width)) / 2);
+  position: absolute;
+  top: 56px;
+  bottom: 0;
+  width: var(--m3ez-side-space);
+  overflow: hidden;
+  color: var(--black);
+  pointer-events: none;
+}
 
-  body::after {
-    opacity: .078;
+.m3ez-wireframe-gutter.is-left {
+  left: 0;
+}
+
+.m3ez-wireframe-gutter.is-right {
+  right: 0;
+}
+
+.m3ez-wireframe-object {
+  position: absolute;
+  left: var(--wf-x);
+  top: var(--wf-y);
+  display: block;
+  width: var(--wf-size);
+  height: auto;
+  overflow: visible;
+  opacity: calc(.075 * var(--wf-opacity));
+  transform: rotate(var(--wf-angle));
+  transform-origin: center;
+}
+
+.m3ez-wireframe-object path {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: .8;
+  vector-effect: non-scaling-stroke;
+}
+
+.m3ez-wireframe-object.is-medium path {
+  stroke-width: .72;
+}
+
+.m3ez-wireframe-object.is-fragment path {
+  stroke-width: .66;
+}
+
+:root[data-theme="dark"] .m3ez-wireframe-object {
+  opacity: calc(.095 * var(--wf-opacity));
+}
+
+@media (max-width: 1179px) {
+  #m3ez-wireframe-gutters-v1 {
+    display: none;
   }
 }
 
 @media print {
-  body::before,
-  body::after {
-    content: none;
+  #m3ez-wireframe-gutters-v1 {
+    display: none !important;
   }
 }
