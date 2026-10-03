@@ -51,7 +51,9 @@ test('first load shows Hero, carousel and Method while lower content stays hidde
     assert.ok(await page.locator('#top').isVisible());
     assert.ok(await page.locator('#m3ez-credential-carousel-v1').isVisible());
     assert.ok(await page.locator('#method').isVisible());
-    assert.match(await page.locator('#method').evaluate(node => getComputedStyle(node, '::after').content), /Explore more/);
+    const explore = page.locator('#m3ez-explore-more-v1');
+    assert.ok(await explore.isVisible());
+    assert.equal(await explore.getAttribute('href'), '#research');
     assert.equal(await page.locator('#research').isVisible(), false);
     assert.equal(await page.locator('#credentials').isVisible(), false);
     assert.equal(await page.locator('#contact').isVisible(), false);
@@ -70,7 +72,7 @@ test('View Research reveals the full portfolio without disturbing the hero carou
     assert.ok(await page.locator('#research').isVisible());
     assert.ok(await page.locator('#credentials').isVisible());
     assert.ok(await page.locator('#contact').isVisible());
-    assert.equal(await page.locator('#method').evaluate(node => getComputedStyle(node, '::after').content), 'none');
+    assert.equal(await page.locator('#m3ez-explore-more-v1').isVisible(), false);
     assert.ok(await page.locator('#m3ez-credential-carousel-v1').isVisible());
     assert.equal(await page.locator('#m3ez-credential-carousel-v1 .credential-carousel-card[data-position="current"]').getAttribute('data-index'), before);
   } finally {
@@ -104,5 +106,17 @@ test('Contact reveals first, and direct lower-section hashes bypass the collapse
     assert.equal(await method.locator('#research').isVisible(), false);
   } finally {
     await method.close();
+  }
+});
+
+test('Explore more reveals the full portfolio and lands on Research', async () => {
+  const page = await pageAt('/');
+  try {
+    await page.locator('#m3ez-explore-more-v1').click();
+    await page.waitForFunction(() => location.hash === '#research' && document.documentElement.dataset.portfolioExpanded === 'true');
+    assert.ok(await page.locator('#research').isVisible());
+    assert.equal(await page.locator('#m3ez-explore-more-v1').isVisible(), false);
+  } finally {
+    await page.close();
   }
 });
