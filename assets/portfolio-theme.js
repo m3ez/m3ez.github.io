@@ -105,6 +105,222 @@
   if (!autoThemeEnabled) applyTheme(savedTheme);
   updateSky();
 
+
+  function mountCyberBackground() {
+    const BACKGROUND_ID = 'm3ez-cyber-background-v1';
+    if (!document.body || document.getElementById(BACKGROUND_ID)) return;
+
+    const canvas = document.createElement('canvas');
+    canvas.id = BACKGROUND_ID;
+    canvas.setAttribute('aria-hidden', 'true');
+    document.body.prepend(canvas);
+
+    const context = canvas.getContext('2d', { alpha: true });
+    if (!context) return;
+
+    const labels = ['443', 'TLS', 'GET', 'SSH', 'CVE', 'AUTH', '0x7f'];
+    const reducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)');
+    let width = 0;
+    let height = 0;
+    let dpr = 1;
+    let nodes = [];
+    let edges = [];
+    let animationFrame = 0;
+    let resizeFrame = 0;
+    let pointerActive = false;
+    let pointerX = -1000;
+    let pointerY = -1000;
+    const startedAt = performance.now();
+
+    function seededRandom(seed) {
+      let state = seed >>> 0;
+      return () => {
+        state = (state * 1664525 + 1013904223) >>> 0;
+        return state / 4294967296;
+      };
+    }
+
+    function buildGeometry() {
+      width = Math.max(1, window.innerWidth);
+      height = Math.max(1, window.innerHeight);
+      dpr = Math.min(window.devicePixelRatio || 1, 2);
+      canvas.width = Math.round(width * dpr);
+      canvas.height = Math.round(height * dpr);
+      canvas.style.width = width + 'px';
+      canvas.style.height = height + 'px';
+      context.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+      const spacing = width <= 680 ? 132 : 172;
+      const random = seededRandom((width * 73856093) ^ (height * 19349663));
+      const columns = Math.ceil(width / spacing) + 2;
+      const rows = Math.ceil(height / spacing) + 2;
+      const nextNodes = [];
+
+      for (let row = -1; row < rows; row += 1) {
+        for (let column = -1; column < columns; column += 1) {
+          const x = column * spacing + spacing * .5 + (random() - .5) * spacing * .58;
+          const y = row * spacing + spacing * .5 + (random() - .5) * spacing * .58;
+          if (x < -spacing || x > width + spacing || y < -spacing || y > height + spacing) continue;
+          nextNodes.push({
+            x,
+            y,
+            radius: 1 + random() * 1.25,
+            label: random() < .115 ? labels[Math.floor(random() * labels.length)] : '',
+          });
+        }
+      }
+
+      const nextEdges = [];
+      const degree = new Array(nextNodes.length).fill(0);
+      for (let i = 0; i < nextNodes.length; i += 1) {
+        const candidates = [];
+        for (let j = i + 1; j < nextNodes.length; j += 1) {
+          const dx = nextNodes[i].x - nextNodes[j].x;
+          const dy = nextNodes[i].y - nextNodes[j].y;
+          const distance = Math.hypot(dx, dy);
+          if (distance <= spacing * 1.34) candidates.push({ j, distance });
+        }
+        candidates.sort((a, b) => a.distance - b.distance);
+        for (const candidate of candidates.slice(0, 3)) {
+          if (degree[i] >= 2 || degree[candidate.j] >= 2) continue;
+          nextEdges.push([i, candidate.j]);
+          degree[i] += 1;
+          degree[candidate.j] += 1;
+        }
+      }
+
+      nodes = nextNodes;
+      edges = nextEdges;
+    }
+
+    function ink(alpha) {
+      return root.dataset.theme === 'dark'
+        ? `rgba(255,255,255,${alpha})`
+        : `rgba(0,0,0,${alpha})`;
+    }
+
+    function proximity(x, y) {
+      if (!pointerActive || reducedMotion?.matches) return 0;
+      const distance = Math.hypot(pointerX - x, pointerY - y);
+      return Math.max(0, 1 - distance / 190);
+    }
+
+    function drawRadarArcs() {
+      const radius = Math.min(width, height) * .27;
+      context.save();
+      context.setLineDash([4, 10]);
+      context.lineWidth = .7;
+      context.strokeStyle = ink(root.dataset.theme === 'dark' ? .034 : .026);
+      for (const scale of [.55, .78, 1]) {
+        context.beginPath();
+        context.arc(0, 0, radius * scale, 0, Math.PI * .58);
+        context.stroke();
+        context.beginPath();
+        context.arc(width, height, radius * scale, Math.PI, Math.PI * 1.58);
+        context.stroke();
+      }
+      context.restore();
+    }
+
+    function draw(now = performance.now()) {
+      context.clearRect(0, 0, width, height);
+      drawRadarArcs();
+
+      for (const [fromIndex, toIndex] of edges) {
+        const from = nodes[fromIndex];
+        const to = nodes[toIndex];
+        const midpointX = (from.x + to.x) / 2;
+        const midpointY = (from.y + to.y) / 2;
+        const reveal = proximity(midpointX, midpointY);
+        const baseAlpha = root.dataset.theme === 'dark' ? .038 : .027;
+        context.strokeStyle = ink(baseAlpha + reveal * .055);
+        context.lineWidth = .65 + reveal * .25;
+        context.beginPath();
+        context.moveTo(from.x, from.y);
+        context.lineTo(to.x, to.y);
+        context.stroke();
+      }
+
+      for (const node of nodes) {
+        const reveal = proximity(node.x, node.y);
+        const nodeAlpha = (root.dataset.theme === 'dark' ? .072 : .052) + reveal * .085;
+        context.fillStyle = ink(nodeAlpha);
+        context.beginPath();
+        context.arc(node.x, node.y, node.radius + reveal * .45, 0, Math.PI * 2);
+        context.fill();
+
+        if (node.label) {
+          context.fillStyle = ink((root.dataset.theme === 'dark' ? .09 : .068) + reveal * .07);
+          context.font = '10px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace';
+          context.fillText(node.label, node.x + 8, node.y - 7);
+        }
+      }
+
+      if (!reducedMotion?.matches && edges.length) {
+        const elapsed = now - startedAt;
+        const cycle = 11000;
+        const cycleIndex = Math.floor(elapsed / cycle);
+        const phase = (elapsed % cycle) / cycle;
+        const edge = edges[(cycleIndex * 7) % edges.length];
+        const from = nodes[edge[0]];
+        const to = nodes[edge[1]];
+        const x = from.x + (to.x - from.x) * phase;
+        const y = from.y + (to.y - from.y) * phase;
+        context.fillStyle = ink(root.dataset.theme === 'dark' ? .28 : .2);
+        context.beginPath();
+        context.arc(x, y, 1.65, 0, Math.PI * 2);
+        context.fill();
+      }
+    }
+
+    function animate(now) {
+      draw(now);
+      animationFrame = window.requestAnimationFrame(animate);
+    }
+
+    function syncMotion() {
+      window.cancelAnimationFrame(animationFrame);
+      animationFrame = 0;
+      if (reducedMotion?.matches) {
+        draw();
+      } else {
+        animationFrame = window.requestAnimationFrame(animate);
+      }
+    }
+
+    function resize() {
+      window.cancelAnimationFrame(resizeFrame);
+      resizeFrame = window.requestAnimationFrame(() => {
+        buildGeometry();
+        draw();
+      });
+    }
+
+    window.addEventListener('pointermove', event => {
+      pointerActive = true;
+      pointerX = event.clientX;
+      pointerY = event.clientY;
+      if (reducedMotion?.matches) draw();
+    }, { passive: true });
+
+    window.addEventListener('pointerout', event => {
+      if (event.relatedTarget) return;
+      pointerActive = false;
+      if (reducedMotion?.matches) draw();
+    }, { passive: true });
+
+    window.addEventListener('resize', resize, { passive: true });
+    reducedMotion?.addEventListener?.('change', syncMotion);
+
+    const themeObserver = new MutationObserver(mutations => {
+      if (mutations.some(mutation => mutation.attributeName === 'data-theme')) draw();
+    });
+    themeObserver.observe(root, { attributes: true, attributeFilter: ['data-theme'] });
+
+    buildGeometry();
+    syncMotion();
+  }
+
   function mountDividerLight() {
     const hero = document.getElementById('top');
     if (!hero || document.getElementById(LIGHT_ID)) return;
@@ -154,6 +370,7 @@
   }
 
   function mount() {
+    mountCyberBackground();
     mountDividerLight();
     mountDividerClouds();
     mountDividerCelestial();
