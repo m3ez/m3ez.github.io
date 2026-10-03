@@ -431,52 +431,29 @@
 }
 
 
+
 /* Landing progressive disclosure: keep Hero + Method visible until a portfolio
    destination is chosen. The head bootstrap sets the state before first paint. */
-:root[data-portfolio-expanded="false"] #method ~ *:not(#m3ez-explore-more-v1),
+:root[data-portfolio-expanded="false"] #method ~ *,
 :root[data-portfolio-expanded="false"] .site-footer {
   display: none !important;
 }
 
-#m3ez-explore-more-v1 {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: .55rem;
+:root[data-portfolio-expanded="false"] #method::after {
+  content: "Explore more  ↓";
+  display: block;
   width: max-content;
-  margin: clamp(1.75rem, 4vw, 3rem) auto clamp(2.5rem, 6vw, 4.5rem);
+  margin: clamp(1.75rem, 4vw, 3rem) auto 0;
   color: var(--muted);
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   font-size: 12px;
   font-weight: 600;
   letter-spacing: .08em;
-  text-decoration: none;
+  line-height: 1.4;
   text-transform: uppercase;
 }
 
-#m3ez-explore-more-v1:hover,
-#m3ez-explore-more-v1:focus-visible {
-  color: var(--ink);
-}
-
-#m3ez-explore-more-v1 .m3ez-explore-arrow {
-  display: inline-block;
-  font-size: 14px;
-  line-height: 1;
-  transform: translateY(-1px);
-  transition: transform 180ms cubic-bezier(.22, 1, .36, 1);
-}
-
-#m3ez-explore-more-v1:hover .m3ez-explore-arrow,
-#m3ez-explore-more-v1:focus-visible .m3ez-explore-arrow {
-  transform: translateY(2px);
-}
-
-:root[data-portfolio-expanded="true"] #m3ez-explore-more-v1 {
-  display: none;
-}
-
-:root[data-portfolio-reveal="active"] #method ~ *:not(#m3ez-explore-more-v1),
+:root[data-portfolio-reveal="active"] #method ~ *,
 :root[data-portfolio-reveal="active"] .site-footer {
   animation: m3ez-extended-content-reveal 520ms cubic-bezier(.22, 1, .36, 1) both;
 }
@@ -493,18 +470,19 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  #m3ez-explore-more-v1 .m3ez-explore-arrow {
-    transition: none;
-  }
-
-  :root[data-portfolio-reveal="active"] #method ~ *:not(#m3ez-explore-more-v1),
+  :root[data-portfolio-reveal="active"] #method ~ *,
   :root[data-portfolio-reveal="active"] .site-footer {
     animation: none;
   }
 }
 
 @media print {
-  #m3ez-explore-more-v1 {
-    display: none !important;
+  :root[data-portfolio-expanded="false"] #method ~ *,
+  :root[data-portfolio-expanded="false"] .site-footer {
+    display: revert !important;
+  }
+
+  :root[data-portfolio-expanded="false"] #method::after {
+    content: none;
   }
 }
