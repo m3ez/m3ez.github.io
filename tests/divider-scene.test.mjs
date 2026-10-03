@@ -42,8 +42,8 @@ test('scene stays static, has a mobile height, and is removed for print', () => 
   assert.match(css, /@media print\s*\{\s*#top\.hero:has\(\+ #method\)::before\s*\{\s*content:\s*none/s);
 });
 
-test('the existing runner gait and reduced-motion opt-out remain independent', () => {
-  assert.match(css, /m3ez-divider-stride[^;]*steps\(16\)/);
+test('the backpack walker gait and reduced-motion opt-out remain independent', () => {
+  assert.match(css, /m3ez-divider-walk[^;]*steps\(16\)/);
   assert.match(css, /@media \(prefers-reduced-motion: reduce\)\s*\{\s*#top\.hero:has\(\+ #method\)::after\s*\{\s*content:\s*none;\s*animation:\s*none/s);
   const addition = css.slice(css.indexOf('/* Soft mountain strip'));
   assert.doesNotMatch(addition, /#m3ez-theme-toggle|#m3ez-back-to-top|\.site-header|#top\.hero\s*>\s*\*/);
