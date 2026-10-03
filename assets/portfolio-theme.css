@@ -665,7 +665,7 @@
   width: var(--wf-size);
   height: auto;
   overflow: visible;
-  opacity: calc(.075 * var(--wf-opacity));
+  opacity: var(--wf-opacity);
   transform: rotate(var(--wf-angle));
   transform-origin: center;
 }
@@ -683,10 +683,6 @@
 
 .m3ez-wireframe-object.is-fragment path {
   stroke-width: .66;
-}
-
-:root[data-theme="dark"] .m3ez-wireframe-object {
-  opacity: calc(.095 * var(--wf-opacity));
 }
 
 @media (max-width: 1179px) {
