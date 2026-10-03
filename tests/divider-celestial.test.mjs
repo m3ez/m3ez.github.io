@@ -34,11 +34,14 @@ test('theme switch animates the celestial icons but honors reduced motion', () =
 });
 
 
-test('three decorative clouds stay local to the divider and drift subtly', () => {
+test('day and night clouds use different silhouettes close to the celestial mark', () => {
   assert.match(js, /CLOUDS_ID\s*=\s*'m3ez-divider-clouds-v1'/);
-  assert.match(js, /divider-cloud-1/);
-  assert.match(js, /divider-cloud-2/);
-  assert.match(js, /divider-cloud-3/);
+  assert.match(js, /divider-cloud-day-1/);
+  assert.match(js, /divider-cloud-day-2/);
+  assert.match(js, /divider-cloud-night-1/);
+  assert.match(js, /divider-cloud-night-2/);
+  assert.match(js, /const dayCloud = .*fill="currentColor"/s);
+  assert.match(js, /const nightCloud = .*fill="none".*stroke="currentColor"/s);
   assert.match(js, /clouds\.setAttribute\('aria-hidden',\s*'true'\)/);
   assert.match(js, /hero\.appendChild\(clouds\)/);
 
@@ -47,15 +50,26 @@ test('three decorative clouds stay local to the divider and drift subtly', () =>
   assert.match(layer, /bottom:\s*0/);
   assert.match(layer, /height:\s*64px/);
   assert.match(layer, /pointer-events:\s*none/);
-  assert.match(css, /m3ez-cloud-drift-a 11s ease-in-out infinite alternate/);
-  assert.match(css, /m3ez-cloud-drift-b 14s ease-in-out -4s infinite alternate/);
-  assert.match(css, /m3ez-cloud-drift-c 9s ease-in-out -2s infinite alternate/);
-  assert.match(css, /translate3d\(-6px, 0, 0\)/);
-  assert.match(css, /translate3d\(10px, -1px, 0\)/);
+  assert.match(css, /divider-cloud-day-1[^}]*left:\s*44%/s);
+  assert.match(css, /divider-cloud-day-2[^}]*left:\s*53%/s);
+  assert.match(css, /divider-cloud-night-1[^}]*left:\s*45\.5%/s);
+  assert.match(css, /divider-cloud-night-2[^}]*left:\s*54%/s);
 });
 
-test('cloud motion respects reduced-motion and mobile keeps the scene sparse', () => {
-  assert.match(css, /@media \(prefers-reduced-motion: reduce\)[\s\S]*?#m3ez-divider-clouds-v1 svg\s*\{[^}]*animation:\s*none[^}]*transform:\s*none/s);
-  assert.match(css, /@media \(max-width: 760px\)[\s\S]*?#m3ez-divider-clouds-v1 \.divider-cloud-3\s*\{\s*display:\s*none;/s);
+test('cloud sets cross-fade and slide when the theme changes', () => {
+  assert.match(css, /#m3ez-divider-clouds-v1 svg\s*\{[^}]*transition:\s*\n\s*opacity 680ms cubic-bezier\(\.4, 0, \.2, 1\),\s*\n\s*transform 820ms cubic-bezier\(\.22, 1, \.36, 1\)/s);
+  assert.match(css, /\.divider-cloud-day\s*\{[^}]*opacity:\s*\.055[^}]*translate3d\(0, 0, 0\)/s);
+  assert.match(css, /\.divider-cloud-night\s*\{[^}]*opacity:\s*0[^}]*translate3d\(5px, 4px, 0\)/s);
+  assert.match(css, /:root\[data-theme="dark"\] #m3ez-divider-clouds-v1 \.divider-cloud-day\s*\{[^}]*opacity:\s*0[^}]*translate3d\(-5px, 4px, 0\)/s);
+  assert.match(css, /:root\[data-theme="dark"\] #m3ez-divider-clouds-v1 \.divider-cloud-night\s*\{[^}]*opacity:\s*\.11[^}]*translate3d\(0, 0, 0\)/s);
+});
+
+test('day and night clouds drift independently while respecting reduced motion', () => {
+  assert.match(css, /m3ez-cloud-day-a 12s ease-in-out infinite alternate/);
+  assert.match(css, /m3ez-cloud-day-b 15s ease-in-out -5s infinite alternate/);
+  assert.match(css, /m3ez-cloud-night-a 16s ease-in-out -3s infinite alternate/);
+  assert.match(css, /m3ez-cloud-night-b 13s ease-in-out -7s infinite alternate/);
+  assert.match(css, /@media \(prefers-reduced-motion: reduce\)[\s\S]*?#m3ez-divider-clouds-v1 svg\s*\{\s*transition:\s*none;/s);
+  assert.match(css, /@media \(prefers-reduced-motion: reduce\)[\s\S]*?#m3ez-divider-clouds-v1 \.divider-cloud-drift\s*\{[^}]*animation:\s*none[^}]*transform:\s*none/s);
   assert.match(css, /@media print[\s\S]*?#m3ez-divider-clouds-v1\s*\{\s*display:\s*none;/s);
 });
