@@ -9,11 +9,11 @@ const root = new URL('../', import.meta.url);
 
 test('theme bootstrap runs before styles without waiting for the enhancement module', async () => {
   const html = await readFile(new URL('index.html', root), 'utf8');
-  const tag = '<script src="/assets/portfolio-theme.js"></script>';
+  const tag = '<script src="/assets/portfolio-theme.js?v=20261003-2"></script>';
   assert.ok(html.includes(tag), 'homepage must include the standalone theme bootstrap');
   assert.ok(html.indexOf(tag) < html.indexOf('<link rel="stylesheet"'), 'saved theme must apply before styles');
   assert.equal(html.split(tag).length - 1, 1);
-  assert.equal(html.split('href="/assets/portfolio-theme.css"').length - 1, 1);
+  assert.equal(html.split('href="/assets/portfolio-theme.css?v=20261003-2"').length - 1, 1);
 });
 
 test('dark palette is the exact grayscale inverse of the existing light palette', async () => {
