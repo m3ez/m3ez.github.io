@@ -74,7 +74,7 @@
 }
 
 /* Minimal divider walker. The hero's existing bottom border is the path.
-   The slower gait, straighter limbs and backpack match the quiet side-profile style. */
+   Heel strike, toe-off, knee flexion, opposing arm swing and a lightly lagging backpack create a calmer side-profile walk. */
 #top.hero:has(+ #method) {
   position: relative;
 }
@@ -83,8 +83,8 @@
   display: none;
   --walker-width: 34px;
   --walker-height: 40.8px;
-  --walker-crossing: 36s;
-  --walker-cycle: 1.2s;
+  --walker-crossing: 48s;
+  --walker-cycle: 1.44s;
   content: "";
   position: absolute;
   bottom: 0;
@@ -139,8 +139,8 @@
   #top.hero:has(+ #method)::after {
     --walker-width: 26px;
     --walker-height: 31.2px;
-    --walker-crossing: 19s;
-    --walker-cycle: 1.12s;
+    --walker-crossing: 24s;
+    --walker-cycle: 1.36s;
   }
 }
 
