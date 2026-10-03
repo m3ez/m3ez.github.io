@@ -5,6 +5,7 @@ import { readFile, mkdir } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { resolve, extname, sep, join } from 'node:path';
 import { chromium } from 'playwright';
+import { certs } from '../../assets/certs.js';
 
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const types = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.ico': 'image/x-icon', '.svg': 'image/svg+xml' };
@@ -32,6 +33,13 @@ async function load(page) {
   await page.goto(origin, { waitUntil: 'networkidle' });
   assert.equal(await page.locator(toggle).count(), 1, 'exactly one floating theme button must be present');
 }
+async function expandPortfolio(page) {
+  await page.evaluate(() => {
+    document.documentElement.dataset.portfolioExpanded = 'true';
+    document.documentElement.dataset.portfolioReveal = 'complete';
+  });
+}
+
 async function colors(page) {
   return page.evaluate(() => {
     const body = getComputedStyle(document.body);
@@ -67,8 +75,8 @@ for (const width of [320, 390, 768, 1440]) {
       assert.deepEqual(await colors(page), { background: 'rgb(0, 0, 0)', color: 'rgb(238, 238, 238)', scheme: 'dark', tokens: { paper: '#000', black: '#fff', ink: '#eee', muted: '#a6a6a6', line: '#474747', soft: '#191919' } });
       const action = await page.locator('.hero-actions .primary-action').first().evaluate(node => ({ background: getComputedStyle(node).backgroundColor, color: getComputedStyle(node).color }));
       assert.deepEqual(action, { background: 'rgb(255, 255, 255)', color: 'rgb(0, 0, 0)' });
-      assert.equal(await page.locator('.credential-grid-item').count(), 14);
-      assert.equal(await page.locator('.credential-carousel-card').count(), 14);
+      assert.equal(await page.locator('.credential-grid-item').count(), certs.length);
+      assert.equal(await page.locator('.credential-carousel-card').count(), certs.length);
       assert.equal(await page.locator('.trust-statement').textContent(), 'I find broken trust boundaries.');
       assert.equal(await page.locator('.hero-copy').textContent(), 'Independent security researcher and authorized assessments.');
       assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false);
@@ -76,6 +84,7 @@ for (const width of [320, 390, 768, 1440]) {
       await button.blur();
       await page.mouse.move(0, 0);
       await screenshot(page, `${width}-dark.png`);
+      await expandPortfolio(page);
       await page.evaluate(() => window.scrollTo({ top: 600, behavior: 'instant' }));
       await page.locator('#m3ez-back-to-top-v1.is-visible').waitFor();
       const after = await button.boundingBox();
@@ -278,6 +287,7 @@ for (const width of [390, 1440]) {
       try {
         await page.addInitScript(value => localStorage.setItem('m3ez-theme', value), theme);
         await load(page);
+        await expandPortfolio(page);
         const button = page.locator('#m3ez-back-to-top-v1');
         const ink = theme === 'light' ? 'rgb(0, 0, 0)' : 'rgb(255, 255, 255)';
         async function appearance() {
