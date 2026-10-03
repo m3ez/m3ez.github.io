@@ -4,6 +4,19 @@
   "profile": "https://www.wordfence.com/threat-intel/vulnerabilities/researchers/supakiad-s",
   "items": [
     {
+      "id": "CVE-2026-97644",
+      "title": "Groundhogg <= 4.9 - Authenticated (Sales Person+) Privilege Escalation via Contact Identity Rebinding leading to Administrator Account Takeover to 'user_id' Parameter (v3 /contacts) chained with v4 /emails/test",
+      "cvss": 8.8,
+      "href": "https://www.wordfence.com/threat-intel/vulnerabilities/id/557306b7-7b66-465e-8d4d-ebae5b1577c9?source=api-prod",
+      "severity": "High",
+      "class": "Privilege escalation",
+      "authContext": "Sales Person+",
+      "unauthenticated": false,
+      "target": "Groundhogg",
+      "year": 2026,
+      "shortTitle": "Authenticated (Sales Person+) Privilege Escalation via Contact Identity Rebinding leading to Administrator Account Takeover to 'user_id' Parameter (v3 /contacts) chained with v4 /emails/test"
+    },
+    {
       "id": "CVE-2026-97248",
       "title": "Booking Activities <= 1.18.7.1 - Unauthenticated PHP Object Injection",
       "cvss": 8.1,
@@ -876,9 +889,9 @@
     }
   ],
   "stats": {
-    "total": 67,
+    "total": 68,
     "critical": 8,
-    "high": 28,
+    "high": 29,
     "unauthenticated": 36
   }
 }
