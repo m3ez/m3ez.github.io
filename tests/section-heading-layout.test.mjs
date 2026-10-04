@@ -53,8 +53,8 @@ test('consulting intro clears inherited paragraph width', () => {
 test('copy measures stay fluid and object-scoped', () => {
   assert.match(css, /#consulting \.consulting-intro\{min-width:0;max-width:none\}/);
   assert.match(css, /\.consulting-subsection-heading p\{max-width:none;/);
-  assert.match(css, /\.consulting-service dd\{[^}]*max-width:min\(100%,72ch\)/);
-  assert.match(css, /\.consulting-service \.capability-output span\{max-width:min\(100%,64ch\)/);
+  assert.match(css, /\.consulting-service dd\{[^}]*width:100%;[^}]*max-width:none/);
+  assert.match(css, /\.consulting-service \.capability-output span\{[^}]*flex:1 1 0;[^}]*max-width:none/);
   assert.match(css, /\.credential-proof\{max-width:min\(100%,24ch\)/);
 });
 
@@ -73,4 +73,38 @@ test('scope keeps one bottom divider', () => {
 test('consulting focus detail spans available width', () => {
   assert.match(editorial, /\.consulting-subsection-heading p\{[\s\S]*?width:100%;[\s\S]*?min-width:0;[\s\S]*?max-width:none;[\s\S]*?justify-self:stretch/);
   assert.doesNotMatch(editorial, /\.consulting-subsection-heading p\{[^}]*white-space:nowrap/);
+});
+
+
+test('consulting service content expands responsively', () => {
+  assert.match(css, /\.consulting-service-list>\.consulting-service\{[^}]*grid-template-columns:6\.25rem minmax\(0,1fr\)/);
+  assert.match(css, /\.consulting-service dd\{[^}]*width:100%;[^}]*max-width:none/);
+  assert.match(css, /\.consulting-service \.capability-output span\{[^}]*flex:1 1 0;[^}]*max-width:none/);
+  assert.match(css, /@media \(max-width:760px\)\{[\s\S]*?\.consulting-service-list>\.consulting-service\{grid-template-columns:1fr/);
+});
+
+
+test('consulting service copy uses the full content column', () => {
+  assert.match(css, /\.consulting-service dd\{[^}]*width:100%;[^}]*min-width:0;[^}]*max-width:none/);
+  assert.match(css, /\.consulting-service \.capability-output span\{[^}]*flex:1 1 0;[^}]*min-width:0;[^}]*max-width:none/);
+});
+
+
+test('consulting service node sits before the title text', () => {
+  assert.match(css, /\.consulting-service dt\{[^}]*display:flex;[^}]*gap:\.5rem/);
+  assert.match(css, /\.consulting-service dt::before\{[^}]*position:static;[^}]*flex:0 0 auto/);
+  assert.doesNotMatch(css, /\.consulting-service dt::before\{[^}]*left:-/);
+});
+
+
+test('consulting title node has a slow reduced-motion-safe heartbeat', () => {
+  assert.match(css, /\.consulting-service dt::before\{[^}]*animation:consulting-node-heartbeat 3\.6s ease-in-out infinite/);
+  assert.match(css, /@keyframes consulting-node-heartbeat\{[\s\S]*?5%\{transform:scale\(1\.32\)[\s\S]*?14%\{transform:scale\(1\.18\)/);
+  assert.match(css, /@media \(prefers-reduced-motion:reduce\)\{[^}]*\.consulting-service dt::before\{animation:none;transform:none;box-shadow:none\}/);
+});
+
+
+test('consulting node scales with title cap height', () => {
+  assert.match(css, /\.consulting-service dt::before\{[^}]*align-self:center;[^}]*width:\.72em;height:\.72em/);
+  assert.doesNotMatch(css, /\.consulting-service dt::before\{[^}]*width:7px;height:7px/);
 });
