@@ -74,3 +74,11 @@ test('consulting focus detail spans available width', () => {
   assert.match(editorial, /\.consulting-subsection-heading p\{[\s\S]*?width:100%;[\s\S]*?min-width:0;[\s\S]*?max-width:none;[\s\S]*?justify-self:stretch/);
   assert.doesNotMatch(editorial, /\.consulting-subsection-heading p\{[^}]*white-space:nowrap/);
 });
+
+
+test('consulting service content expands responsively', () => {
+  assert.match(css, /\.consulting-service-list>\.consulting-service\{[^}]*grid-template-columns:6\.25rem minmax\(0,1fr\)/);
+  assert.match(css, /\.consulting-service dd\{[^}]*max-width:min\(100%,100ch\)/);
+  assert.match(css, /\.consulting-service \.capability-output span\{[^}]*max-width:min\(100%,90ch\)/);
+  assert.match(css, /@media \(max-width:760px\)\{[\s\S]*?\.consulting-service-list>\.consulting-service\{grid-template-columns:1fr/);
+});
