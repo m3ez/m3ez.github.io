@@ -77,7 +77,7 @@ for (const width of [1440, 1721, 1920]) {
       assert.ok(await page.locator(rails).isVisible());
       assert.equal(await page.locator(`${rails} .side-rail-quote`).textContent(), quote);
       assert.equal(await page.locator(nav).getAttribute('aria-label'), 'Page sections');
-      assert.deepEqual(await page.locator(`${nav} a`).evaluateAll(nodes => nodes.map(node => node.getAttribute('href'))), ['#top', '#research', '#credentials', '#consulting', '#contact']);
+      assert.deepEqual(await page.locator(`${nav} a`).evaluateAll(nodes => nodes.map(node => node.getAttribute('href'))), ['#top', '#security-scope', '#research', '#credentials', '#consulting', '#contact']);
       await active(page, 'top');
       assert.equal(await page.locator(`${rails} .side-rail-current`).textContent(), '01 — INTRO');
       const main = await page.locator('#content').boundingBox();
@@ -129,7 +129,7 @@ test('keyboard rail navigation reveals collapsed sections using native hash link
     assert.equal(new URL(page.url()).hash, '#research');
     assert.equal(await page.locator('html').getAttribute('data-portfolio-expanded'), 'true');
     assert.ok(await page.locator('#research').isVisible());
-    assert.equal(await page.locator(`${rails} .side-rail-current`).textContent(), '02 — RESEARCH');
+    assert.equal(await page.locator(`${rails} .side-rail-current`).textContent(), '03 — RESEARCH');
     assert.deepEqual(errors, []);
   } finally { await page.close(); }
 });
@@ -137,7 +137,7 @@ test('keyboard rail navigation reveals collapsed sections using native hash link
 test('native scrolling updates the current section, including the bottom and return to top', async () => {
   const { page, errors } = await load({ hash: '#research' });
   try {
-    for (const [id, label] of [['credentials', '03 — CREDENTIALS'], ['consulting', '04 — CONSULTING'], ['contact', '05 — CONTACT'], ['top', '01 — INTRO']]) {
+    for (const [id, label] of [['security-scope', '02 — SCOPE'], ['credentials', '04 — CREDENTIALS'], ['consulting', '05 — CONSULTING'], ['contact', '06 — CONTACT'], ['top', '01 — INTRO']]) {
       await page.locator(`#${id}`).evaluate(node => node.scrollIntoView({ behavior: 'instant' }));
       await active(page, id);
       assert.equal(await page.locator(`${rails} .side-rail-current`).textContent(), label);
