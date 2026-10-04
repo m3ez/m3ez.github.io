@@ -108,3 +108,16 @@ test('consulting node scales with title cap height', () => {
   assert.match(css, /\.consulting-service dt::before\{[^}]*align-self:center;[^}]*width:\.72em;height:\.72em/);
   assert.doesNotMatch(css, /\.consulting-service dt::before\{[^}]*width:7px;height:7px/);
 });
+
+
+test('consulting step labels align with the title node row', () => {
+  assert.match(css, /\.consulting-service::before\{[^}]*grid-column:1;[^}]*grid-row:1;[^}]*align-self:center;[^}]*justify-self:center;[^}]*text-align:center/);
+  assert.doesNotMatch(css, /\.consulting-service::before\{[^}]*grid-row:1 \/ span 3/);
+  assert.match(css, /@media \(max-width:760px\)\{[\s\S]*?\.consulting-service::before\{[^}]*grid-row:auto;[^}]*align-self:start/);
+});
+
+
+test('consulting step label gets desktop optical centering', () => {
+  assert.match(css, /\.consulting-service::before\{[^}]*transform:translateY\(2px\)/);
+  assert.match(css, /@media \(max-width:760px\)\{[\s\S]*?\.consulting-service::before\{[^}]*transform:none/);
+});
