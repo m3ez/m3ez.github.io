@@ -78,22 +78,26 @@ function start() {
   }
   function sourceY(source) {
     const r = source.node.getBoundingClientRect();
+    // CSS borders paint on snapped layout edges, not the fractional DOM bounds.
     return source.position === 'center' ? r.top+r.height/2
-      : source.position === 'top' ? r.top+source.actualWidth/2 : r.bottom-source.actualWidth/2;
+      : source.position === 'top' ? Math.round(r.top)+source.actualWidth/2
+      : Math.round(r.bottom)-source.actualWidth/2;
   }
   function draw(source, side, width, sideSeed) {
     const random = rng(sideSeed), between = (a, b) => a+(b-a)*random();
     const spread = Math.min(142, width*.50);
     const half = Math.ceil(spread*1.5+18), height = half*2;
     const id = `edge-${source.key}-${side}`;
-    const svg = svgElement('svg', {class:'m3ez-edge-cluster', width, height, viewBox:`0 0 ${width} ${height}`, focusable:'false', 'aria-hidden':'true'});
+    const svg = svgElement('svg', {class:'m3ez-edge-cluster', width, height, viewBox:`0 ${source.weight/2} ${width} ${height}`, focusable:'false', 'aria-hidden':'true'});
     svg.style.color = source.color;
     svg.style.setProperty('--edge-join-width', `${source.weight}px`);
     const defs = svgElement('defs');
     const gradient = svgElement('linearGradient', {id:`${id}-fade`, gradientUnits:'userSpaceOnUse', x1:side==='left'?width:0, y1:0, x2:side==='left'?0:width, y2:0});
     gradient.append(
       svgElement('stop', {offset:0, 'stop-color':'white', 'stop-opacity':1}),
-      svgElement('stop', {offset:.16, 'stop-color':'white', class:'m3ez-edge-fade-body'}),
+      // Keep the straight stem solid; only fade after it leaves the divider.
+      svgElement('stop', {offset:Math.min(27/width,.12), 'stop-color':'white', 'stop-opacity':1}),
+      svgElement('stop', {offset:.36, 'stop-color':'white', class:'m3ez-edge-fade-body'}),
       svgElement('stop', {offset:.80, 'stop-color':'white', class:'m3ez-edge-fade-tail'}),
       svgElement('stop', {offset:1, 'stop-color':'white', 'stop-opacity':0})
     );
@@ -164,7 +168,9 @@ function start() {
     const positions=new Map(sources.map(s=>[s.key,sourceY(s)]));
     clusters.forEach(c=>{
       const y=positions.get(c.source.key)-c.half;
-      c.svg.style.transform=`translate3d(0,${y.toFixed(3)}px,0)`;
+      // Keep the SVG viewport on the layout-pixel grid. The viewBox supplies
+      // the half-stroke offset; a fractional 3D translation blurs it again.
+      c.svg.style.top=`${y+c.source.weight/2}px`;
       const offscreen = y > innerHeight + 20 || y + c.half * 2 < -20;
       c.svg.style.visibility = offscreen ? 'hidden' : 'visible';
       c.svg.dataset.offscreen = String(offscreen);
@@ -182,9 +188,11 @@ function start() {
     watch([...containers,...candidates]);
     if(!active){wings.forEach(w=>w.replaceChildren());clusters=[];sources=[];signature='';return;}
     const maximum=Math.max(72,parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--edge-max-width'))||380);
-    const widths=[Math.min(maximum,left),Math.min(maximum,viewport-right)];
-    Object.assign(wings[0].style,{left:`${left-widths[0]}px`,width:`${widths[0]}px`});
-    Object.assign(wings[1].style,{left:`${right}px`,width:`${widths[1]}px`});
+    // Match the painted CSS edges, including half-pixel centered containers.
+    const paintLeft=Math.round(left),paintRight=Math.round(right);
+    const widths=[Math.min(maximum,paintLeft),Math.min(maximum,viewport-paintRight)];
+    Object.assign(wings[0].style,{left:`${paintLeft-widths[0]}px`,width:`${widths[0]}px`});
+    Object.assign(wings[1].style,{left:`${paintRight}px`,width:`${widths[1]}px`});
     sources=candidates.map(n=>inspectSource(n,left,right)).filter(Boolean);
     const next=JSON.stringify([widths,seed,sources.map(s=>[s.key,s.weight,s.color,s.position])]);
     if(signature!==next){
