@@ -45,8 +45,12 @@ test('Verify returns to Analyze through the labelled static dashed feedback path
 });
 
 test('left return leg aligns with the Analyze edge', () => {
-  assert.match(section, /d="M250 1V20H5V1"/);
+  assert.match(section, /d="M205 1V20H5V1"/);
   assert.match(section, /d="m1 5 4-4 4 4"/);
+});
+
+test('feedback label follows the shifted source', () => {
+  assert.match(methodCss, /#method \.method-feedback-label\{[^}]*left:0;right:30%;[^}]*text-align:center/);
 });
 
 test('the previous text-only Method writer cannot overwrite the diagram', () => {
