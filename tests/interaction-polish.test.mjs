@@ -6,13 +6,17 @@ const interactions = readFileSync(new URL('../assets/portfolio-interactions.js',
 const css = readFileSync(new URL('../assets/research-credentials.css', import.meta.url), 'utf8');
 
 test('primary navigation tracks the current portfolio section accessibly', () => {
-  assert.match(interactions, /const ACTIVE_SECTION_IDS = \['research', 'credentials', 'consulting', 'contact'\]/);
+  assert.match(interactions, /const ACTIVE_SECTION_IDS = \['security-scope', 'research', 'credentials', 'consulting', 'contact'\]/);
   assert.match(interactions, /function syncActiveSection\(\)/);
   assert.match(interactions, /requestAnimationFrame\(syncActiveSection\)/);
   assert.match(interactions, /link\.setAttribute\('aria-current', 'location'\)/);
   assert.match(interactions, /link\.removeAttribute\('aria-current'\)/);
   assert.match(interactions, /window\.addEventListener\('scroll', scheduleActiveSection, \{ passive: true \}\)/);
   assert.match(interactions, /window\.addEventListener\('resize', scheduleActiveSection\)/);
+});
+
+test('mobile navigation includes Security Scope', () => {
+  assert.match(interactions, /\["Scope", "#security-scope"\]/);
 });
 
 test('active navigation uses a restrained underline without layout movement', () => {
