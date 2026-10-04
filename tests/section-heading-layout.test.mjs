@@ -102,3 +102,9 @@ test('consulting title node has a slow reduced-motion-safe heartbeat', () => {
   assert.match(css, /@keyframes consulting-node-heartbeat\{[\s\S]*?5%\{transform:scale\(1\.32\)[\s\S]*?14%\{transform:scale\(1\.18\)/);
   assert.match(css, /@media \(prefers-reduced-motion:reduce\)\{[^}]*\.consulting-service dt::before\{animation:none;transform:none;box-shadow:none\}/);
 });
+
+
+test('consulting node scales with title cap height', () => {
+  assert.match(css, /\.consulting-service dt::before\{[^}]*align-self:center;[^}]*width:\.72em;height:\.72em/);
+  assert.doesNotMatch(css, /\.consulting-service dt::before\{[^}]*width:7px;height:7px/);
+});
