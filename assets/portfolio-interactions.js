@@ -408,6 +408,7 @@ export function initializeInteractions() {
       panel.hidden = true;
 
       [
+        ["Scope", "#security-scope"],
         ["Research", "#research"],
         ["Credentials", "#credentials"],
         ["Consulting", "#consulting"],
@@ -465,7 +466,7 @@ export function initializeInteractions() {
   })();
 
   (() => {
-    const ACTIVE_SECTION_IDS = ['research', 'credentials', 'consulting', 'contact'];
+    const ACTIVE_SECTION_IDS = ['security-scope', 'research', 'credentials', 'consulting', 'contact'];
     const nav = document.querySelector('.site-header nav');
     if (!nav) return;
 
