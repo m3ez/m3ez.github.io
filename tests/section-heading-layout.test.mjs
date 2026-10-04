@@ -48,3 +48,12 @@ test('section intros use available desktop width without forced nowrap', () => {
 test('consulting intro clears inherited paragraph width', () => {
   assert.match(editorial, /#consulting \.consulting-intro p\{max-width:none;color:var\(--muted\)\}/);
 });
+
+
+test('copy measures stay fluid and object-scoped', () => {
+  assert.match(css, /#consulting \.consulting-intro\{min-width:0;max-width:none\}/);
+  assert.match(css, /\.consulting-subsection-heading p\{max-width:none;/);
+  assert.match(css, /\.consulting-service dd\{[^}]*max-width:min\(100%,72ch\)/);
+  assert.match(css, /\.consulting-service \.capability-output span\{max-width:min\(100%,64ch\)/);
+  assert.match(css, /\.credential-proof\{max-width:min\(100%,24ch\)/);
+});
