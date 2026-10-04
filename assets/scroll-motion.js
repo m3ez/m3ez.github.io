@@ -4,6 +4,7 @@ const REVEAL_SELECTORS = [
   '#research > .section-heading',
   '#recognition > .section-heading',
   '#consulting > .section-heading',
+  '#consulting > .consulting-focus-heading',
   '#consulting .capability-list > div',
   '#consulting > .privacy-note',
   '#consulting > .consulting-scope',
