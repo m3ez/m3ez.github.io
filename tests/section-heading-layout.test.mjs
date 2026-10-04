@@ -82,3 +82,9 @@ test('consulting service content expands responsively', () => {
   assert.match(css, /\.consulting-service \.capability-output span\{[^}]*max-width:min\(100%,90ch\)/);
   assert.match(css, /@media \(max-width:760px\)\{[\s\S]*?\.consulting-service-list>\.consulting-service\{grid-template-columns:1fr/);
 });
+
+
+test('consulting service copy uses the full content column', () => {
+  assert.match(css, /\.consulting-service dd\{[^}]*width:100%;[^}]*min-width:0;[^}]*max-width:none/);
+  assert.match(css, /\.consulting-service \.capability-output span\{[^}]*flex:1 1 0;[^}]*min-width:0;[^}]*max-width:none/);
+});
