@@ -550,14 +550,24 @@
   position: relative;
 }
 
+/* Keep the link in its existing section so Hero + Method remain adjacent.
+   Reserve landing space for the control outside the section's bottom border. */
+:root[data-portfolio-expanded="false"] #content {
+  padding-bottom: 4.5rem;
+}
+
 #m3ez-explore-more-v1 {
   position: absolute;
+  top: 100%;
   left: 50%;
-  bottom: .65rem;
+  z-index: 2;
   display: inline-flex;
   align-items: center;
   gap: .5rem;
   width: max-content;
+  min-height: 44px;
+  margin: .5rem 0 0;
+  padding: .5rem .75rem;
   color: var(--muted);
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   font-size: 12px;
@@ -593,23 +603,10 @@
   animation: m3ez-extended-content-reveal 520ms cubic-bezier(.22, 1, .36, 1) both;
 }
 
-/* The link is a final hero grid row on mobile, above the preserved sky strip.
-   In-flow spacing keeps the 44px touch target clear of the carousel and clouds. */
+/* Mobile keeps Hero only; the shared link placement stays below its divider. */
 @media (max-width: 760px) {
   :root[data-portfolio-expanded="false"] #method {
     display: none !important;
-  }
-
-  #top > #m3ez-explore-more-v1 {
-    position: relative;
-    inset: auto;
-    z-index: 2;
-    grid-column: 1 / -1;
-    justify-self: center;
-    min-height: 44px;
-    margin: 1rem auto .75rem;
-    padding: .5rem .75rem;
-    transform: none;
   }
 
   :root[data-portfolio-reveal="active"] #method {
@@ -641,6 +638,10 @@
 }
 
 @media print {
+  :root[data-portfolio-expanded="false"] #content {
+    padding-bottom: 0;
+  }
+
   :root[data-portfolio-expanded="false"] #method,
   :root[data-portfolio-expanded="false"] #method ~ *,
   :root[data-portfolio-expanded="false"] .site-footer {
