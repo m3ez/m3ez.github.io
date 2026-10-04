@@ -1,14 +1,8 @@
+import { getNavigationSections } from './navigation-sections.js';
+
 const RAILS_ID = 'm3ez-side-rails-v1';
 const STYLE_ID = 'm3ez-side-rails-style-v1';
 const WIDE_VIEWPORT = '(min-width: 1440px) and (min-height: 640px)';
-const SECTIONS = [
-  ['top', 'Intro'],
-  ['research', 'Research'],
-  ['credentials', 'Credentials'],
-  ['consulting', 'Consulting'],
-  ['contact', 'Contact'],
-];
-
 // The enhancement owns its styles, like the existing carousel. Nothing changes
 // the content width, Hero/Method adjacency, or floating theme/back-to-top controls.
 const CSS = `
@@ -84,7 +78,7 @@ const CSS = `
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  height: clamp(220px, 34vh, 320px);
+  gap: clamp(0px, 1.2vh, 12px);
 }
 #${RAILS_ID} .side-rail-links::before,
 #${RAILS_ID} .side-rail-progress {
@@ -152,8 +146,7 @@ export function initializeSideRails() {
   const main = document.getElementById('content');
   if (!main || !document.getElementById('top') || document.getElementById(RAILS_ID)) return;
 
-  const sections = SECTIONS.map(([id, label]) => ({ id, label, node: document.getElementById(id) }))
-    .filter(section => section.node);
+  const sections = getNavigationSections('rail');
   if (sections.length < 2) return;
 
   if (!document.getElementById(STYLE_ID)) {

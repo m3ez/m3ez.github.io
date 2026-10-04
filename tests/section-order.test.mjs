@@ -25,3 +25,14 @@ test('enhancement module preserves Credentials before Consulting for future expo
   assert.match(redesign, /consulting\.before\(credentials\)/);
   assert.match(redesign, /function start\(\)\s*\{\s*placeCredentialsBeforeConsulting\(\);/);
 });
+
+
+test('Security Scope sits directly between Method and Research', () => {
+  const method = html.indexOf('id="method"');
+  const scope = html.indexOf('id="security-scope"');
+  const research = html.indexOf('id="research"');
+
+  assert.ok(method >= 0 && scope >= 0 && research >= 0);
+  assert.ok(method < scope && scope < research, 'Security Scope must follow Method and precede Research');
+  assert.match(html, /<ul class="security-scope-grid" role="list"><li>Web<\/li><li>API<\/li><li>Mobile<\/li><li>Active Directory<\/li><li>Network<\/li><li>Thick Client<\/li><li>Secure Code Review<\/li><li>Exploit Development<\/li><\/ul>/);
+});
