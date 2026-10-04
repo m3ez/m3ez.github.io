@@ -115,3 +115,9 @@ test('consulting step labels align with the title node row', () => {
   assert.doesNotMatch(css, /\.consulting-service::before\{[^}]*grid-row:1 \/ span 3/);
   assert.match(css, /@media \(max-width:760px\)\{[\s\S]*?\.consulting-service::before\{[^}]*grid-row:auto;[^}]*align-self:start/);
 });
+
+
+test('consulting step label gets desktop optical centering', () => {
+  assert.match(css, /\.consulting-service::before\{[^}]*transform:translateY\(1\.5px\)/);
+  assert.match(css, /@media \(max-width:760px\)\{[\s\S]*?\.consulting-service::before\{[^}]*transform:none/);
+});
