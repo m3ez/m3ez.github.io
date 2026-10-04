@@ -43,3 +43,8 @@ test('section intros use available desktop width without forced nowrap', () => {
   assert.doesNotMatch(editorial, /white-space:nowrap/);
   assert.match(editorial, /#consulting \.consulting-intro\{max-width:none\}/);
 });
+
+
+test('consulting intro clears inherited paragraph width', () => {
+  assert.match(editorial, /#consulting \.consulting-intro p\{max-width:none;color:var\(--muted\)\}/);
+});
