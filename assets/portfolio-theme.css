@@ -77,14 +77,16 @@
    A 32-frame gait coordinates hip rotation, knee flexion, foot roll, counter-swinging arms, restrained torso motion, and a lightly lagging backpack. */
 #top.hero:has(+ #method) {
   position: relative;
-}
-
-#top.hero:has(+ #method)::after {
-  display: none;
   --walker-width: 34px;
   --walker-height: 40.8px;
   --walker-crossing: 48s;
   --walker-cycle: 1.52s;
+  --cat-gap: 8px;
+  --cat-offset: calc(var(--walker-width) + var(--cat-gap));
+}
+
+#top.hero:has(+ #method)::after {
+  display: none;
   content: "";
   position: absolute;
   bottom: 0;
@@ -107,7 +109,10 @@
     m3ez-divider-walk var(--walker-cycle) steps(32) infinite;
 }
 
-:root[data-divider-walker="active"] #top.hero:has(+ #method)::after {
+/* Neither crossing starts until the cat is mounted: both clocks begin on the
+   same style update, and restart together when R/r toggles the pair. */
+:root[data-divider-walker="active"] #top.hero:has(+ #method):has(> #m3ez-divider-cat-v1)::after,
+:root[data-divider-walker="active"] #top.hero:has(+ #method) > #m3ez-divider-cat-v1 {
   display: block;
 }
 
@@ -120,7 +125,7 @@
 
 @keyframes m3ez-divider-walk-cross {
   0% {
-    left: 0;
+    left: var(--cat-offset);
     opacity: 0;
   }
   4% {
@@ -136,7 +141,7 @@
 }
 
 @media (max-width: 640px) {
-  #top.hero:has(+ #method)::after {
+  #top.hero:has(+ #method) {
     --walker-width: 26px;
     --walker-height: 31.2px;
     --walker-crossing: 24s;
@@ -154,6 +159,80 @@
 @media print {
   #top.hero:has(+ #method)::after {
     content: none;
+    animation: none;
+  }
+}
+
+/* Small cat follower: the same crossing and fade as the walker, offset by a
+   fixed gap. No extra layout row, pointer target or JavaScript animation timer. */
+#m3ez-divider-cat-v1 {
+  display: none;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: var(--walker-width);
+  height: calc(var(--walker-height) * .6);
+  color: var(--black);
+  pointer-events: none;
+  opacity: 0;
+  transform: translateX(calc(-1 * var(--cat-offset)));
+  animation: m3ez-divider-walk-cross var(--walker-crossing) linear infinite;
+}
+
+#m3ez-divider-cat-v1 svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+#m3ez-divider-cat-v1 .divider-cat-leg {
+  transform-box: view-box;
+  animation: m3ez-cat-step var(--walker-cycle) ease-in-out infinite;
+}
+
+#m3ez-divider-cat-v1 .divider-cat-back-near {
+  transform-origin: 12px 17px;
+}
+
+#m3ez-divider-cat-v1 .divider-cat-front-far {
+  transform-origin: 26px 16px;
+  animation-delay: calc(var(--walker-cycle) * -.25);
+}
+
+#m3ez-divider-cat-v1 .divider-cat-back-far {
+  transform-origin: 12px 17px;
+  animation-delay: calc(var(--walker-cycle) * -.5);
+}
+
+#m3ez-divider-cat-v1 .divider-cat-front-near {
+  transform-origin: 26px 16px;
+  animation-delay: calc(var(--walker-cycle) * -.75);
+}
+
+#m3ez-divider-cat-v1 .divider-cat-tail {
+  transform-box: view-box;
+  transform-origin: 10px 15px;
+  animation: m3ez-cat-tail calc(var(--walker-cycle) * 1.5) ease-in-out infinite;
+}
+
+@keyframes m3ez-cat-step {
+  0%, 100% { transform: rotate(12deg); }
+  50% { transform: rotate(-12deg); }
+}
+
+@keyframes m3ez-cat-tail {
+  0%, 100% { transform: rotate(-5deg); }
+  50% { transform: rotate(5deg); }
+}
+
+@media (prefers-reduced-motion: reduce), print {
+  #m3ez-divider-cat-v1 {
+    display: none !important;
+    animation: none;
+  }
+
+  #m3ez-divider-cat-v1 .divider-cat-leg,
+  #m3ez-divider-cat-v1 .divider-cat-tail {
     animation: none;
   }
 }

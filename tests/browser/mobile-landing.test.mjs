@@ -79,14 +79,14 @@ for (const width of [320, 390, 640, 760]) for (const palette of ['light', 'dark'
 }
 
 for (const width of [761, 1024, 1440]) {
-  test(`desktop at ${width}px retains Method, Research destination and an inactive walker`, async () => {
+  test(`desktop at ${width}px retains Method, Research destination and an active walker`, async () => {
     const { page } = await load({ width });
     try {
       assert.ok(await page.locator('#method').isVisible());
       assert.equal(await page.locator('#research').isVisible(), false);
       assert.equal(await page.locator(hint).getAttribute('href'), '#research');
       assert.equal(await page.locator(hint).evaluate(node => node.parentElement.id), 'method');
-      assert.equal(await page.locator('#top').evaluate(node => getComputedStyle(node, '::after').display), 'none');
+      assert.equal(await page.locator('#top').evaluate(node => getComputedStyle(node, '::after').display), 'block');
       await page.locator(hint).click();
       await page.waitForFunction(() => location.hash === '#research');
       assert.ok(await page.locator('#research').isVisible());
@@ -133,7 +133,7 @@ test('resize moves a single Explore control while preserving expansion and manua
     await page.waitForFunction(() => document.querySelector('#m3ez-explore-more-v1').parentElement.id === 'method');
     assert.ok(await page.locator('#method').isVisible());
     assert.equal(await page.locator(hint).getAttribute('href'), '#research');
-    assert.equal(await page.locator('html').getAttribute('data-divider-walker'), 'inactive');
+    assert.equal(await page.locator('html').getAttribute('data-divider-walker'), 'active');
     await page.setViewportSize({ width: 390, height: 900 });
     await page.waitForFunction(() => document.querySelector('#m3ez-explore-more-v1').parentElement.id === 'top');
     assert.equal(await page.locator('#method').isVisible(), false);

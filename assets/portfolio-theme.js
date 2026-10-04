@@ -7,6 +7,7 @@
   const CELESTIAL_ID = 'm3ez-divider-celestial-v1';
   const CLOUDS_ID = 'm3ez-divider-clouds-v1';
   const LIGHT_ID = 'm3ez-divider-light-v1';
+  const CAT_ID = 'm3ez-divider-cat-v1';
   const root = document.documentElement;
   // Keep this breakpoint in sync with progressive-disclosure.js and theme CSS.
   const mobileLayout = window.matchMedia?.('(max-width: 760px)');
@@ -22,17 +23,10 @@
   let moonIcon;
   let moonPath;
   let autoThemeEnabled = true;
-  let walkerManuallyToggled = false;
-
-  // Responsive defaults only: R/r takes control for the remainder of this page.
-  // CSS still suppresses the animation for reduced motion and print.
-  function updateWalkerDefault() {
-    if (!walkerManuallyToggled) {
-      root.dataset.dividerWalker = mobileLayout?.matches ? 'active' : 'inactive';
-    }
-  }
-  updateWalkerDefault();
-  mobileLayout?.addEventListener('change', updateWalkerDefault);
+  // The walking pair is enabled on desktop and mobile. R/r remains a
+  // page-local override; resizing never changes the user's choice.
+  // CSS suppresses both figures for reduced motion and print.
+  root.dataset.dividerWalker = 'active';
 
   function getLocalHour(date = new Date()) {
     return date.getHours() + date.getMinutes() / 60 + date.getSeconds() / 3600;
@@ -231,10 +225,36 @@
     updateSky();
   }
 
+  function mountDividerCat() {
+    const hero = document.getElementById('top');
+    if (!hero || document.getElementById(CAT_ID)) return;
+
+    const cat = document.createElement('span');
+    cat.id = CAT_ID;
+    cat.setAttribute('aria-hidden', 'true');
+    // Local, decorative SVG only. CSS gives the cat and walker one crossing
+    // clock, with a fixed gap rather than a slower pace that would drift.
+    cat.innerHTML =
+      '<svg viewBox="0 0 40 28" xmlns="http://www.w3.org/2000/svg" fill="currentColor" aria-hidden="true" focusable="false">' +
+      '<g fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">' +
+      '<path class="divider-cat-tail" d="M10 15C4 15 5 10 5 7C5 3 2 3 2 5"/>' +
+      '<path class="divider-cat-leg divider-cat-back-far" opacity=".5" d="M12 17L14 22L13 26H15"/>' +
+      '<path class="divider-cat-leg divider-cat-front-far" opacity=".5" d="M26 16L24 22L25 26H27"/>' +
+      '</g>' +
+      '<path d="M9 16C9 12 13 11 17 11H24C27 11 29 14 28 17C27 20 23 20 19 19H13C10 19 8 18 9 16Z"/>' +
+      '<path d="M25 13L25 5L29 7L33 4L34 10L37 12L35 15L29 17Z"/>' +
+      '<g fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">' +
+      '<path class="divider-cat-leg divider-cat-back-near" d="M12 17L10 22L11 26H13"/>' +
+      '<path class="divider-cat-leg divider-cat-front-near" d="M26 16L27 22L27 26H29"/>' +
+      '</g></svg>';
+    hero.appendChild(cat);
+  }
+
   function mount() {
     mountDividerLight();
     mountDividerClouds();
     mountDividerCelestial();
+    mountDividerCat();
     if (document.getElementById(BUTTON_ID)) return;
     button = document.createElement('button');
     button.id = BUTTON_ID;
@@ -257,7 +277,6 @@
     if (event.key.toLowerCase() !== 'r' || event.repeat || event.altKey || event.ctrlKey || event.metaKey) return;
     const target = event.target;
     if (target instanceof HTMLElement && (target.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(target.tagName))) return;
-    walkerManuallyToggled = true;
     root.dataset.dividerWalker = root.dataset.dividerWalker === 'active' ? 'inactive' : 'active';
   });
 
