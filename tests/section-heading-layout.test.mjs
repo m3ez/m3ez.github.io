@@ -62,3 +62,9 @@ test('copy measures stay fluid and object-scoped', () => {
 test('consulting privacy note aligns to the right', () => {
   assert.match(css, /\.consulting-privacy\{[^}]*text-align:right/);
 });
+
+
+test('scope keeps one bottom divider', () => {
+  assert.match(css, /\.consulting-scope\{[^}]*border-bottom:0/);
+  assert.match(css, /\.consulting-scope-grid\{[^}]*border-bottom:\.5px solid var\(--line\)/);
+});
