@@ -8,18 +8,31 @@
   const CLOUDS_ID = 'm3ez-divider-clouds-v1';
   const LIGHT_ID = 'm3ez-divider-light-v1';
   const root = document.documentElement;
-  const initialHash = window.location?.hash || '';
+  // Keep this breakpoint in sync with progressive-disclosure.js and theme CSS.
+  const mobileLayout = window.matchMedia?.('(max-width: 760px)');
+  let initialHash = window.location?.hash || '';
+  try { initialHash = decodeURIComponent(initialHash); } catch { /* Keep malformed hashes harmless. */ }
   const landingHash =
     !initialHash ||
     initialHash === '#top' ||
     initialHash === '#content' ||
-    initialHash === '#method' ||
-    initialHash.startsWith('#method-');
+    (!mobileLayout?.matches && (initialHash === '#method' || initialHash.startsWith('#method-')));
   root.dataset.portfolioExpanded = landingHash ? 'false' : 'true';
   let button;
   let moonIcon;
   let moonPath;
   let autoThemeEnabled = true;
+  let walkerManuallyToggled = false;
+
+  // Responsive defaults only: R/r takes control for the remainder of this page.
+  // CSS still suppresses the animation for reduced motion and print.
+  function updateWalkerDefault() {
+    if (!walkerManuallyToggled) {
+      root.dataset.dividerWalker = mobileLayout?.matches ? 'active' : 'inactive';
+    }
+  }
+  updateWalkerDefault();
+  mobileLayout?.addEventListener('change', updateWalkerDefault);
 
   function getLocalHour(date = new Date()) {
     return date.getHours() + date.getMinutes() / 60 + date.getSeconds() / 3600;
@@ -244,6 +257,7 @@
     if (event.key.toLowerCase() !== 'r' || event.repeat || event.altKey || event.ctrlKey || event.metaKey) return;
     const target = event.target;
     if (target instanceof HTMLElement && (target.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(target.tagName))) return;
+    walkerManuallyToggled = true;
     root.dataset.dividerWalker = root.dataset.dividerWalker === 'active' ? 'inactive' : 'active';
   });
 

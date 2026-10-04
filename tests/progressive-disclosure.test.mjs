@@ -14,12 +14,13 @@ test('landing bootstrap collapses extended content before first paint', () => {
   assert.match(themeCss, /:root\[data-portfolio-expanded="false"\] \.site-footer/);
 });
 
-test('hero and Method remain outside the collapsed selector', () => {
+test('mobile hides Method and moves Explore while desktop keeps the Research destination', () => {
   assert.doesNotMatch(themeCss, /data-portfolio-expanded="false"[^}]*#top/);
-  assert.doesNotMatch(themeCss, /data-portfolio-expanded="false"[^}]*#method\s*\{[^}]*display\s*:\s*none/s);
+  assert.match(themeCss, /@media \(max-width: 760px\)\s*\{\s*:root\[data-portfolio-expanded="false"\] #method\s*\{\s*display:\s*none !important/s);
   assert.match(disclosure, /HINT_ID\s*=\s*'m3ez-explore-more-v1'/);
-  assert.match(disclosure, /hint\.href\s*=\s*'#research'/);
-  assert.match(disclosure, /method\.appendChild\(hint\)/);
+  assert.match(disclosure, /hint\.href\s*=\s*mobileLayout\.matches \? '#method' : '#research'/);
+  assert.match(disclosure, /const parent = mobileLayout\.matches \? hero : method/);
+  assert.match(disclosure, /parent\.appendChild\(hint\)/);
   assert.match(themeCss, /#m3ez-explore-more-v1\s*\{/);
   assert.match(themeCss, /:root\[data-portfolio-expanded="true"\] #m3ez-explore-more-v1/);
 });
