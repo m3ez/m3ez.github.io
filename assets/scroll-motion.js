@@ -1,3 +1,5 @@
+import { initializeSideRails } from './side-rails.js';
+
 const REVEAL_SELECTORS = [
   '#research > .section-heading',
   '#recognition > .section-heading',
@@ -137,6 +139,7 @@ function initializeInertialScroll(reducedMotion) {
 export function initializeScrollMotion() {
   if (document.documentElement.dataset.m3ezScrollMotion === 'ready') return;
   document.documentElement.dataset.m3ezScrollMotion = 'ready';
+  initializeSideRails();
 
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
   initializeInertialScroll(reducedMotion);
