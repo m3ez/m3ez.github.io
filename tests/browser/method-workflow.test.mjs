@@ -234,17 +234,28 @@ async function feedbackGeometry(page, width) {
     const matrix = path.getScreenCTM();
     const from = path.getPointAtLength(0).matrixTransform(matrix);
     const to = path.getPointAtLength(path.getTotalLength()).matrixTransform(matrix);
-    const analyze = document.getElementById(feedback.dataset.to).getBoundingClientRect();
-    const verify = document.getElementById(feedback.dataset.from).getBoundingClientRect();
+    const analyzeNode = document.getElementById(feedback.dataset.to);
+    const verifyNode = document.getElementById(feedback.dataset.from);
+    const analyze = analyzeNode.getBoundingClientRect();
+    const verify = verifyNode.getBoundingClientRect();
+    const analyzeMarker = analyzeNode.querySelector('.method-marker').getBoundingClientRect();
+    const verifyMarker = verifyNode.querySelector('.method-marker').getBoundingClientRect();
     const label = feedback.querySelector('p').getBoundingClientRect();
     const deliver = node.querySelector('[data-phase="deliver"]').getBoundingClientRect();
-    return { from: {x:from.x,y:from.y}, to: {x:to.x,y:to.y}, analyze: analyze.toJSON(), verify: verify.toJSON(), label: label.toJSON(), deliver: deliver.toJSON() };
+    return {
+      from: {x:from.x,y:from.y}, to: {x:to.x,y:to.y},
+      analyze: analyze.toJSON(), verify: verify.toJSON(),
+      analyzeMarker: analyzeMarker.toJSON(), verifyMarker: verifyMarker.toJSON(),
+      label: label.toJSON(), deliver: deliver.toJSON(),
+    };
   });
-  const {from,to,analyze,verify,label,deliver} = geometry;
+  const {from,to,analyze,verify,analyzeMarker,verifyMarker,label,deliver} = geometry;
   if (width > 980) {
-    assert.ok(Math.abs(from.x - (verify.x + verify.width / 2)) < 2, JSON.stringify(geometry));
-    assert.ok(Math.abs(to.x - (analyze.x + analyze.width / 2)) < 2, JSON.stringify(geometry));
-    assert.ok(to.x < from.x && to.y >= analyze.y + analyze.height - 1);
+    assert.ok(Math.abs(from.x - (verifyMarker.x + verifyMarker.width / 2)) < 2, JSON.stringify(geometry));
+    assert.ok(Math.abs(to.x - (analyzeMarker.x + analyzeMarker.width / 2)) < 2, JSON.stringify(geometry));
+    assert.ok(Math.abs(from.y - (verifyMarker.y + verifyMarker.height / 2)) < 2, JSON.stringify(geometry));
+    assert.ok(Math.abs(to.y - (analyzeMarker.y + analyzeMarker.height / 2)) < 2, JSON.stringify(geometry));
+    assert.ok(to.x < from.x, JSON.stringify(geometry));
     assert.ok(label.y >= verify.y + verify.height && label.right <= deliver.x + 1);
   } else {
     assert.ok(Math.abs(from.y - (verify.y + verify.height / 2)) < 2, JSON.stringify(geometry));
