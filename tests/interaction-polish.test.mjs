@@ -3,12 +3,18 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 
 const interactions = readFileSync(new URL('../assets/portfolio-interactions.js', import.meta.url), 'utf8');
+const navigation = readFileSync(new URL('../assets/navigation-sections.js', import.meta.url), 'utf8');
+const sideRails = readFileSync(new URL('../assets/side-rails.js', import.meta.url), 'utf8');
 const css = readFileSync(new URL('../assets/research-credentials.css', import.meta.url), 'utf8');
 
 test('all navigation surfaces use shared dynamic section discovery', () => {
   assert.match(interactions, /import \{ getNavigationSections \} from '\.\/navigation-sections\.js';/);
   assert.match(interactions, /getNavigationSections\('primary'\)/);
   assert.match(interactions, /getNavigationSections\('mobile'\)/);
+  assert.match(sideRails, /getNavigationSections\('rail'\)/);
+  assert.match(navigation, /querySelectorAll\('#content > section\[id\]'\)/);
+  assert.match(navigation, /section\.dataset\.nav !== 'off'/);
+  assert.match(navigation, /section\.dataset\.navSurfaces/);
   assert.doesNotMatch(interactions, /const ACTIVE_SECTION_IDS =/);
   assert.match(interactions, /function syncActiveSection\(\)/);
   assert.match(interactions, /requestAnimationFrame\(syncActiveSection\)/);
