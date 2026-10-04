@@ -27,12 +27,15 @@ test('enhancement module preserves Credentials before Consulting for future expo
 });
 
 
-test('Security Scope sits directly between Method and Research', () => {
+test('Scope is nested inside Consulting instead of being a standalone section', () => {
   const method = html.indexOf('id="method"');
-  const scope = html.indexOf('id="security-scope"');
   const research = html.indexOf('id="research"');
+  const consulting = html.indexOf('id="consulting"');
+  const scope = html.indexOf('class="consulting-scope"');
 
-  assert.ok(method >= 0 && scope >= 0 && research >= 0);
-  assert.ok(method < scope && scope < research, 'Security Scope must follow Method and precede Research');
-  assert.match(html, /<ul class="security-scope-grid" role="list"><li>Web<\/li><li>API<\/li><li>Mobile<\/li><li>Active Directory<\/li><li>Network<\/li><li>Thick Client<\/li><li>Secure Code Review<\/li><li>Exploit Development<\/li><\/ul>/);
+  assert.ok(method >= 0 && research >= 0 && consulting >= 0 && scope >= 0);
+  assert.ok(method < research, 'Research follows Method again');
+  assert.ok(consulting < scope, 'Scope must live inside Consulting');
+  assert.doesNotMatch(html, /id="security-scope"/, 'Scope is no longer a standalone navigation destination');
+  assert.match(html, /<ul class="consulting-scope-grid" role="list"><li>Web<\/li><li>API<\/li><li>Mobile<\/li><li>Active Directory<\/li><li>Network<\/li><li>Thick Client<\/li><li>Secure Code Review<\/li><li>Exploit Development<\/li><\/ul>/);
 });
