@@ -17,6 +17,8 @@
     initialHash.startsWith('#method-');
   root.dataset.portfolioExpanded = landingHash ? 'false' : 'true';
   let button;
+  let moonIcon;
+  let moonPath;
   let autoThemeEnabled = true;
 
   function getLocalHour(date = new Date()) {
@@ -52,6 +54,64 @@
     };
   }
 
+  // Date-only geocentric illumination, adapted from SunCalc 1.9.0 (BSD-2-Clause).
+  // Source and complete license: ./suncalc-LICENSE.txt. No location or network call.
+  // This low-precision model is for decoration, not an ephemeris or moonrise clock.
+  function getMoonState(date) {
+    const rad = Math.PI / 180;
+    const days = date.getTime() / 86400000 + 2440587.5 - 2451545;
+    const obliquity = rad * 23.4397;
+    const { sin, cos, tan, asin, acos, atan2 } = Math;
+    const coordinates = (longitude, latitude) => ({
+      ra: atan2(sin(longitude) * cos(obliquity) - tan(latitude) * sin(obliquity), cos(longitude)),
+      dec: asin(sin(latitude) * cos(obliquity) + cos(latitude) * sin(obliquity) * sin(longitude)),
+    });
+    const solarAnomaly = rad * (357.5291 + .98560028 * days);
+    const solarLongitude = solarAnomaly + rad * (
+      1.9148 * sin(solarAnomaly) + .02 * sin(2 * solarAnomaly) +
+      .0003 * sin(3 * solarAnomaly) + 102.9372
+    ) + Math.PI;
+    const sun = coordinates(solarLongitude, 0);
+    const lunarAnomaly = rad * (134.963 + 13.064993 * days);
+    const lunarLongitude = rad * (218.316 + 13.176396 * days) + rad * 6.289 * sin(lunarAnomaly);
+    const lunarLatitude = rad * 5.128 * sin(rad * (93.272 + 13.229350 * days));
+    const moon = coordinates(lunarLongitude, lunarLatitude);
+    const distance = 385001 - 20905 * cos(lunarAnomaly);
+    const separation = acos(Math.max(-1, Math.min(1,
+      sin(sun.dec) * sin(moon.dec) + cos(sun.dec) * cos(moon.dec) * cos(sun.ra - moon.ra)
+    )));
+    const incidence = atan2(149598000 * sin(separation), distance - 149598000 * cos(separation));
+    const angle = atan2(cos(sun.dec) * sin(sun.ra - moon.ra),
+      sin(sun.dec) * cos(moon.dec) - cos(sun.dec) * sin(moon.dec) * cos(sun.ra - moon.ra));
+    const waxing = angle < 0;
+    const phase = .5 + .5 * incidence * (waxing ? -1 : 1) / Math.PI;
+    const fraction = Math.max(0, Math.min(1, (1 + cos(incidence)) / 2));
+    // The nearest conventional phase is metadata only; the SVG is never snapped.
+    const names = ['new-moon', 'waxing-crescent', 'first-quarter', 'waxing-gibbous',
+      'full-moon', 'waning-gibbous', 'last-quarter', 'waning-crescent'];
+    return { fraction, waxing, name: names[Math.round(phase * 8) % 8] };
+  }
+
+  function updateMoon(moon) {
+    root.dataset.moonPhase = moon.name;
+    root.dataset.moonIllumination = moon.fraction.toFixed(6);
+    if (!moonPath) return;
+
+    // A semicircular limb plus an elliptical terminator yields the illuminated
+    // area directly. No paper-colored covering circle, opaque rectangle or mask.
+    // Conventional north-up orientation: waxing right, waning left. The existing
+    // local-time rotation remains decorative, not the observer's actual sky tilt.
+    const outerSweep = moon.waxing ? 1 : 0;
+    const innerSweep = moon.fraction < .5 ? 1 - outerSweep : outerSweep;
+    const terminator = Math.abs(8 * (1 - 2 * moon.fraction));
+    const innerArc = terminator < .0001
+      ? 'L12 4'
+      : `A${terminator.toFixed(5)} 8 0 0 ${innerSweep} 12 4`;
+    moonPath.setAttribute('d', `M12 4 A8 8 0 0 ${outerSweep} 12 20 ${innerArc} Z`);
+    moonIcon?.style?.setProperty('filter',
+      `drop-shadow(0 0 ${(3 + 4 * moon.fraction).toFixed(2)}px rgba(164, 184, 224, ${(.04 + .2 * moon.fraction).toFixed(3)}))`);
+  }
+
   function applyTheme(value) {
     const dark = value === 'dark';
     root.dataset.theme = dark ? 'dark' : 'light';
@@ -64,7 +124,10 @@
   }
 
   function updateSky(date = new Date()) {
+    if (!Number.isFinite(date.getTime())) return;
     const state = getSkyState(date);
+    const moon = getMoonState(date);
+    updateMoon(moon);
     root.dataset.sky = state.name;
     root.dataset.skyPhase = state.sunVisible ? 'sun' : 'moon';
 
@@ -77,7 +140,7 @@
         : 10 - state.progress * 20;
       const lightOpacity = state.sunVisible
         ? .08 + state.altitude * .12
-        : .035 + state.altitude * .045;
+        : (.035 + state.altitude * .045) * (.08 + .92 * moon.fraction);
       const cloudBrightness = state.sunVisible
         ? .9 + state.altitude * .1
         : .72 + state.altitude * .08;
@@ -147,10 +210,12 @@
       '<svg class="divider-celestial-icon divider-celestial-morning" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="3.6" fill="currentColor"/><g fill="none" stroke="currentColor" stroke-width="1.15" stroke-linecap="round"><path d="M12 3.4v2m0 13.2v2M4.5 7.7l1.7 1m11.6-1 1.7-1M3.5 12h2m13 0h2M6.2 17.3l-1.6 1"/></g></svg>' +
       '<svg class="divider-celestial-icon divider-celestial-noon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="3.7" fill="currentColor"/><g fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"><path d="M12 2.5v2.2m0 14.6v2.2M2.5 12h2.2m14.6 0h2.2M5.28 5.28l1.56 1.56m10.32 10.32 1.56 1.56M5.28 18.72l1.56-1.56m10.32-10.32 1.56-1.56"/></g></svg>' +
       '<svg class="divider-celestial-icon divider-celestial-sunset" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="11.5" r="3.5" fill="currentColor"/><g fill="none" stroke="currentColor" stroke-width="1.15" stroke-linecap="round"><path d="M12 3.3v2M4.8 7.3l1.7 1.1m11-1.1 1.7-1.1M3.5 12h2.1m12.8 0h2.1M6.4 16.6l-1.6 1.2m12.8-1.2 1.6 1.2"/></g></svg>' +
-      '<svg class="divider-celestial-icon divider-celestial-evening" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M19.8 15.2A8.15 8.15 0 0 1 8.8 4.2 8.16 8.16 0 1 0 19.8 15.2Z"/><circle cx="18.2" cy="6.1" r=".65" fill="currentColor" opacity=".45"/></svg>' +
-      '<svg class="divider-celestial-icon divider-celestial-midnight" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M20.35 15.35A8.45 8.45 0 0 1 8.65 3.65 8.46 8.46 0 1 0 20.35 15.35Z"/><circle cx="18.3" cy="5.1" r=".62" fill="currentColor" opacity=".5"/><circle cx="20.2" cy="8.2" r=".38" fill="currentColor" opacity=".35"/></svg>' +
-      '<svg class="divider-celestial-icon divider-celestial-late-night" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M19.9 15.6A8.25 8.25 0 0 1 8.4 4.1 8.27 8.27 0 1 0 19.9 15.6Z"/><circle cx="5.2" cy="8.2" r=".55" fill="currentColor" opacity=".4"/></svg>';
+      // Keep the existing night-segment CSS hooks on one continuously shaped SVG.
+      '<svg class="divider-celestial-icon divider-celestial-moon divider-celestial-evening divider-celestial-midnight divider-celestial-late-night" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width=".55" opacity=".08"/><path class="divider-moon-lit" fill="currentColor"/></svg>';
     hero.appendChild(celestial);
+    moonIcon = celestial.querySelector?.('.divider-celestial-moon');
+    moonPath = celestial.querySelector?.('.divider-moon-lit');
+    updateSky();
   }
 
   function mount() {
@@ -192,6 +257,12 @@
     autoThemeEnabled = true;
     updateSky();
   });
+
+  // Timers may be throttled in a background tab or during device sleep.
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') updateSky();
+  });
+  window.addEventListener('pageshow', () => updateSky());
 
   if (typeof window.setInterval === 'function') {
     window.setInterval(updateSky, 60_000);
