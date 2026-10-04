@@ -72,7 +72,7 @@ for (const width of [320, 390, 640, 760, 761, 1024, 1440]) for (const palette of
       assert.equal(await page.locator('html').getAttribute('data-divider-walker'), 'active');
       assert.ok(await page.locator(cat).isVisible());
       assert.equal(await page.locator(cat).getAttribute('aria-hidden'), 'true');
-      assert.equal(await page.locator(`${cat} svg`).getAttribute('focusable'), 'false');
+      assert.equal(await page.locator(cat).evaluate(n => n.tabIndex), -1);
       assert.equal(await page.locator(cat).evaluate(n => getComputedStyle(n).pointerEvents), 'none');
       assert.equal(await page.locator('#top').evaluate(n => n.nextElementSibling.id), 'method');
       assert.equal(await page.locator(cat).evaluate(n => getComputedStyle(n).color), palette === 'dark' ? 'rgb(255, 255, 255)' : 'rgb(0, 0, 0)');
@@ -108,13 +108,12 @@ test('R toggles both figures and the choice survives desktop/mobile resizing', a
   } finally { await page.close(); }
 });
 
-test('cat legs and tail animate without adding a focusable element', async () => {
+test('articulated leg and tail sprite animates without adding a focusable element', async () => {
   const { page } = await load();
   try {
-    assert.equal(await page.locator(`${cat} .divider-cat-leg`).count(), 4);
+    assert.equal(await page.locator(`${cat} .divider-cat-pose`).count(), 1);
     const movements = await page.locator(cat).evaluate(n => n.getAnimations({ subtree: true }).map(a => a.animationName));
-    assert.equal(movements.filter(name => name === 'm3ez-cat-step').length, 4);
-    assert.ok(movements.includes('m3ez-cat-tail'));
+    assert.equal(movements.filter(name => name === 'm3ez-cat-gait').length, 1);
     assert.equal(await page.locator(`${cat} a, ${cat} button, ${cat} [tabindex]`).count(), 0);
   } finally { await page.close(); }
 });
@@ -148,5 +147,44 @@ test('deep links retain the cat without restoring Explore or collapsing content'
     assert.equal(await page.locator('html').getAttribute('data-portfolio-expanded'), 'true');
     assert.equal(await page.locator('#m3ez-explore-more-v1').isVisible(), false);
     assert.deepEqual(errors, []);
+  } finally { await page.close(); }
+});
+
+for (const width of [390, 1440]) {
+  test(`64-pose chubby cat stays in its frame and has speed-matched paw cadence at ${width}px`, async () => {
+    const { page } = await load({ width });
+    try {
+      const pose = page.locator(`${cat} .divider-cat-pose`);
+      assert.equal(await pose.count(), 1, 'Mount the articulated sprite instead of pendulum legs');
+      const data = await pose.evaluate(n => {
+        const style = getComputedStyle(n);
+        const animation = n.getAnimations()[0];
+        const pet = n.parentElement;
+        const hero = pet.parentElement;
+        const travel = hero.clientWidth - parseFloat(getComputedStyle(hero, '::after').width) - parseFloat(getComputedStyle(pet).width) - 8;
+        const crossing = pet.getAnimations()[0];
+        const duration = Number(animation.effect.getTiming().duration);
+        // Sample inside each step, avoiding floating-point ambiguity at a boundary.
+        const offsets = [0, 1.5/64, 32.5/64, 63.5/64, .99999, 1.00001].map(f => {
+          animation.pause(); animation.currentTime = duration * f;
+          return parseFloat(getComputedStyle(n).maskPosition.split(' ')[0]);
+        });
+        return { width: parseFloat(style.width), sheetWidth: parseFloat(style.maskSize), timing: style.animationTimingFunction,
+          offsets, duration, expected: (20 * parseFloat(style.width) / 44) * Number(crossing.effect.getTiming().duration) * .96 / travel };
+      });
+      assert.equal(data.timing, 'steps(64)');
+      assert.ok(Math.abs(data.sheetWidth - data.width * 64) < .1);
+      for (const [i, frame] of [0, 1, 32, 63, 63, 0].entries()) assert.ok(Math.abs(data.offsets[i] + frame * data.width) < .2, `frame ${frame}: ${JSON.stringify(data)}`);
+      assert.ok(Math.abs(data.duration - data.expected) < 1, 'cadence follows crossing speed at this width');
+    } finally { await page.close(); }
+  });
+}
+
+test('cadence remains correct when reduced motion is turned off after initial load', async () => {
+  const { page } = await load({ width: 1440, motion: 'reduce' });
+  try {
+    await page.emulateMedia({ reducedMotion: 'no-preference' });
+    const cycle = await page.locator('.divider-cat-pose').evaluate(n => n.getAnimations()[0].effect.getTiming().duration);
+    assert.ok(cycle > 725 && cycle < 765, `expected speed-matched cadence, received ${cycle}ms`);
   } finally { await page.close(); }
 });

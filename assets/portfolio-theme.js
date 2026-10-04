@@ -232,22 +232,32 @@
     const cat = document.createElement('span');
     cat.id = CAT_ID;
     cat.setAttribute('aria-hidden', 'true');
-    // Local, decorative SVG only. CSS gives the cat and walker one crossing
-    // clock, with a fixed gap rather than a slower pace that would drift.
-    cat.innerHTML =
-      '<svg viewBox="0 0 40 28" xmlns="http://www.w3.org/2000/svg" fill="currentColor" aria-hidden="true" focusable="false">' +
-      '<g fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">' +
-      '<path class="divider-cat-tail" d="M10 15C4 15 5 10 5 7C5 3 2 3 2 5"/>' +
-      '<path class="divider-cat-leg divider-cat-back-far" opacity=".5" d="M12 17L14 22L13 26H15"/>' +
-      '<path class="divider-cat-leg divider-cat-front-far" opacity=".5" d="M26 16L24 22L25 26H27"/>' +
-      '</g>' +
-      '<path d="M9 16C9 12 13 11 17 11H24C27 11 29 14 28 17C27 20 23 20 19 19H13C10 19 8 18 9 16Z"/>' +
-      '<path d="M25 13L25 5L29 7L33 4L34 10L37 12L35 15L29 17Z"/>' +
-      '<g fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">' +
-      '<path class="divider-cat-leg divider-cat-back-near" d="M12 17L10 22L11 26H13"/>' +
-      '<path class="divider-cat-leg divider-cat-front-near" d="M26 16L27 22L27 26H29"/>' +
-      '</g></svg>';
+    // A precomputed 64-pose mask keeps articulated joints out of the frame loop.
+    cat.innerHTML = '<span class="divider-cat-pose" aria-hidden="true"></span>';
     hero.appendChild(cat);
+
+    // Match planted-paw travel to the shared crossing speed. The sprite covers
+    // --cat-stride-units viewBox units per stride; only layout changes need a new cadence.
+    function updateCatCadence() {
+      const style = getComputedStyle(cat);
+      const width = parseFloat(style.width);
+      const walkerWidth = parseFloat(getComputedStyle(hero, '::after').width);
+      const heroStyle = getComputedStyle(hero);
+      const crossing = heroStyle.getPropertyValue('--walker-crossing').trim();
+      const duration = parseFloat(crossing) / (crossing.endsWith('ms') ? 1000 : 1);
+      const gap = parseFloat(heroStyle.getPropertyValue('--cat-gap'));
+      const stride = parseFloat(heroStyle.getPropertyValue('--cat-stride-units')) || 20;
+      const distance = hero.clientWidth - walkerWidth - width - gap;
+      if (width > 0 && duration > 0 && distance > 0) {
+        cat.style.setProperty('--cat-cycle', `${(stride * width / 44 * duration * .96 / distance).toFixed(5)}s`);
+      }
+    }
+    // DOM test shims and older browsers can use the CSS cadence fallback.
+    if (typeof getComputedStyle === 'function') {
+      updateCatCadence();
+      if (typeof ResizeObserver === 'function') new ResizeObserver(updateCatCadence).observe(hero);
+      else window.addEventListener('resize', updateCatCadence, { passive: true });
+    }
   }
 
   function mount() {
