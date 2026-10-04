@@ -539,8 +539,8 @@
 
 
 
-/* Landing progressive disclosure: keep Hero + Method visible until a portfolio
-   destination is chosen. The head bootstrap sets the state before first paint. */
+/* Landing progressive disclosure: desktop keeps Hero + Method; mobile keeps
+   Hero only. The head bootstrap sets the state before first paint. */
 :root[data-portfolio-expanded="false"] #method ~ *,
 :root[data-portfolio-expanded="false"] .site-footer {
   display: none !important;
@@ -593,6 +593,30 @@
   animation: m3ez-extended-content-reveal 520ms cubic-bezier(.22, 1, .36, 1) both;
 }
 
+/* The link is a final hero grid row on mobile, above the preserved sky strip.
+   In-flow spacing keeps the 44px touch target clear of the carousel and clouds. */
+@media (max-width: 760px) {
+  :root[data-portfolio-expanded="false"] #method {
+    display: none !important;
+  }
+
+  #top > #m3ez-explore-more-v1 {
+    position: relative;
+    inset: auto;
+    z-index: 2;
+    grid-column: 1 / -1;
+    justify-self: center;
+    min-height: 44px;
+    margin: 1rem auto .75rem;
+    padding: .5rem .75rem;
+    transform: none;
+  }
+
+  :root[data-portfolio-reveal="active"] #method {
+    animation: m3ez-extended-content-reveal 520ms cubic-bezier(.22, 1, .36, 1) both;
+  }
+}
+
 @keyframes m3ez-extended-content-reveal {
   from {
     opacity: 0;
@@ -609,6 +633,7 @@
     transition: none;
   }
 
+  :root[data-portfolio-reveal="active"] #method,
   :root[data-portfolio-reveal="active"] #method ~ *,
   :root[data-portfolio-reveal="active"] .site-footer {
     animation: none;
@@ -616,6 +641,7 @@
 }
 
 @media print {
+  :root[data-portfolio-expanded="false"] #method,
   :root[data-portfolio-expanded="false"] #method ~ *,
   :root[data-portfolio-expanded="false"] .site-footer {
     display: revert !important;

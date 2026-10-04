@@ -19,7 +19,8 @@ export function initializeProgressiveDisclosure() {
 
   const main = document.getElementById('content');
   const method = document.getElementById('method');
-  if (!main || !method) {
+  const hero = document.getElementById('top');
+  if (!main || !method || !hero) {
     root.dataset.portfolioExpanded = EXPANDED;
     return;
   }
@@ -34,6 +35,8 @@ export function initializeProgressiveDisclosure() {
 
   root.dataset.m3ezProgressiveDisclosure = READY_MARKER;
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+  // Matches the mobile landing and sky breakpoint in portfolio-theme.css.
+  const mobileLayout = window.matchMedia('(max-width: 760px)');
 
   const targetFromHash = hash => {
     const id = decodeHash(hash);
@@ -42,7 +45,8 @@ export function initializeProgressiveDisclosure() {
 
   const isExtendedTarget = target =>
     target instanceof Element &&
-    extendedRoots.some(section => section === target || section.contains(target));
+    ((mobileLayout.matches && (target === method || method.contains(target))) ||
+      extendedRoots.some(section => section === target || section.contains(target)));
 
   function expand({ animate = true } = {}) {
     if (root.dataset.portfolioExpanded === EXPANDED) return;
@@ -67,14 +71,30 @@ export function initializeProgressiveDisclosure() {
     root.dataset.portfolioExpanded = COLLAPSED;
   }
 
-  if (!document.getElementById(HINT_ID)) {
-    const hint = document.createElement('a');
+  let hint = document.getElementById(HINT_ID);
+  if (!hint) {
+    hint = document.createElement('a');
     hint.id = HINT_ID;
-    hint.href = '#research';
     hint.setAttribute('aria-label', 'Explore the full portfolio');
     hint.innerHTML = '<span>Explore more</span><span class="m3ez-explore-arrow" aria-hidden="true">↓</span>';
-    method.appendChild(hint);
   }
+
+  function placeHint() {
+    // Move the same link; do not insert a sibling between Hero and Method,
+    // because the celestial/walker scene uses their adjacent-sibling selector.
+    const parent = mobileLayout.matches ? hero : method;
+    hint.href = mobileLayout.matches ? '#method' : '#research';
+    if (hint.parentElement !== parent) parent.appendChild(hint);
+  }
+  placeHint();
+  mobileLayout.addEventListener('change', () => {
+    placeHint();
+    // Resizing must not hide an active deep link or a keyboard-focused target.
+    // Once expanded, the portfolio never collapses on orientation changes.
+    if (isExtendedTarget(targetFromHash(window.location.hash)) || isExtendedTarget(document.activeElement)) {
+      expand({ animate: false });
+    }
+  });
 
   document.addEventListener('click', event => {
     const anchor = event.target instanceof Element
