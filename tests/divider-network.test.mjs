@@ -19,7 +19,7 @@ test('geometry is measured from real visible borders and randomizes only once pe
   assert.match(js, /getBoundingClientRect\(\)/);
   assert.match(js, /s\.borderBottomStyle !== 'solid'/);
   assert.match(js, /Math\.abs\(r\.left - left\) > 1/);
-  assert.match(js, /r\.bottom-source\.actualWidth\/2/);
+  assert.match(js, /Math\.round\(r\.bottom\)-source\.actualWidth\/2/);
   assert.match(js, /ResizeObserver\(scheduleLayout\)/);
   assert.match(js, /'data-portfolio-expanded'/);
   assert.doesNotMatch(js, /setInterval|setTimeout|<canvas|\.png|\.jpg|data:image|https?:\/\/(?!www\.w3\.org)/);
