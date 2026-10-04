@@ -1,0 +1,80 @@
+/* Divider-connected desktop network.
+   SVG supplies the cubic curves; CSS supplies the palette, fade and slow trace.
+   No panels, raster backgrounds, page-wide filters or content layout changes. */
+:root {
+  --edge-strength: .62;
+  --edge-max-width: 380; /* Unitless pixels; do not sprawl across ultrawide gutters. */
+}
+.m3ez-edge-network {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  display: none;
+  overflow: hidden;
+  background: transparent;
+  color: var(--black, #111);
+  pointer-events: none;
+  user-select: none;
+  contain: layout paint;
+}
+@media screen and (min-width: 1280px) {
+  .m3ez-edge-network[data-active="true"] { display: block; }
+}
+.m3ez-edge-network *,
+.m3ez-edge-network *::before,
+.m3ez-edge-network *::after { pointer-events: none; }
+.m3ez-edge-wing {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  overflow: hidden; /* Each side stops exactly at the existing content edge. */
+  background: transparent;
+  contain: layout paint;
+}
+.m3ez-edge-cluster {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: block;
+  overflow: visible;
+}
+.m3ez-edge-cluster path,
+.m3ez-edge-cluster circle {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: .9;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+/* At the first pixel the continuation matches the real divider. Only the
+   outward spread is softened, so there is no gap or pale seam at the join. */
+.m3ez-edge-fade-body { stop-opacity: var(--edge-strength, .62); }
+.m3ez-edge-fade-tail { stop-opacity: calc(var(--edge-strength, .62) * .62); }
+.m3ez-edge-cluster .m3ez-edge-trunk { stroke-width: var(--edge-join-width, 1px); }
+.m3ez-edge-cluster .m3ez-edge-branch { opacity: .68; stroke-width: .86; }
+.m3ez-edge-cluster .m3ez-edge-hairline { opacity: .44; stroke-width: .72; }
+.m3ez-edge-cluster .m3ez-edge-mesh { opacity: .30; stroke-width: .68; }
+.m3ez-edge-cluster .m3ez-edge-node { opacity: .78; stroke-width: .8; }
+.m3ez-edge-cluster .m3ez-edge-dot { fill: currentColor; stroke: none; opacity: .68; }
+.m3ez-edge-cluster .m3ez-edge-pulse {
+  stroke-width: 1.15;
+  stroke-dasharray: 11 189;
+  stroke-dashoffset: 110;
+  opacity: 0;
+  animation: m3ez-edge-flow var(--trace-time, 16s) linear infinite;
+  animation-delay: var(--trace-delay, 0s);
+}
+@keyframes m3ez-edge-flow {
+  0% { stroke-dashoffset: 110; opacity: 0; }
+  18%, 62% { opacity: .42; }
+  88%, 100% { stroke-dashoffset: -110; opacity: 0; }
+}
+.m3ez-edge-network[data-paused="true"] .m3ez-edge-pulse,
+.m3ez-edge-cluster[data-offscreen="true"] .m3ez-edge-pulse { animation-play-state: paused; }
+@media (prefers-reduced-motion: reduce) {
+  .m3ez-edge-cluster .m3ez-edge-pulse { display: none; animation: none; }
+}
+@media (forced-colors: active), print {
+  .m3ez-edge-network { display: none !important; }
+}

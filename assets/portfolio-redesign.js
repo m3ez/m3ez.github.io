@@ -2,6 +2,7 @@ import { CATEGORIES, certs, issuerMonogram } from './certs.js';
 import { initializeInteractions } from './portfolio-interactions.js';
 import { initializeMethodWorkflow } from './method-workflow.js';
 import { initializeScrollMotion } from './scroll-motion.js';
+import { initializeDividerNetwork } from './divider-network.js';
 import { initializeProgressiveDisclosure } from './progressive-disclosure.js';
 import {
   RECOGNITION_YEARS,
@@ -578,6 +579,7 @@ function start() {
   initializeProgressiveDisclosure();
   renderReferences();
   renderRecognition();
+  initializeDividerNetwork();
   renderCredentials();
   initializeScrollMotion();
   void renderResearch();
