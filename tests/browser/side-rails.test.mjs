@@ -78,6 +78,11 @@ for (const width of [1440, 1721, 1920]) {
       assert.equal(await page.locator(`${rails} .side-rail-quote`).textContent(), quote);
       assert.equal(await page.locator(nav).getAttribute('aria-label'), 'Page sections');
       assert.deepEqual(await page.locator(`${nav} a`).evaluateAll(nodes => nodes.map(node => node.getAttribute('href'))), ['#top', '#security-scope', '#research', '#credentials', '#consulting', '#contact']);
+      const primaryLinks = await page.locator('.site-header nav > a').evaluateAll(nodes => nodes.map(node => node.getAttribute('href')));
+      const mobileLinks = await page.locator('#mobile-primary-navigation a').evaluateAll(nodes => nodes.map(node => node.getAttribute('href')));
+      const railLinks = await page.locator(`${nav} a`).evaluateAll(nodes => nodes.map(node => node.getAttribute('href')).filter(href => href !== '#top'));
+      assert.deepEqual(primaryLinks, mobileLinks, 'top and mobile navigation must share the same dynamic sections');
+      assert.deepEqual(primaryLinks, railLinks, 'right-side rail must share the same dynamic sections, aside from Intro');
       await active(page, 'top');
       assert.equal(await page.locator(`${rails} .side-rail-current`).textContent(), '01 — INTRO');
       const main = await page.locator('#content').boundingBox();
