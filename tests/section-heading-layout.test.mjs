@@ -53,8 +53,8 @@ test('consulting intro clears inherited paragraph width', () => {
 test('copy measures stay fluid and object-scoped', () => {
   assert.match(css, /#consulting \.consulting-intro\{min-width:0;max-width:none\}/);
   assert.match(css, /\.consulting-subsection-heading p\{max-width:none;/);
-  assert.match(css, /\.consulting-service dd\{[^}]*max-width:min\(100%,72ch\)/);
-  assert.match(css, /\.consulting-service \.capability-output span\{max-width:min\(100%,64ch\)/);
+  assert.match(css, /\.consulting-service dd\{[^}]*width:100%;[^}]*max-width:none/);
+  assert.match(css, /\.consulting-service \.capability-output span\{[^}]*flex:1 1 0;[^}]*max-width:none/);
   assert.match(css, /\.credential-proof\{max-width:min\(100%,24ch\)/);
 });
 
@@ -78,8 +78,8 @@ test('consulting focus detail spans available width', () => {
 
 test('consulting service content expands responsively', () => {
   assert.match(css, /\.consulting-service-list>\.consulting-service\{[^}]*grid-template-columns:6\.25rem minmax\(0,1fr\)/);
-  assert.match(css, /\.consulting-service dd\{[^}]*max-width:min\(100%,100ch\)/);
-  assert.match(css, /\.consulting-service \.capability-output span\{[^}]*max-width:min\(100%,90ch\)/);
+  assert.match(css, /\.consulting-service dd\{[^}]*width:100%;[^}]*max-width:none/);
+  assert.match(css, /\.consulting-service \.capability-output span\{[^}]*flex:1 1 0;[^}]*max-width:none/);
   assert.match(css, /@media \(max-width:760px\)\{[\s\S]*?\.consulting-service-list>\.consulting-service\{grid-template-columns:1fr/);
 });
 
