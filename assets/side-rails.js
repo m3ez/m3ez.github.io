@@ -85,7 +85,7 @@ const CSS = `
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  height: clamp(220px, 34vh, 320px);
+  height: clamp(264px, 40vh, 360px);
 }
 #${RAILS_ID} .side-rail-links::before,
 #${RAILS_ID} .side-rail-progress {
