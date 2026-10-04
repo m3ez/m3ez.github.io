@@ -44,6 +44,11 @@ test('Verify returns to Analyze through the labelled static dashed feedback path
   assert.equal((section.match(/stroke-dasharray="3 4"/g) ?? []).length, 2);
 });
 
+test('left return leg aligns with the Analyze edge', () => {
+  assert.match(section, /d="M250 1V20H5V1"/);
+  assert.match(section, /d="m1 5 4-4 4 4"/);
+});
+
 test('the previous text-only Method writer cannot overwrite the diagram', () => {
   assert.doesNotMatch(interactions, /const METHOD_LINE\s*=/);
   assert.match(redesign, /import \{ initializeMethodWorkflow \} from '\.\/method-workflow\.js';/);
