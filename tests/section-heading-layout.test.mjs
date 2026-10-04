@@ -57,3 +57,8 @@ test('copy measures stay fluid and object-scoped', () => {
   assert.match(css, /\.consulting-service \.capability-output span\{max-width:min\(100%,64ch\)/);
   assert.match(css, /\.credential-proof\{max-width:min\(100%,24ch\)/);
 });
+
+
+test('consulting privacy note aligns to the right', () => {
+  assert.match(css, /\.consulting-privacy\{[^}]*text-align:right/);
+});
