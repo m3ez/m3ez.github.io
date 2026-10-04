@@ -3,6 +3,7 @@ const STYLE_ID = 'm3ez-side-rails-style-v1';
 const WIDE_VIEWPORT = '(min-width: 1440px) and (min-height: 640px)';
 const SECTIONS = [
   ['top', 'Intro'],
+  ['security-scope', 'Scope'],
   ['research', 'Research'],
   ['credentials', 'Credentials'],
   ['consulting', 'Consulting'],
