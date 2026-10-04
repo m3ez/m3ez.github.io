@@ -5,18 +5,17 @@ import { readFileSync } from 'node:fs';
 const interactions = readFileSync(new URL('../assets/portfolio-interactions.js', import.meta.url), 'utf8');
 const css = readFileSync(new URL('../assets/research-credentials.css', import.meta.url), 'utf8');
 
-test('primary navigation tracks the current portfolio section accessibly', () => {
-  assert.match(interactions, /const ACTIVE_SECTION_IDS = \['security-scope', 'research', 'credentials', 'consulting', 'contact'\]/);
+test('all navigation surfaces use shared dynamic section discovery', () => {
+  assert.match(interactions, /import \{ getNavigationSections \} from '\.\/navigation-sections\.js';/);
+  assert.match(interactions, /getNavigationSections\('primary'\)/);
+  assert.match(interactions, /getNavigationSections\('mobile'\)/);
+  assert.doesNotMatch(interactions, /const ACTIVE_SECTION_IDS =/);
   assert.match(interactions, /function syncActiveSection\(\)/);
   assert.match(interactions, /requestAnimationFrame\(syncActiveSection\)/);
   assert.match(interactions, /link\.setAttribute\('aria-current', 'location'\)/);
   assert.match(interactions, /link\.removeAttribute\('aria-current'\)/);
   assert.match(interactions, /window\.addEventListener\('scroll', scheduleActiveSection, \{ passive: true \}\)/);
   assert.match(interactions, /window\.addEventListener\('resize', scheduleActiveSection\)/);
-});
-
-test('mobile navigation includes Security Scope', () => {
-  assert.match(interactions, /\["Scope", "#security-scope"\]/);
 });
 
 test('active navigation uses a restrained underline without layout movement', () => {
