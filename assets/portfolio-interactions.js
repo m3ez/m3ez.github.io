@@ -1,8 +1,26 @@
 import { certs, issuerMonogram } from './certs.js';
+import { getNavigationSections } from './navigation-sections.js';
 
 // Interaction code moved from the exported Next.js chunk.
 // The hero carousel and credential grid share assets/certs.js as their source of truth.
 export function initializeInteractions() {
+
+  function renderPrimaryNavigation() {
+    const nav = document.querySelector('.site-header nav');
+    if (!nav) return;
+
+    const links = getNavigationSections('primary').map(section => {
+      const link = document.createElement('a');
+      link.href = `#${section.id}`;
+      link.className = `nav-${section.id}`;
+      link.textContent = section.label;
+      return link;
+    });
+    nav.replaceChildren(...links);
+  }
+
+  renderPrimaryNavigation();
+
   (() => {
     const MARKER = "m3ez-credential-carousel-v1";
     const ROTATION_MS = 4500;
@@ -251,16 +269,6 @@ export function initializeInteractions() {
       if (document.documentElement.dataset.m3ezSwipeNav === MARKER) return;
       document.documentElement.dataset.m3ezSwipeNav = MARKER;
 
-      const nav = document.querySelector(".site-header nav");
-      if (nav && !nav.querySelector('a[href="#credentials"]')) {
-        const credentials = document.createElement("a");
-        credentials.href = "#credentials";
-        credentials.className = "nav-credentials";
-        credentials.textContent = "Credentials";
-        const consulting = nav.querySelector(".nav-consulting");
-        nav.insertBefore(credentials, consulting || nav.lastElementChild);
-      }
-
       const root = document.getElementById("m3ez-credential-carousel-v1");
       const stage = root?.querySelector(".credential-carousel-stage");
       const previous = root?.querySelector(
@@ -407,16 +415,10 @@ export function initializeInteractions() {
       panel.className = "mobile-nav-panel";
       panel.hidden = true;
 
-      [
-        ["Scope", "#security-scope"],
-        ["Research", "#research"],
-        ["Credentials", "#credentials"],
-        ["Consulting", "#consulting"],
-        ["Contact", "#contact"],
-      ].forEach(([label, href]) => {
+      getNavigationSections('mobile').forEach(section => {
         const link = document.createElement("a");
-        link.href = href;
-        link.textContent = label;
+        link.href = `#${section.id}`;
+        link.textContent = section.label;
         link.addEventListener("click", () => closeMenu());
         panel.appendChild(link);
       });
@@ -466,19 +468,16 @@ export function initializeInteractions() {
   })();
 
   (() => {
-    const ACTIVE_SECTION_IDS = ['security-scope', 'research', 'credentials', 'consulting', 'contact'];
     const nav = document.querySelector('.site-header nav');
     if (!nav) return;
 
-    const sections = ACTIVE_SECTION_IDS
-      .map((id) => document.getElementById(id))
-      .filter(Boolean);
+    const sections = getNavigationSections('mobile');
     if (!sections.length) return;
 
     const linksById = new Map(
-      ACTIVE_SECTION_IDS.map((id) => [
-        id,
-        [...nav.querySelectorAll(`a[href="#${id}"]`)],
+      sections.map(section => [
+        section.id,
+        [...nav.querySelectorAll(`a[href="#${section.id}"]`)],
       ]),
     );
 
@@ -490,14 +489,14 @@ export function initializeInteractions() {
       let closestTop = Number.NEGATIVE_INFINITY;
 
       for (const section of sections) {
-        const top = section.getBoundingClientRect().top;
+        const top = section.node.getBoundingClientRect().top;
         if (top <= markerY && top > closestTop) {
           activeId = section.id;
           closestTop = top;
         }
       }
 
-      if (window.scrollY < Math.max(0, sections[0].offsetTop - markerY)) {
+      if (window.scrollY < Math.max(0, sections[0].node.offsetTop - markerY)) {
         activeId = null;
       }
 
