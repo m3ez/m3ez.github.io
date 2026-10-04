@@ -36,3 +36,10 @@ test('mobile keeps the same single-axis heading layout and stacks credential met
 test('research keeps only the shared heading divider', () => {
   assert.match(css, /\.cve-ledger>section\.research-index-v2\{border-top:0;margin-top:0;padding-top:0\}/);
 });
+
+
+test('section intros use available desktop width without forced nowrap', () => {
+  assert.match(editorial, />\.section-heading>p,[\s\S]*?>\.section-heading>\.consulting-intro\{[\s\S]*?max-width:none/);
+  assert.doesNotMatch(editorial, /white-space:nowrap/);
+  assert.match(editorial, /#consulting \.consulting-intro\{max-width:none\}/);
+});
