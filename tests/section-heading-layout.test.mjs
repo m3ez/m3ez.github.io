@@ -31,3 +31,8 @@ test('mobile keeps the same single-axis heading layout and stacks credential met
   assert.match(editorial, /@media \(max-width:760px\)\{[\s\S]*?grid-template-columns:minmax\(0,1fr\)/);
   assert.match(editorial, /#credentials>\.section-heading>\.credential-total\{[\s\S]*?grid-column:1;[\s\S]*?grid-row:3/);
 });
+
+
+test('research keeps only the shared heading divider', () => {
+  assert.match(css, /\.cve-ledger>section\.research-index-v2\{border-top:0;margin-top:0;padding-top:0\}/);
+});
