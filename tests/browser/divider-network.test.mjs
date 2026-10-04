@@ -72,17 +72,19 @@ async function assertJoins(page) {
   const joins = await page.locator('.m3ez-edge-trunk').evaluateAll(nodes => nodes.map(path => {
     const source = document.getElementById(path.dataset.anchor) || document.querySelector('.site-header');
     const r = source.getBoundingClientRect(), css = getComputedStyle(source);
+    // Match CSS paint snapping; fractional DOM bounds are not painted edges.
+    const paintLeft = Math.round(r.left), paintRight = Math.round(r.right);
     const matrix = path.getScreenCTM();
     const at = length => { const p = path.getPointAtLength(length); return new DOMPoint(p.x, p.y).matrixTransform(matrix); };
     const start = at(0), straight = at(8);
     const side = path.dataset.side, wing = path.closest('.m3ez-edge-wing').getBoundingClientRect();
     const allOutside = Array.from({ length: 41 }, (_, i) => at(path.getTotalLength() * i / 40))
-      .every(p => side === 'left' ? p.x <= r.left + .01 : p.x >= r.right - .01);
-    return { id: path.dataset.anchor, x: start.x, y: start.y, expectedX: side === 'left' ? r.left : r.right,
-      expectedY: r.bottom - parseFloat(css.borderBottomWidth) / 2,
+      .every(p => side === 'left' ? p.x <= paintLeft + .01 : p.x >= paintRight - .01);
+    return { id: path.dataset.anchor, x: start.x, y: start.y, expectedX: side === 'left' ? paintLeft : paintRight,
+      expectedY: Math.round(r.bottom) - parseFloat(css.borderBottomWidth) / 2,
       tangentError: Math.abs(start.y - straight.y), color: getComputedStyle(path).stroke, expectedColor: css.borderBottomColor,
       width: getComputedStyle(path).strokeWidth, expectedWidth: css.borderBottomWidth, allOutside,
-      wingOutside: side === 'left' ? wing.right <= r.left + .01 : wing.left >= r.right - .01 };
+      wingOutside: side === 'left' ? wing.right <= paintLeft + .01 : wing.left >= paintRight - .01 };
   }));
   assert.ok(joins.length >= 6, 'header, hero and Method have two attached wings each');
   for (const j of joins) {
