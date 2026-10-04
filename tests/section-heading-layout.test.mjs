@@ -68,3 +68,9 @@ test('scope keeps one bottom divider', () => {
   assert.match(css, /\.consulting-scope\{[^}]*border-bottom:0/);
   assert.match(css, /\.consulting-scope-grid\{[^}]*border-bottom:\.5px solid var\(--line\)/);
 });
+
+
+test('consulting focus detail spans available width', () => {
+  assert.match(editorial, /\.consulting-subsection-heading p\{[\s\S]*?width:100%;[\s\S]*?min-width:0;[\s\S]*?max-width:none;[\s\S]*?justify-self:stretch/);
+  assert.doesNotMatch(editorial, /\.consulting-subsection-heading p\{[^}]*white-space:nowrap/);
+});
