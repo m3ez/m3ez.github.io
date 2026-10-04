@@ -5,6 +5,7 @@ const REVEAL_SELECTORS = [
   '#recognition > .section-heading',
   '#consulting > .section-heading',
   '#consulting > .privacy-note',
+  '#consulting > .consulting-scope',
   '#consulting .capability-list > div',
   '#credentials > .section-heading',
   '#method > h2',
