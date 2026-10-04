@@ -88,3 +88,10 @@ test('consulting service copy uses the full content column', () => {
   assert.match(css, /\.consulting-service dd\{[^}]*width:100%;[^}]*min-width:0;[^}]*max-width:none/);
   assert.match(css, /\.consulting-service \.capability-output span\{[^}]*flex:1 1 0;[^}]*min-width:0;[^}]*max-width:none/);
 });
+
+
+test('consulting service node sits before the title text', () => {
+  assert.match(css, /\.consulting-service dt\{[^}]*display:flex;[^}]*gap:\.5rem/);
+  assert.match(css, /\.consulting-service dt::before\{[^}]*position:static;[^}]*flex:0 0 auto/);
+  assert.doesNotMatch(css, /\.consulting-service dt::before\{[^}]*left:-/);
+});
