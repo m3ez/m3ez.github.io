@@ -43,8 +43,8 @@ test('mobile head bootstrap enables the walker and collapses the landing page', 
   assert.equal(app.root.dataset.portfolioExpanded, 'false');
 });
 
-test('desktop walker remains off by default', () => {
-  assert.equal(boot().root.dataset.dividerWalker, 'inactive');
+test('desktop walker is enabled by default', () => {
+  assert.equal(boot().root.dataset.dividerWalker, 'active');
 });
 
 test('mobile Method deep links are expanded before styles paint', () => {
@@ -59,12 +59,12 @@ test('desktop Method links keep the existing collapsed lower portfolio', () => {
   }
 });
 
-test('walker default follows the breakpoint until a manual override', () => {
+test('walker stays enabled across breakpoints until a manual override', () => {
   const app = boot();
   app.resize(true);
   assert.equal(app.root.dataset.dividerWalker, 'active');
   app.resize(false);
-  assert.equal(app.root.dataset.dividerWalker, 'inactive');
+  assert.equal(app.root.dataset.dividerWalker, 'active');
 });
 
 test('R/r overrides survive orientation changes in both directions', () => {
@@ -88,14 +88,16 @@ test('typing, shortcuts, repeat and unrelated keys do not claim a walker overrid
     app.key(event.tag ? { target: app.element(event.tag, event.editable) } : event);
     assert.equal(app.root.dataset.dividerWalker, 'active');
     app.resize(false);
-    assert.equal(app.root.dataset.dividerWalker, 'inactive', 'ignored keys must not freeze defaults');
+    assert.equal(app.root.dataset.dividerWalker, 'active', 'ignored keys must leave the pair enabled');
+    app.key();
+    assert.equal(app.root.dataset.dividerWalker, 'inactive', 'plain R still toggles both figures');
   }
 });
 
 test('missing matchMedia and malformed hashes keep bootstrap usable', () => {
   const app = boot({ withMedia: false, hash: '#%not-valid' });
-  assert.equal(app.root.dataset.dividerWalker, 'inactive');
+  assert.equal(app.root.dataset.dividerWalker, 'active');
   assert.ok(['light', 'dark'].includes(app.root.dataset.theme));
   app.key();
-  assert.equal(app.root.dataset.dividerWalker, 'active');
+  assert.equal(app.root.dataset.dividerWalker, 'inactive');
 });

@@ -77,14 +77,19 @@
    A 32-frame gait coordinates hip rotation, knee flexion, foot roll, counter-swinging arms, restrained torso motion, and a lightly lagging backpack. */
 #top.hero:has(+ #method) {
   position: relative;
-}
-
-#top.hero:has(+ #method)::after {
-  display: none;
   --walker-width: 34px;
   --walker-height: 40.8px;
   --walker-crossing: 48s;
   --walker-cycle: 1.52s;
+  --cat-gap: 8px;
+  --cat-stride-units: 20;
+  --cat-width: calc(var(--walker-width) + 4px);
+  --cat-height: calc(var(--walker-height) * .62);
+  --cat-offset: calc(var(--cat-width) + var(--cat-gap));
+}
+
+#top.hero:has(+ #method)::after {
+  display: none;
   content: "";
   position: absolute;
   bottom: 0;
@@ -107,7 +112,10 @@
     m3ez-divider-walk var(--walker-cycle) steps(32) infinite;
 }
 
-:root[data-divider-walker="active"] #top.hero:has(+ #method)::after {
+/* Neither crossing starts until the cat is mounted: both clocks begin on the
+   same style update, and restart together when R/r toggles the pair. */
+:root[data-divider-walker="active"] #top.hero:has(+ #method):has(> #m3ez-divider-cat-v1)::after,
+:root[data-divider-walker="active"] #top.hero:has(+ #method) > #m3ez-divider-cat-v1 {
   display: block;
 }
 
@@ -120,7 +128,7 @@
 
 @keyframes m3ez-divider-walk-cross {
   0% {
-    left: 0;
+    left: var(--cat-offset);
     opacity: 0;
   }
   4% {
@@ -136,7 +144,7 @@
 }
 
 @media (max-width: 640px) {
-  #top.hero:has(+ #method)::after {
+  #top.hero:has(+ #method) {
     --walker-width: 26px;
     --walker-height: 31.2px;
     --walker-crossing: 24s;
@@ -154,6 +162,56 @@
 @media print {
   #top.hero:has(+ #method)::after {
     content: none;
+    animation: none;
+  }
+}
+
+/* Rounded cat follower: distinct elbow/wrist and stifle/hock chains in
+   64 poses. Paws plant, roll off and fold through recovery; crossing is shared. */
+#m3ez-divider-cat-v1 {
+  display: none;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: var(--cat-width);
+  height: var(--cat-height);
+  color: var(--black);
+  pointer-events: none;
+  opacity: 0;
+  transform: translateX(calc(-1 * var(--cat-offset)));
+  animation: m3ez-divider-walk-cross var(--walker-crossing) linear infinite;
+}
+
+#m3ez-divider-cat-v1 .divider-cat-pose {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: currentColor;
+  -webkit-mask-image: url("./cat-walk-cycle.svg");
+  mask-image: url("./cat-walk-cycle.svg");
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-size: calc(var(--cat-width) * 64) 100%;
+  mask-size: calc(var(--cat-width) * 64) 100%;
+  -webkit-mask-position: 0 0;
+  mask-position: 0 0;
+  animation: m3ez-cat-gait var(--cat-cycle, var(--walker-cycle)) steps(64) infinite;
+}
+
+@keyframes m3ez-cat-gait {
+  to {
+    -webkit-mask-position: calc(var(--cat-width) * -64) 0;
+    mask-position: calc(var(--cat-width) * -64) 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce), print {
+  #m3ez-divider-cat-v1 {
+    display: none !important;
+    animation: none;
+  }
+
+  #m3ez-divider-cat-v1 .divider-cat-pose {
     animation: none;
   }
 }
