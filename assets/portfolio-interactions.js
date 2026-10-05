@@ -33,10 +33,10 @@ export function initializeInteractions() {
 /* Overlaid grid items share the tallest card's intrinsic height, including when
    inactive. Long titles, descriptions and zoom never collide with the footer. */
 .credential-carousel-stage{order:0;flex:none;display:grid;grid-template-columns:minmax(0,1fr);position:relative;min-height:15rem;padding:1.1rem 0;overflow:hidden}
-.credential-carousel-card{grid-area:1/1;position:relative;left:0;z-index:0;justify-self:center;align-self:stretch;display:flex;flex-direction:column;gap:.5rem;width:min(70%,18rem);min-width:0;min-height:12.75rem;padding:1rem 1.15rem;border:2px solid var(--line);background:var(--paper);color:var(--ink);opacity:0;transform:scale(.68);pointer-events:none;text-decoration:none;transition:left 400ms ease,opacity 400ms ease,transform 400ms ease,border-color 400ms ease}
-.credential-carousel-card[data-position="current"]{left:0;z-index:3;border-color:var(--black);box-shadow:4px 4px 0 var(--soft);opacity:1;transform:scale(1);pointer-events:auto}
-.credential-carousel-card[data-position="previous"]{left:-32%;z-index:2;opacity:.46;transform:translateY(.6rem) scale(.78);pointer-events:auto;cursor:pointer}
-.credential-carousel-card[data-position="next"]{left:32%;z-index:2;opacity:.46;transform:translateY(.6rem) scale(.78);pointer-events:auto;cursor:pointer}
+.credential-carousel-card{grid-area:1/1;position:relative;left:0;z-index:0;justify-self:center;align-self:stretch;display:flex;flex-direction:column;gap:.5rem;width:min(70%,18rem);min-width:0;min-height:12.75rem;padding:1rem 1.15rem;border:2px solid var(--line);background:var(--paper);color:var(--ink);opacity:0;filter:blur(0);transform:scale(.68);pointer-events:none;text-decoration:none;transition:left 400ms ease,opacity 400ms ease,filter 400ms ease,transform 400ms ease,border-color 400ms ease}
+.credential-carousel-card[data-position="current"]{left:0;z-index:3;border-color:var(--black);box-shadow:4px 4px 0 var(--soft);opacity:1;filter:blur(0);transform:scale(1);pointer-events:auto}
+.credential-carousel-card[data-position="previous"]{left:-32%;z-index:2;opacity:.4;filter:blur(1px);transform:translateY(.6rem) scale(.78);pointer-events:auto;cursor:pointer}
+.credential-carousel-card[data-position="next"]{left:32%;z-index:2;opacity:.4;filter:blur(1px);transform:translateY(.6rem) scale(.78);pointer-events:auto;cursor:pointer}
 .credential-carousel-card[data-position="past"]{left:-62%;opacity:0;transform:translateY(.8rem) scale(.68)}
 .credential-carousel-card[data-position="future"]{left:62%;opacity:0;transform:translateY(.8rem) scale(.68)}
 .credential-carousel-head{display:flex;align-items:center;justify-content:space-between;gap:.5rem;min-width:0;min-height:1.25rem}
