@@ -17,6 +17,32 @@
       "shortTitle": "Authenticated (Sales Person+) Privilege Escalation via Contact Identity Rebinding leading to Administrator Account Takeover to 'user_id' Parameter (v3 /contacts) chained with v4 /emails/test"
     },
     {
+      "id": "CVE-2026-97269",
+      "title": "WPFunnels – Funnel Builder for WooCommerce with Checkout & One Click Upsell <= 3.13.1 - Unauthenticated Insecure Direct Object Reference",
+      "cvss": 5.3,
+      "href": "https://www.wordfence.com/threat-intel/vulnerabilities/id/924d8186-63bd-4604-8262-a6481425bc7a?source=api-prod",
+      "severity": "Medium",
+      "class": "IDOR",
+      "authContext": "Unauthenticated",
+      "unauthenticated": true,
+      "target": "WPFunnels – Funnel Builder for WooCommerce with Checkout & One Click Upsell",
+      "year": 2026,
+      "shortTitle": "Unauthenticated Insecure Direct Object Reference"
+    },
+    {
+      "id": "CVE-2026-97251",
+      "title": "Bus Ticket Booking with Seat Reservation <= 5.9.3 - Unauthenticated Insecure Direct Object Reference",
+      "cvss": 5.3,
+      "href": "https://www.wordfence.com/threat-intel/vulnerabilities/id/02cb377a-3208-4031-b81f-724218891eef?source=api-prod",
+      "severity": "Medium",
+      "class": "IDOR",
+      "authContext": "Unauthenticated",
+      "unauthenticated": true,
+      "target": "Bus Ticket Booking with Seat Reservation",
+      "year": 2026,
+      "shortTitle": "Unauthenticated Insecure Direct Object Reference"
+    },
+    {
       "id": "CVE-2026-97248",
       "title": "Booking Activities <= 1.18.7.1 - Unauthenticated PHP Object Injection",
       "cvss": 8.1,
@@ -889,9 +915,9 @@
     }
   ],
   "stats": {
-    "total": 68,
+    "total": 70,
     "critical": 8,
     "high": 29,
-    "unauthenticated": 36
+    "unauthenticated": 38
   }
 }
