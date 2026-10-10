@@ -82,6 +82,19 @@
       "shortTitle": "Unauthenticated Admin Account Takeover via 'wpapp_category[]' Parameter"
     },
     {
+      "id": "CVE-2026-91050",
+      "title": "Appointment Booking Plugin <= 5.7.2 - Insecure Direct Object Reference to Authenticated (Subscriber+) Unauthorized Booking Creation and Sensitive Information Disclosure via 'params[presets][order_item_id]' Parameter",
+      "cvss": 4.3,
+      "href": "https://www.wordfence.com/threat-intel/vulnerabilities/id/136f8e94-a09a-48c4-bea9-e8b21d3fd91f?source=api-prod",
+      "severity": "Medium",
+      "class": "IDOR",
+      "authContext": "Subscriber+",
+      "unauthenticated": false,
+      "target": "Appointment Booking Plugin",
+      "year": 2026,
+      "shortTitle": "Insecure Direct Object Reference to Authenticated (Subscriber+) Unauthorized Booking Creation and Sensitive Information Disclosure via 'params[presets][order_item_id]' Parameter"
+    },
+    {
       "id": "CVE-2026-89413",
       "title": "Filter Gallery <= 1.1.4 - Missing Authorization to Authenticated (Subscriber+) Arbitrary Gallery Deletion via 'ufg_gallery_id' Parameter",
       "cvss": 8.1,
@@ -119,6 +132,19 @@
       "target": "Better Messages",
       "year": 2026,
       "shortTitle": "Missing Authorization to Authenticated (Custom+) Chat-Room Transcript Disclosure via '/thread/<id>' REST Endpoint"
+    },
+    {
+      "id": "CVE-2026-89301",
+      "title": "rtMedia for WordPress, BuddyPress and bbPress <= 4.7.13 - Missing Authorization to Unauthenticated Limited File Read/Disclosure and Limited File Deletion via Sideload via 'files[tmp_name]' Parameter",
+      "cvss": 7.5,
+      "href": "https://www.wordfence.com/threat-intel/vulnerabilities/id/ea679227-5ab3-408b-ae1b-340099880789?source=api-prod",
+      "severity": "High",
+      "class": "File read",
+      "authContext": "Unauthenticated",
+      "unauthenticated": true,
+      "target": "rtMedia for WordPress, BuddyPress and bbPress",
+      "year": 2026,
+      "shortTitle": "Missing Authorization to Unauthenticated Limited File Read/Disclosure and Limited File Deletion via Sideload via 'files[tmp_name]' Parameter"
     },
     {
       "id": "CVE-2026-89278",
@@ -199,6 +225,19 @@
       "shortTitle": "Unauthenticated SQL Injection"
     },
     {
+      "id": "CVE-2026-83526",
+      "title": "FV Player 8 <= 8.1.7 - Authenticated (Subscriber+) Arbitrary File Upload via videos[].fv_wp_flowplayer_field_src Parameter",
+      "cvss": 8.8,
+      "href": "https://www.wordfence.com/threat-intel/vulnerabilities/id/5c75cb7b-1ebe-411c-8664-848d741e40d4?source=api-prod",
+      "severity": "High",
+      "class": "File upload",
+      "authContext": "Subscriber+",
+      "unauthenticated": false,
+      "target": "FV Player 8",
+      "year": 2026,
+      "shortTitle": "Authenticated (Subscriber+) Arbitrary File Upload via videos[].fv_wp_flowplayer_field_src Parameter"
+    },
+    {
       "id": "CVE-2026-82901",
       "title": "Ultra Addons for Contact Form 7 <= 3.5.50 - Unauthenticated Arbitrary File Upload via Signature Form Field",
       "cvss": 9.8,
@@ -264,6 +303,19 @@
       "shortTitle": "Unauthenticated PHP Object Injection"
     },
     {
+      "id": "CVE-2026-77183",
+      "title": "FooSales <= 1.43.0 - Authenticated (Custom+) Privilege Escalation via create_update_customer REST Endpoint",
+      "cvss": 8.8,
+      "href": "https://www.wordfence.com/threat-intel/vulnerabilities/id/97097d41-1d78-4db0-8ee2-70a776bd99f2?source=api-prod",
+      "severity": "High",
+      "class": "Privilege escalation",
+      "authContext": "Custom+",
+      "unauthenticated": false,
+      "target": "FooSales",
+      "year": 2026,
+      "shortTitle": "Authenticated (Custom+) Privilege Escalation via create_update_customer REST Endpoint"
+    },
+    {
       "id": "CVE-2026-75865",
       "title": "WPLP Cookie Consent <= 4.4.1 - Unauthenticated Arbitrary File Upload via 'upload-logo' REST Endpoint",
       "cvss": 9.8,
@@ -288,6 +340,19 @@
       "target": "Booktics – Appointment Booking Calendar for Service Businesses",
       "year": 2026,
       "shortTitle": "Missing Authorization"
+    },
+    {
+      "id": "CVE-2026-42695",
+      "title": "FV Flowplayer Video Player <= 7.5.54.7212 - Authenticated (Subscriber+) Stored Cross-Site Scripting",
+      "cvss": 6.4,
+      "href": "https://www.wordfence.com/threat-intel/vulnerabilities/id/08b98e8d-21cc-48e9-8b4e-304cc1168d0f?source=api-prod",
+      "severity": "Medium",
+      "class": "XSS",
+      "authContext": "Subscriber+",
+      "unauthenticated": false,
+      "target": "FV Flowplayer Video Player",
+      "year": 2026,
+      "shortTitle": "Authenticated (Subscriber+) Stored Cross-Site Scripting"
     },
     {
       "id": "CVE-2026-32498",
@@ -431,6 +496,19 @@
       "target": "Tutor LMS",
       "year": 2026,
       "shortTitle": "Authenticated (Subscriber+) SQL Injection via Stored Quiz Answer Array"
+    },
+    {
+      "id": "CVE-2026-14379",
+      "title": "GamiPress <= 7.9.4 - Authenticated (Subscriber+) Stored Cross-Site Scripting via 'video_id' Parameter",
+      "cvss": 6.4,
+      "href": "https://www.wordfence.com/threat-intel/vulnerabilities/id/637a4815-5b71-4ba2-8bf2-e0d335cb94f3?source=api-prod",
+      "severity": "Medium",
+      "class": "XSS",
+      "authContext": "Subscriber+",
+      "unauthenticated": false,
+      "target": "GamiPress",
+      "year": 2026,
+      "shortTitle": "Authenticated (Subscriber+) Stored Cross-Site Scripting via 'video_id' Parameter"
     },
     {
       "id": "CVE-2026-12761",
@@ -915,9 +993,9 @@
     }
   ],
   "stats": {
-    "total": 70,
+    "total": 76,
     "critical": 8,
-    "high": 29,
-    "unauthenticated": 38
+    "high": 32,
+    "unauthenticated": 39
   }
 }
