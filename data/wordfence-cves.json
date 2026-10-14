@@ -173,6 +173,19 @@
       "shortTitle": "Missing Authorization to Authenticated (Subscriber+) Arbitrary Post Modification via 'image_id' Parameter via ufg_save_gallery AJAX Action"
     },
     {
+      "id": "CVE-2026-87855",
+      "title": "JTL-Connector for WooCommerce <= 2.4.3 - Unauthenticated Arbitrary File Upload via 'image.push' Method",
+      "cvss": 9.8,
+      "href": "https://www.wordfence.com/threat-intel/vulnerabilities/id/ed869c1e-ae54-4db2-8147-39050a034c5e?source=api-prod",
+      "severity": "Critical",
+      "class": "File upload",
+      "authContext": "Unauthenticated",
+      "unauthenticated": true,
+      "target": "JTL-Connector for WooCommerce",
+      "year": 2026,
+      "shortTitle": "Unauthenticated Arbitrary File Upload via 'image.push' Method"
+    },
+    {
       "id": "CVE-2026-85984",
       "title": "miniOrange OTP Login, Verification and SMS Notifications <= 5.5.5 - Unauthenticated Authentication Bypass via 'mo_wp_login_intent' Parameter",
       "cvss": 9.8,
@@ -301,6 +314,19 @@
       "target": "Geo Controller",
       "year": 2026,
       "shortTitle": "Unauthenticated PHP Object Injection"
+    },
+    {
+      "id": "CVE-2026-78193",
+      "title": "JTL-Connector for WooCommerce <= 2.4.3 - Unauthenticated SQL Injection",
+      "cvss": 7.5,
+      "href": "https://www.wordfence.com/threat-intel/vulnerabilities/id/a74ef04c-6fa3-45c6-bab1-b3c730e4898d?source=api-prod",
+      "severity": "High",
+      "class": "SQLi",
+      "authContext": "Unauthenticated",
+      "unauthenticated": true,
+      "target": "JTL-Connector for WooCommerce",
+      "year": 2026,
+      "shortTitle": "Unauthenticated SQL Injection"
     },
     {
       "id": "CVE-2026-77183",
@@ -444,6 +470,19 @@
       "target": "User Access Manager",
       "year": 2026,
       "shortTitle": "Unauthenticated Arbitrary File Read via 'uamgetfile' Parameter"
+    },
+    {
+      "id": "CVE-2026-17092",
+      "title": "Directorist: AI-Powered Business Directory, Listings & Classified Ads <= 8.10.2.1 - Missing Authorization to Authenticated (Subscriber+) Arbitrary Listing Deletion via 'listing_id' Parameter",
+      "cvss": 8.1,
+      "href": "https://www.wordfence.com/threat-intel/vulnerabilities/id/bd520915-2605-450a-9abd-423f1c226eb6?source=api-prod",
+      "severity": "High",
+      "class": "Missing authz",
+      "authContext": "Subscriber+",
+      "unauthenticated": false,
+      "target": "Directorist: AI-Powered Business Directory, Listings & Classified Ads",
+      "year": 2026,
+      "shortTitle": "Missing Authorization to Authenticated (Subscriber+) Arbitrary Listing Deletion via 'listing_id' Parameter"
     },
     {
       "id": "CVE-2026-17087",
@@ -993,9 +1032,9 @@
     }
   ],
   "stats": {
-    "total": 76,
-    "critical": 8,
-    "high": 32,
-    "unauthenticated": 39
+    "total": 79,
+    "critical": 9,
+    "high": 34,
+    "unauthenticated": 41
   }
 }
