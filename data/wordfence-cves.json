@@ -4,6 +4,45 @@
   "profile": "https://www.wordfence.com/threat-intel/vulnerabilities/researchers/supakiad-s",
   "items": [
     {
+      "id": "CVE-2026-110701",
+      "title": "CP Multi View Events Calendar <= 1.4.42 - Unauthenticated Stored Cross-Site Scripting via 'CalendarTitle' Parameter",
+      "cvss": 7.2,
+      "href": "https://www.wordfence.com/threat-intel/vulnerabilities/id/12f2d3d3-4cc1-4569-9183-62f4841e72f7?source=api-prod",
+      "severity": "High",
+      "class": "XSS",
+      "authContext": "Unauthenticated",
+      "unauthenticated": true,
+      "target": "CP Multi View Events Calendar",
+      "year": 2026,
+      "shortTitle": "Unauthenticated Stored Cross-Site Scripting via 'CalendarTitle' Parameter"
+    },
+    {
+      "id": "CVE-2026-109447",
+      "title": "User Profile Builder <= 4.0.3 - Unauthenticated Privilege Escalation to 'role' Parameter via Legacy Meta-Name Collision on [wppb-register]",
+      "cvss": 8.1,
+      "href": "https://www.wordfence.com/threat-intel/vulnerabilities/id/88bfd754-e2ee-47c7-9af5-f31cbe993102?source=api-prod",
+      "severity": "High",
+      "class": "Privilege escalation",
+      "authContext": "Unauthenticated",
+      "unauthenticated": true,
+      "target": "User Profile Builder",
+      "year": 2026,
+      "shortTitle": "Unauthenticated Privilege Escalation to 'role' Parameter via Legacy Meta-Name Collision on [wppb-register]"
+    },
+    {
+      "id": "CVE-2026-109221",
+      "title": "Groundhogg <= 4.9.3 - Authenticated (Sales Representative+) Arbitrary File Deletion via CSV Import 'copy_file' Field Mapping",
+      "cvss": 8.1,
+      "href": "https://www.wordfence.com/threat-intel/vulnerabilities/id/fb5100ac-cfe6-4e91-9349-6e8efa850147?source=api-prod",
+      "severity": "High",
+      "class": "Other",
+      "authContext": "Sales Representative+",
+      "unauthenticated": false,
+      "target": "Groundhogg",
+      "year": 2026,
+      "shortTitle": "Authenticated (Sales Representative+) Arbitrary File Deletion via CSV Import 'copy_file' Field Mapping"
+    },
+    {
       "id": "CVE-2026-97644",
       "title": "Groundhogg <= 4.9 - Authenticated (Sales Person+) Privilege Escalation via Contact Identity Rebinding leading to Administrator Account Takeover to 'user_id' Parameter (v3 /contacts) chained with v4 /emails/test",
       "cvss": 8.8,
@@ -147,6 +186,19 @@
       "shortTitle": "Missing Authorization to Unauthenticated Limited File Read/Disclosure and Limited File Deletion via Sideload via 'files[tmp_name]' Parameter"
     },
     {
+      "id": "CVE-2026-89280",
+      "title": "Dokan: AI Powered WooCommerce Multivendor Marketplace Solution <= 5.2.1 - Insecure Direct Object Reference to Authenticated (Custom+) Limited Account Takeover via 'password' Parameter to /wp-json/dokan/v1/customers/{id}",
+      "cvss": 4.3,
+      "href": "https://www.wordfence.com/threat-intel/vulnerabilities/id/dfa56b6b-508f-44d8-a81c-2b84cebd245b?source=api-prod",
+      "severity": "Medium",
+      "class": "IDOR",
+      "authContext": "Custom+",
+      "unauthenticated": false,
+      "target": "Dokan: AI Powered WooCommerce Multivendor Marketplace Solution",
+      "year": 2026,
+      "shortTitle": "Insecure Direct Object Reference to Authenticated (Custom+) Limited Account Takeover via 'password' Parameter to /wp-json/dokan/v1/customers/{id}"
+    },
+    {
       "id": "CVE-2026-89278",
       "title": "GPTranslate <= 2.34.6 - Unauthenticated Sensitive Information Exposure in Public Frontend Inline Script",
       "cvss": 5.3,
@@ -210,6 +262,19 @@
       "target": "YOP Poll",
       "year": 2026,
       "shortTitle": "Unauthenticated Origin Validation Error to Administrator Account Takeover via '/auth/wp-login-redirect' REST Route"
+    },
+    {
+      "id": "CVE-2026-85659",
+      "title": "PilotPress <= 2.0.43 - Authenticated (Subscriber+) Privilege Escalation via Account Takeover via 'username' Parameter",
+      "cvss": 8.8,
+      "href": "https://www.wordfence.com/threat-intel/vulnerabilities/id/ceee48dd-72a7-49c3-90d5-7af1a30f9ecb?source=api-prod",
+      "severity": "High",
+      "class": "Privilege escalation",
+      "authContext": "Subscriber+",
+      "unauthenticated": false,
+      "target": "PilotPress",
+      "year": 2026,
+      "shortTitle": "Authenticated (Subscriber+) Privilege Escalation via Account Takeover via 'username' Parameter"
     },
     {
       "id": "CVE-2026-85309",
@@ -1032,9 +1097,9 @@
     }
   ],
   "stats": {
-    "total": 79,
+    "total": 84,
     "critical": 9,
-    "high": 34,
-    "unauthenticated": 41
+    "high": 38,
+    "unauthenticated": 43
   }
 }
