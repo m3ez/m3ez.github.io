@@ -121,6 +121,19 @@
       "shortTitle": "Authenticated (Shop Worker+) Privilege Escalation"
     },
     {
+      "id": "CVE-2026-96669",
+      "title": "Food Store <= 1.5.5 - Unauthenticated Stored Cross-Site Scripting via 'service_type' Cookie",
+      "cvss": 7.2,
+      "href": "https://www.wordfence.com/threat-intel/vulnerabilities/id/60725f12-6219-4c5e-8b5c-e925f0837ddb?source=api-prod",
+      "severity": "High",
+      "class": "XSS",
+      "authContext": "Unauthenticated",
+      "unauthenticated": true,
+      "target": "Food Store",
+      "year": 2026,
+      "shortTitle": "Unauthenticated Stored Cross-Site Scripting via 'service_type' Cookie"
+    },
+    {
       "id": "CVE-2026-94541",
       "title": "WPMobile.App <= 11.82 - Unauthenticated Admin Account Takeover via 'wpapp_category[]' Parameter",
       "cvss": 9.8,
@@ -1110,9 +1123,9 @@
     }
   ],
   "stats": {
-    "total": 85,
+    "total": 86,
     "critical": 9,
-    "high": 38,
-    "unauthenticated": 43
+    "high": 39,
+    "unauthenticated": 44
   }
 }
