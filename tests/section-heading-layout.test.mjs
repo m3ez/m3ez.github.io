@@ -100,11 +100,7 @@ test('consulting service node sits before the title text', () => {
 test('consulting title node has a slow reduced-motion-safe heartbeat', () => {
   assert.match(css, /\.consulting-service dt::before\{[^}]*animation:consulting-node-heartbeat 3\.6s ease-in-out infinite/);
   assert.match(css, /@keyframes consulting-node-heartbeat\{[\s\S]*?5%\{transform:scale\(1\.32\)[\s\S]*?14%\{transform:scale\(1\.18\)/);
-  // Allow preceding sibling rules, but never match an override outside its media block.
-  const reducedMotionBlocks = [...css.matchAll(/@media\s*\(prefers-reduced-motion:\s*reduce\)\s*\{((?:[^{}]*\{[^{}]*\}\s*)*)\}/g)];
-  assert.ok(reducedMotionBlocks.some(([, rules]) =>
-    /\.consulting-service dt::before\{animation:none;transform:none;box-shadow:none\}/.test(rules)),
-  'the consulting node must disable animation, transform, and shadow inside reduced-motion styles');
+  assert.match(css, /@media \(prefers-reduced-motion:reduce\)\{(?:[^{}]|\{[^{}]*\})*?\.consulting-service dt::before\{animation:none;transform:none;box-shadow:none\}/);
 });
 
 

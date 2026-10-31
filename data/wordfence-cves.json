@@ -56,6 +56,19 @@
       "shortTitle": "Authenticated (Sales Representative+) Arbitrary File Deletion via CSV Import 'copy_file' Field Mapping"
     },
     {
+      "id": "CVE-2026-97645",
+      "title": "Gravity Forms <= 3.1.2 - Unauthenticated Stored Cross-Site Scripting via List Field",
+      "cvss": 7.2,
+      "href": "https://www.wordfence.com/threat-intel/vulnerabilities/id/9889e718-381b-4d11-a234-0278037c61c4?source=api-prod",
+      "severity": "High",
+      "class": "XSS",
+      "authContext": "Unauthenticated",
+      "unauthenticated": true,
+      "target": "Gravity Forms",
+      "year": 2026,
+      "shortTitle": "Unauthenticated Stored Cross-Site Scripting via List Field"
+    },
+    {
       "id": "CVE-2026-97644",
       "title": "Groundhogg <= 4.9 - Authenticated (Sales Person+) Privilege Escalation via Contact Identity Rebinding leading to Administrator Account Takeover to 'user_id' Parameter (v3 /contacts) chained with v4 /emails/test",
       "cvss": 8.8,
@@ -121,6 +134,19 @@
       "shortTitle": "Authenticated (Shop Worker+) Privilege Escalation"
     },
     {
+      "id": "CVE-2026-96669",
+      "title": "Food Store <= 1.5.5 - Unauthenticated Stored Cross-Site Scripting via 'service_type' Cookie",
+      "cvss": 7.2,
+      "href": "https://www.wordfence.com/threat-intel/vulnerabilities/id/60725f12-6219-4c5e-8b5c-e925f0837ddb?source=api-prod",
+      "severity": "High",
+      "class": "XSS",
+      "authContext": "Unauthenticated",
+      "unauthenticated": true,
+      "target": "Food Store",
+      "year": 2026,
+      "shortTitle": "Unauthenticated Stored Cross-Site Scripting via 'service_type' Cookie"
+    },
+    {
       "id": "CVE-2026-94541",
       "title": "WPMobile.App <= 11.82 - Unauthenticated Admin Account Takeover via 'wpapp_category[]' Parameter",
       "cvss": 9.8,
@@ -145,6 +171,19 @@
       "target": "Appointment Booking Plugin",
       "year": 2026,
       "shortTitle": "Insecure Direct Object Reference to Authenticated (Subscriber+) Unauthorized Booking Creation and Sensitive Information Disclosure via 'params[presets][order_item_id]' Parameter"
+    },
+    {
+      "id": "CVE-2026-89435",
+      "title": "Formidable Forms <= 6.35 - Authenticated (Subscriber+) Arbitrary Plugin Installation via 'file_url' Parameter",
+      "cvss": 8.8,
+      "href": "https://www.wordfence.com/threat-intel/vulnerabilities/id/87661de6-e835-495e-9bd2-4d64b4718108?source=api-prod",
+      "severity": "High",
+      "class": "Other",
+      "authContext": "Subscriber+",
+      "unauthenticated": false,
+      "target": "Formidable Forms",
+      "year": 2026,
+      "shortTitle": "Authenticated (Subscriber+) Arbitrary Plugin Installation via 'file_url' Parameter"
     },
     {
       "id": "CVE-2026-89413",
@@ -1110,9 +1149,9 @@
     }
   ],
   "stats": {
-    "total": 85,
+    "total": 88,
     "critical": 9,
-    "high": 38,
-    "unauthenticated": 43
+    "high": 41,
+    "unauthenticated": 45
   }
 }
