@@ -56,6 +56,19 @@
       "shortTitle": "Authenticated (Sales Representative+) Arbitrary File Deletion via CSV Import 'copy_file' Field Mapping"
     },
     {
+      "id": "CVE-2026-107622",
+      "title": "BuddyForms <= 2.10.5 - Unauthenticated Privilege Escalation to Form-Type Confusion via 'bf_post_type' Parameter",
+      "cvss": 9.8,
+      "href": "https://www.wordfence.com/threat-intel/vulnerabilities/id/2e83e654-f8a6-44a6-a687-92606331309e?source=api-prod",
+      "severity": "Critical",
+      "class": "Privilege escalation",
+      "authContext": "Unauthenticated",
+      "unauthenticated": true,
+      "target": "BuddyForms",
+      "year": 2026,
+      "shortTitle": "Unauthenticated Privilege Escalation to Form-Type Confusion via 'bf_post_type' Parameter"
+    },
+    {
       "id": "CVE-2026-97645",
       "title": "Gravity Forms <= 3.1.2 - Unauthenticated Stored Cross-Site Scripting via List Field",
       "cvss": 7.2,
@@ -1149,9 +1162,9 @@
     }
   ],
   "stats": {
-    "total": 88,
-    "critical": 9,
+    "total": 89,
+    "critical": 10,
     "high": 41,
-    "unauthenticated": 45
+    "unauthenticated": 46
   }
 }
