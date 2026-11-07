@@ -173,6 +173,19 @@
       "shortTitle": "Unauthenticated Admin Account Takeover via 'wpapp_category[]' Parameter"
     },
     {
+      "id": "CVE-2026-93754",
+      "title": "payever – WooCommerce Gateway <= 4.8.0 - Unauthenticated Arbitrary File Upload Leading to Remote Code Execution",
+      "cvss": 9.8,
+      "href": "https://www.wordfence.com/threat-intel/vulnerabilities/id/03412063-d73a-4c5c-8dc6-3e76a5d975a5?source=api-prod",
+      "severity": "Critical",
+      "class": "File upload",
+      "authContext": "Unauthenticated",
+      "unauthenticated": true,
+      "target": "payever – WooCommerce Gateway",
+      "year": 2026,
+      "shortTitle": "Unauthenticated Arbitrary File Upload Leading to Remote Code Execution"
+    },
+    {
       "id": "CVE-2026-91050",
       "title": "Appointment Booking Plugin <= 5.7.2 - Insecure Direct Object Reference to Authenticated (Subscriber+) Unauthorized Booking Creation and Sensitive Information Disclosure via 'params[presets][order_item_id]' Parameter",
       "cvss": 4.3,
@@ -301,6 +314,19 @@
       "target": "JTL-Connector for WooCommerce",
       "year": 2026,
       "shortTitle": "Unauthenticated Arbitrary File Upload via 'image.push' Method"
+    },
+    {
+      "id": "CVE-2026-87112",
+      "title": "QA Assistants <= 5.3.0 - Unauthenticated PHP Object Injection to Remote Code Execution via 'raw_name' and 'dlevent_ver' Parameters",
+      "cvss": 8.8,
+      "href": "https://www.wordfence.com/threat-intel/vulnerabilities/id/76c5b5f1-a04b-4219-b8c0-ee53139fa787?source=api-prod",
+      "severity": "High",
+      "class": "Object injection",
+      "authContext": "Unauthenticated",
+      "unauthenticated": true,
+      "target": "QA Assistants",
+      "year": 2026,
+      "shortTitle": "Unauthenticated PHP Object Injection to Remote Code Execution via 'raw_name' and 'dlevent_ver' Parameters"
     },
     {
       "id": "CVE-2026-85984",
@@ -1162,9 +1188,9 @@
     }
   ],
   "stats": {
-    "total": 89,
-    "critical": 10,
-    "high": 41,
-    "unauthenticated": 46
+    "total": 91,
+    "critical": 11,
+    "high": 42,
+    "unauthenticated": 48
   }
 }
