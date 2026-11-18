@@ -10,6 +10,24 @@ export const CATEGORIES = [
 
 export const certs = [
   {
+    name: 'OSCE³',
+    issuer: 'OffSec',
+    year: 2026,
+    category: 'Offensive',
+    flagship: true,
+    description: 'Expert-level web, red team and exploit development',
+    verificationUrl: 'https://www.credential.net/d542e2d9-701a-4fe7-a9d9-c03cf345dff9',
+  },
+  {
+    name: 'OSED',
+    issuer: 'OffSec',
+    year: 2026,
+    category: 'Offensive',
+    flagship: true,
+    description: 'Windows exploit development, shellcode and mitigation bypass',
+    verificationUrl: 'https://www.credential.net/a851750c-0d5b-494a-a361-708cc21b00cb',
+  },
+  {
     name: 'OSEP',
     issuer: 'OffSec',
     year: 2026,

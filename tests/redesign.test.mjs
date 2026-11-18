@@ -10,12 +10,12 @@ import {
   normalizeWordfenceDocument,
 } from '../assets/research-data.js';
 
-test('credentials source contains 15 certifications with flagships first', () => {
-  assert.equal(certs.length, 15);
+test('credentials source contains 17 certifications with flagships first', () => {
+  assert.equal(certs.length, 17);
   assert.deepEqual(CATEGORIES, ['All', 'Offensive', 'Web', 'Identity', 'Mobile', 'Systems', 'Foundational']);
-  assert.deepEqual(certs.filter((cert) => cert.flagship).map((cert) => cert.name), ['OSEP', 'OSCP+', 'OSWE', 'eWPTX', 'CRTP']);
-  assert.ok(certs.slice(0, 5).every((cert) => cert.flagship));
-  assert.ok(certs.slice(5).every((cert) => !cert.flagship));
+  assert.deepEqual(certs.filter((cert) => cert.flagship).map((cert) => cert.name), ['OSCE³', 'OSED', 'OSEP', 'OSCP+', 'OSWE', 'eWPTX', 'CRTP']);
+  assert.ok(certs.slice(0, 7).every((cert) => cert.flagship));
+  assert.ok(certs.slice(7).every((cert) => !cert.flagship));
   assert.equal(certs.some((cert) => /LLMail|MVR Volume/i.test(cert.name)), false);
   assert.equal(issuerMonogram('TCM Security'), 'TCM');
   assert.equal(issuerMonogram('Altered Security'), 'Altered');
@@ -24,6 +24,28 @@ test('credentials source contains 15 certifications with flagships first', () =>
   assert.equal(crta?.issuer, 'Cyberwarfare Labs');
   assert.equal(crta?.year, 2025);
   assert.equal(crta?.verificationUrl, 'https://labs.cyberwarfare.live/credential/achievement/68972d1fbf373ee66a1cdb20');
+});
+
+
+test('OSCE³ and OSED appear as verified flagship credentials with unique links', () => {
+  const osce = certs.find((cert) => cert.name === 'OSCE³');
+  const osed = certs.find((cert) => cert.name === 'OSED');
+  assert.equal(osce?.verificationUrl, 'https://www.credential.net/d542e2d9-701a-4fe7-a9d9-c03cf345dff9');
+  assert.equal(osed?.verificationUrl, 'https://www.credential.net/a851750c-0d5b-494a-a361-708cc21b00cb');
+  assert.equal(osce?.year, 2026);
+  assert.equal(osed?.year, 2026);
+  assert.equal(osce?.flagship, true);
+  assert.equal(osed?.flagship, true);
+  assert.equal(new Set(certs.map((cert) => cert.verificationUrl)).size, certs.length);
+});
+
+test('static HTML fallback includes the newly issued OffSec certificates', () => {
+  const html = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
+  assert.match(html, /17 issuer-verified credentials and recognition badges/);
+  assert.ok(html.includes('https://www.credential.net/d542e2d9-701a-4fe7-a9d9-c03cf345dff9'));
+  assert.ok(html.includes('https://www.credential.net/a851750c-0d5b-494a-a361-708cc21b00cb'));
+  assert.match(html, /OSCE³ credential \(external link\)/);
+  assert.match(html, /OSED credential \(external link\)/);
 });
 
 test('classifier enriches a raw CVE with requested research metadata', () => {
