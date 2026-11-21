@@ -56,6 +56,19 @@
       "shortTitle": "Authenticated (Sales Representative+) Arbitrary File Deletion via CSV Import 'copy_file' Field Mapping"
     },
     {
+      "id": "CVE-2026-109196",
+      "title": "FV Player 8 <= 8.1.9 - Authenticated (Subscriber+) Stored Cross-Site Scripting via 'splash' Video Field via fv_player_db_save AJAX",
+      "cvss": 6.4,
+      "href": "https://www.wordfence.com/threat-intel/vulnerabilities/id/e551c7e5-ceef-46be-8ff1-79e2494ff3f3?source=api-prod",
+      "severity": "Medium",
+      "class": "XSS",
+      "authContext": "Subscriber+",
+      "unauthenticated": false,
+      "target": "FV Player 8",
+      "year": 2026,
+      "shortTitle": "Authenticated (Subscriber+) Stored Cross-Site Scripting via 'splash' Video Field via fv_player_db_save AJAX"
+    },
+    {
       "id": "CVE-2026-107622",
       "title": "BuddyForms <= 2.10.5 - Unauthenticated Privilege Escalation to Form-Type Confusion via 'bf_post_type' Parameter",
       "cvss": 9.8,
@@ -1188,7 +1201,7 @@
     }
   ],
   "stats": {
-    "total": 91,
+    "total": 92,
     "critical": 11,
     "high": 42,
     "unauthenticated": 48
